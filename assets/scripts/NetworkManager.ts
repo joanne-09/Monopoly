@@ -11,6 +11,8 @@ export enum PhotonEventCodes {
 @ccclass
 export default class NetworkManager extends cc.Component {
 
+    private static instance: NetworkManager = null;
+
     private APP_ID = "e67b38a8-62a3-4f6b-bb72-f735e94a0016"; // Replace with your AppId
     private APP_VERSION = "1.0";
     private client: Photon.LoadBalancing.LoadBalancingClient; // Use 'any' or a specific Photon type if you have .d.ts
@@ -18,12 +20,26 @@ export default class NetworkManager extends cc.Component {
     private messageHandler: ((eventCode: number, content: any, actorNr: number) => void) | null = null;
 
     onLoad() {
-        // Make this node persistent across scenes !!
+        // Prevent duplicate instances
+        if (NetworkManager.instance) {
+            console.log("NetworkManager: Instance already exists, destroying duplicate.");
+            this.node.destroy();
+            return;
+        }
+        // Only set instance and initialize if no instance exists
+        console.log("NetworkManager: Instance created.");
+        NetworkManager.instance = this;
+
+        // Make this node persistent across scenes
         if (!cc.game.isPersistRootNode(this.node)) {
             cc.game.addPersistRootNode(this.node);
             console.log("NetworkManager: Persist root node set.");
         }
 
+        this.initializePhoton();
+    }
+
+    private initializePhoton() {
         // Ensure the Photon library is available
         if (typeof Photon === 'undefined') {
             console.error("Photon SDK not loaded!");
@@ -31,9 +47,7 @@ export default class NetworkManager extends cc.Component {
         }
         console.log("NetworkManager: Photon SDK found.");
 
-        // For Photon Realtime JavaScript SDK, you'd use something like:
-        // The exact class name might vary based on the SDK version you download.
-        // It's often Photon.LoadBalancing.LoadBalancingClient
+        // Initialize Photon client only once
         this.client = new Photon.LoadBalancing.LoadBalancingClient(Photon.ConnectionProtocol.Ws, this.APP_ID, this.APP_VERSION);
         console.log("NetworkManager: Photon client initialized.");
 
@@ -151,6 +165,25 @@ export default class NetworkManager extends cc.Component {
             return actor ? actor.actorNr : -1;
         }
         return -1; // Default if not connected
+    }
+
+    public static getInstance(): NetworkManager {
+        return NetworkManager.instance;
+    }
+
+    public isConnected(): boolean {
+        return this.client && this.client.isJoinedToRoom();
+    }
+
+    onDestroy() {
+        if (NetworkManager.instance === this) {
+            NetworkManager.instance = null;
+            
+            // Disconnect from Photon when the singleton is destroyed
+            if (this.client) {
+                this.client.disconnect();
+            }
+        }
     }
 
     // Example: Call connectToPhoton() when the game starts or a "Multiplayer" button is clicked.

@@ -4,34 +4,53 @@ const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class TestMessaging extends cc.Component {
-    @property(NetworkManager)
-    networkManager: NetworkManager = null;
+    // Remove the @property since we'll use singleton pattern
+    private networkManager: NetworkManager = null;
     @property(cc.EditBox)
     messageInput: cc.EditBox = null;
     @property(cc.Label)
     messageLabel: cc.Label = null;
     @property(cc.Button)
     sendButton: cc.Button = null;
+    @property(cc.Button)
+    changeSceneButton: cc.Button = null;
 
     onLoad() {
-        // Get the NetworkManager component from the scene if not set in the editor
-        if (!this.networkManager) {
-            const node = cc.find("NetworkManager");
-            if (node) {
-                this.networkManager = node.getComponent(NetworkManager);
-            } else {
-                console.error("NetworkManager node not found in scene!");
+        // Wait a frame to ensure NetworkManager singleton is set up
+        this.scheduleOnce(() => {
+            this.networkManager = NetworkManager.getInstance();
+
+            // Fallback: try to find the persistent node if singleton is not set yet
+            if (!this.networkManager) {
+                const node = cc.find("NetworkManager");
+                if (node) {
+                    this.networkManager = node.getComponent(NetworkManager);
+                }
+            }
+
+            if (!this.networkManager) {
+                console.error("NetworkManager instance not found!");
                 return;
             }
-        }
 
-        this.networkManager.setMessageHandler(this.receiveMessage.bind(this));
+            // Set message handler
+            this.networkManager.setMessageHandler(this.receiveMessage.bind(this));
 
-        this.networkManager.connectToPhoton();
-        
-        if (this.sendButton) {
-            this.sendButton.node.on('click', this.sendMessage, this);
-        }
+            // Only connect if not already connected
+            if (!this.networkManager.isConnected()) {
+                this.networkManager.connectToPhoton();
+            }
+            
+            if (this.sendButton) {
+                this.sendButton.node.on('click', this.sendMessage, this);
+            }
+
+            if(this.changeSceneButton) {
+                this.changeSceneButton.node.on('click', () => {
+                    cc.director.loadScene("TestMessaging2");
+                }, this);
+            }
+        }, 0.1);
     }
 
     sendMessage() {
