@@ -14,7 +14,7 @@ export default class NetworkManager extends cc.Component {
     private APP_VERSION = "1.0";
     private client: Photon.LoadBalancing.LoadBalancingClient; // Use 'any' or a specific Photon type if you have .d.ts
 
-    private messageHandler: ((eventCode: number, content: any, actorNr: number) => void) | null = null;
+    private messageHandlers: Array<(eventCode: number, content: any, actorNr: number) => void> = [];
 
     onLoad() {
         // Prevent duplicate instances
@@ -91,9 +91,7 @@ export default class NetworkManager extends cc.Component {
         this.client.onEvent = (code: number, content: any, actorNr: number) => {
             // Comment out verbose event logging
             // console.log(`NetworkManager: Received event ${code} from actor ${actorNr} with content:`, content);
-            if (this.messageHandler) {
-                this.messageHandler(code, content, actorNr);
-            }
+            this.broadcastToHandlers(code, content, actorNr);
             // Handle custom game events for Monopoly (dice roll, buy property, etc.)
             // Example: if (code === MY_GAME_EVENT_CODES.PLAYER_MOVED) { ... }
         };
@@ -146,9 +144,30 @@ export default class NetworkManager extends cc.Component {
         }
     }
 
-    public setMessageHandler(handler: (eventCode: number, content: any, actorNr: number) => void) {
-        this.messageHandler = handler;
-        // console.log("NetworkManager: Message handler set successfully.");
+    public registerMessageHandler(handler: (eventCode: number, content: any, actorNr: number) => void) {
+        if (!this.messageHandlers.includes(handler)) {
+            this.messageHandlers.push(handler);
+            console.log(`NetworkManager: Handler registered. Total handlers: ${this.messageHandlers.length}`);
+        }
+    }
+    
+    public unregisterMessageHandler(handler: (eventCode: number, content: any, actorNr: number) => void) {
+        const index = this.messageHandlers.indexOf(handler);
+        if (index > -1) {
+            this.messageHandlers.splice(index, 1);
+            console.log(`NetworkManager: Handler unregistered. Total handlers: ${this.messageHandlers.length}`);
+        }
+    }
+    
+    private broadcastToHandlers(eventCode: number, content: any, actorNr: number) {
+        console.log(`NetworkManager: Broadcasting event ${eventCode} to ${this.messageHandlers.length} handlers`);
+        this.messageHandlers.forEach(handler => {
+            try {
+                handler(eventCode, content, actorNr);
+            } catch (error) {
+                console.error("NetworkManager: Error in handler:", error);
+            }
+        });
     }
 
     public getMyActorName(): string {
