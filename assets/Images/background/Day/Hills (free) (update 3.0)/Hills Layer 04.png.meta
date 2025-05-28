@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "e17038ad-e446-4e95-bb62-999cf4f97a9d",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 512,
+  "height": 256,
+  "platformSettings": {},
+  "subMetas": {
+    "Hills Layer 04": {
+      "ver": "1.0.6",
+      "uuid": "39727007-ceb7-440f-b929-255897710c4b",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "e17038ad-e446-4e95-bb62-999cf4f97a9d",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": -38.5,
+      "trimX": 0,
+      "trimY": 77,
+      "width": 512,
+      "height": 179,
+      "rawWidth": 512,
+      "rawHeight": 256,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
