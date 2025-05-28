@@ -21,8 +21,8 @@ export default class MatchMakingScene extends cc.Component {
     @property(cc.Sprite)
     playerSprite4: cc.Sprite = null;
 
-    @property(cc.Button)
-    leaveButton: cc.Button = null;
+    @property(cc.Node)
+    leaveButton: cc.Node = null;
 
     private networkManager: NetworkManager = null;
     private playerList: number[] = []; // only the actNr
@@ -38,7 +38,7 @@ export default class MatchMakingScene extends cc.Component {
         this.networkManager.registerMessageHandler(this.handler);
         this.updatePlayerCards();
         if (this.leaveButton) {
-            this.leaveButton.node.on("click", this.onLeave, this);
+            this.leaveButton.on("click", this.onLeave, this);
         }
         // Get initial player list
         this.scheduleOnce(() => {
@@ -76,7 +76,7 @@ export default class MatchMakingScene extends cc.Component {
             }
         }
         if (this.leaveButton) {
-            this.leaveButton.interactable = this.playerList.length < 4;
+            //this.leaveButton.interactable = this.playerList.length < 4;
         }
         if (this.playerList.length === 4) {
             this.scheduleOnce(() => {
@@ -87,6 +87,7 @@ export default class MatchMakingScene extends cc.Component {
 
     onLeave() {
         // Optionally: leave the Photon room here
+        cc.log("leave button clicked");
         cc.director.loadScene("Start");
     }
 
@@ -95,7 +96,7 @@ export default class MatchMakingScene extends cc.Component {
             this.networkManager.unregisterMessageHandler(this.handler);
         }
         if (this.leaveButton) {
-            this.leaveButton.node.off("click", this.onLeave, this);
+            this.leaveButton.off("click", this.onLeave, this);
         }
     }
 }
