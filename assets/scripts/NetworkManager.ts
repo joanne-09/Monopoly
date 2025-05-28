@@ -5,9 +5,6 @@
 
 const { ccclass, property } = cc._decorator;
 
-export enum PhotonEventCodes {
-    SEND_MESSAGE = 1,
-}
 @ccclass
 export default class NetworkManager extends cc.Component {
 
@@ -22,18 +19,18 @@ export default class NetworkManager extends cc.Component {
     onLoad() {
         // Prevent duplicate instances
         if (NetworkManager.instance) {
-            console.log("NetworkManager: Instance already exists, destroying duplicate.");
+            // console.log("NetworkManager: Instance already exists, destroying duplicate.");
             this.node.destroy();
             return;
         }
         // Only set instance and initialize if no instance exists
-        console.log("NetworkManager: Instance created.");
+        // console.log("NetworkManager: Instance created.");
         NetworkManager.instance = this;
 
         // Make this node persistent across scenes
         if (!cc.game.isPersistRootNode(this.node)) {
             cc.game.addPersistRootNode(this.node);
-            console.log("NetworkManager: Persist root node set.");
+            // console.log("NetworkManager: Persist root node set.");
         }
 
         this.initializePhoton();
@@ -45,17 +42,18 @@ export default class NetworkManager extends cc.Component {
             console.error("Photon SDK not loaded!");
             return;
         }
-        console.log("NetworkManager: Photon SDK found.");
+        // console.log("NetworkManager: Photon SDK found.");
 
         // Initialize Photon client only once
         this.client = new Photon.LoadBalancing.LoadBalancingClient(Photon.ConnectionProtocol.Ws, this.APP_ID, this.APP_VERSION);
-        console.log("NetworkManager: Photon client initialized.");
-
+        // console.log("NetworkManager: Photon client initialized.");
+        this.client.setLogLevel(Photon.LogLevel.WARN); // Options: ERROR, WARN, INFO, DEBUG
         this.setupPhotonCallbacks();
     }
 
     connectToPhoton() {
         if (this.client) {
+            // Essential: log only when actually attempting to connect
             console.log("NetworkManager: Attempting to connect to Photon...");
             this.client.connectToRegionMaster("asia"); // e.g., "us", "eu", "asia"
         } else {
@@ -70,26 +68,29 @@ export default class NetworkManager extends cc.Component {
         }
 
         this.client.onStateChange = (state: number) => {
+            // Essential: log state changes
             console.log("Photon State Change: " + state);
             // Handle different states (ConnectedToMaster, JoinedLobby, Joined, etc.)
             if (state === Photon.LoadBalancing.LoadBalancingClient.State.ConnectedToMaster) {
+                // Essential: log successful connection to master
                 console.log("Successfully connected to Master Server. Client will automatically join lobby...");
                 // Client automatically joins lobby when autoJoinLobby is true (default)
                 // No additional action needed here
             } else if (state === Photon.LoadBalancing.LoadBalancingClient.State.JoinedLobby) {
+                // Essential: log lobby join
                 console.log("Successfully joined Lobby. Ready to join or create rooms.");
-                // Now you can try to join a room for your Monopoly game
                 this.joinOrCreateMonopolyRoom();
             }
         };
 
         this.client.onJoinRoom = (createdByMe: boolean) => {
+            // Essential: log room join
             console.log(`NetworkManager: Room joined. Was created by me: ${createdByMe}`);
-            // Game can start or wait for more players
         };
 
         this.client.onEvent = (code: number, content: any, actorNr: number) => {
-            console.log(`NetworkManager: Received event ${code} from actor ${actorNr} with content:`, content);
+            // Comment out verbose event logging
+            // console.log(`NetworkManager: Received event ${code} from actor ${actorNr} with content:`, content);
             if (this.messageHandler) {
                 this.messageHandler(code, content, actorNr);
             }
@@ -98,19 +99,20 @@ export default class NetworkManager extends cc.Component {
         };
 
         this.client.onActorJoin = (actor: Photon.LoadBalancing.Actor) => {
-            console.log(`NetworkManager: Player ${actor.actorNr} (${actor.userId || 'No UserId'}) joined the room.`);
-            // Update player list, etc.
+            // Comment out verbose join logging
+            // console.log(`NetworkManager: Player ${actor.actorNr} (${actor.userId || 'No UserId'}) joined the room.`);
         };
 
         this.client.onActorLeave = (actor: Photon.LoadBalancing.Actor, cleanup: boolean) => {
-            console.log(`NetworkManager: Player ${actor.actorNr} (${actor.userId || 'No UserId'}) left the room. Cleanup: ${cleanup}`);
-            // Handle player disconnects
+            // Comment out verbose leave logging
+            // console.log(`NetworkManager: Player ${actor.actorNr} (${actor.userId || 'No UserId'}) left the room. Cleanup: ${cleanup}`);
         };
-        console.log("NetworkManager: Photon callbacks set up successfully.");
+        // console.log("NetworkManager: Photon callbacks set up successfully.");
     }
 
     joinOrCreateMonopolyRoom() {
         if (this.client && this.client.isInLobby()) {
+            // Essential: log room join/create attempt
             console.log("NetworkManager: Attempting to join or create a Monopoly room...");
             const matchmakingOptions = {
                 expectedCustomRoomProperties: { gameType: "monopoly" }
@@ -119,10 +121,8 @@ export default class NetworkManager extends cc.Component {
                 maxPlayers: 4,
                 customGameProperties: { gameType: "monopoly" },
             };
-            
-            // This will join a matching room or create one with the specified name
             this.client.joinRandomOrCreateRoom(matchmakingOptions, "MonopolyRoom1", roomOptions);
-            console.log("NetworkManager: Attempting to join or create MonopolyRoom1");
+            // console.log("NetworkManager: Attempting to join or create MonopolyRoom1");
         } else {
             console.warn("NetworkManager: Not in lobby or client not ready, cannot join/create room yet. Client state: " + (this.client ? this.client.state : "null"));
         }
@@ -138,9 +138,9 @@ export default class NetworkManager extends cc.Component {
 
     sendGameAction(eventCode: number, data: any) {
         if (this.client && this.client.isJoinedToRoom()) {
-            console.log(`NetworkManager: Attempting to send event ${eventCode} with data:`, data);
+           // console.log(`NetworkManager: Attempting to send event ${eventCode} with data:`, data);
             this.client.raiseEvent(eventCode, data, { receivers: Photon.LoadBalancing.Constants.ReceiverGroup.All });
-            console.log(`NetworkManager: Event ${eventCode} dispatch attempted.`);
+            //console.log(`NetworkManager: Event ${eventCode} dispatch attempted.`);
         } else {
             console.warn("NetworkManager: Not in a room, cannot send event.");
         }
@@ -148,7 +148,7 @@ export default class NetworkManager extends cc.Component {
 
     public setMessageHandler(handler: (eventCode: number, content: any, actorNr: number) => void) {
         this.messageHandler = handler;
-        console.log("NetworkManager: Message handler set successfully.");
+        // console.log("NetworkManager: Message handler set successfully.");
     }
 
     public getMyActorName(): string {
@@ -161,7 +161,7 @@ export default class NetworkManager extends cc.Component {
     public getMyActorNumber(): number {
         if (this.client && typeof this.client.myActor === 'function') {
             const actor = this.client.myActor();
-            console.log("NetworkManager: My actor number is: " + actor.actorNr);
+            // console.log("NetworkManager: My actor number is: " + actor.actorNr);
             return actor ? actor.actorNr : -1;
         }
         return -1; // Default if not connected
@@ -178,7 +178,6 @@ export default class NetworkManager extends cc.Component {
     onDestroy() {
         if (NetworkManager.instance === this) {
             NetworkManager.instance = null;
-            
             // Disconnect from Photon when the singleton is destroyed
             if (this.client) {
                 this.client.disconnect();
