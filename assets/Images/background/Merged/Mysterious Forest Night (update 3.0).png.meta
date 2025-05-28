@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "16da2977-8c49-47fc-8aca-5cf684de50e0",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 512,
+  "height": 256,
+  "platformSettings": {},
+  "subMetas": {
+    "Mysterious Forest Night (update 3.0)": {
+      "ver": "1.0.6",
+      "uuid": "13aafb4a-477f-4cad-a89a-f2d67ab9c08a",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "16da2977-8c49-47fc-8aca-5cf684de50e0",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 512,
+      "height": 256,
+      "rawWidth": 512,
+      "rawHeight": 256,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
