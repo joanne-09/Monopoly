@@ -4,8 +4,9 @@ const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class TestMessaging extends cc.Component {
-    // Remove the @property since we'll use singleton pattern
+    
     private networkManager: NetworkManager = null;
+
     @property(cc.EditBox)
     messageInput: cc.EditBox = null;
     @property(cc.Label)
@@ -18,21 +19,18 @@ export default class TestMessaging extends cc.Component {
     onLoad() {
         // Wait a frame to ensure NetworkManager singleton is set up
         this.scheduleOnce(() => {
+
+            // ====== Setting up the NetworkManager instance for scripts ======
             this.networkManager = NetworkManager.getInstance();
 
             // Fallback: try to find the persistent node if singleton is not set yet
             if (!this.networkManager) {
-                const node = cc.find("NetworkManager");
-                if (node) {
-                    this.networkManager = node.getComponent(NetworkManager);
-                }
+                console.error("NetworkManager instance not found! Trying to find persistent node.");
             }
-
             if (!this.networkManager) {
                 console.error("NetworkManager instance not found!");
                 return;
             }
-
             // Set message handler
             this.networkManager.setMessageHandler(this.receiveMessage.bind(this));
 
@@ -41,6 +39,8 @@ export default class TestMessaging extends cc.Component {
                 this.networkManager.connectToPhoton();
             }
             
+            // ====== END ======
+
             if (this.sendButton) {
                 this.sendButton.node.on('click', this.sendMessage, this);
             }
