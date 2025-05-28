@@ -18,6 +18,7 @@ export default class TestPlayerConnection extends cc.Component {
     private isInitialized: boolean = false;
 
     private keys: { [key: string]: boolean } = {};
+    private messageHandler: (eventCode: number, content: any, actorNr: number) => void;
 
     private handleReceiveEvent(eventCode: number, content: any, actorNr: number) {
         console.log(`Sprite ${this.spriteIndex} received event from actor ${actorNr}`);
@@ -48,6 +49,9 @@ export default class TestPlayerConnection extends cc.Component {
         
         console.log(`Auto-assigned spriteIndex: ${this.spriteIndex} for node: ${this.node.name}`);
         
+        // Create a bound message handler that we can register/unregister properly
+        this.messageHandler = this.handleReceiveEvent.bind(this);
+
         this.scheduleOnce(() => {
             this.networkManager = NetworkManager.getInstance();
             if (!this.networkManager) {
@@ -55,18 +59,9 @@ export default class TestPlayerConnection extends cc.Component {
                 return;
             }
 
-            // FIX: Only sprite 1 sets the message handler
-            if (this.spriteIndex === 1) {
-                this.networkManager.setMessageHandler((eventCode, content, actorNr) => {
-                    // Find all TestPlayerConnection components and call their handlers
-                    const scene = cc.director.getScene();
-                    const allSprites = scene.getComponentsInChildren(TestPlayerConnection);
-                    allSprites.forEach(sprite => {
-                        sprite.handleReceiveEvent(eventCode, content, actorNr);
-                    });
-                });
-                console.log("Message handler set by sprite 1");
-            }
+            // Register this component's handler with NetworkManager
+            this.networkManager.registerMessageHandler(this.messageHandler);
+            console.log(`TestPlayerConnection: Handler registered for sprite ${this.spriteIndex}`);
             
             if (!this.networkManager.isConnected()) {
                 this.networkManager.connectToPhoton();
@@ -108,6 +103,12 @@ export default class TestPlayerConnection extends cc.Component {
         if (this.isLocalPlayer) {
             cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
             cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
+        }
+        
+        // Unregister the message handler to prevent memory leaks
+        if (this.networkManager && this.messageHandler) {
+            this.networkManager.unregisterMessageHandler(this.messageHandler);
+            console.log(`TestPlayerConnection: Handler unregistered for sprite ${this.spriteIndex}`);
         }
     }
 
