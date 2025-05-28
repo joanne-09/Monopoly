@@ -21,7 +21,6 @@ export default class TestPlayerConnection extends cc.Component {
 
     private handleReceiveEvent(eventCode: number, content: any, actorNr: number) {
         console.log(`Sprite ${this.spriteIndex} received event from actor ${actorNr}`);
-        
         if (eventCode === PhotonEventCodes.PLAYER_MOVEMENT) {
             const playerMoveEvent: PlayerMoveEvent = content;
             console.log(`Movement event for playerId: ${playerMoveEvent.playerId}, my spriteIndex: ${this.spriteIndex}, isLocalPlayer: ${this.isLocalPlayer}`);
@@ -56,7 +55,18 @@ export default class TestPlayerConnection extends cc.Component {
                 return;
             }
 
-            this.networkManager.setMessageHandler(this.handleReceiveEvent.bind(this));
+            // FIX: Only sprite 1 sets the message handler
+            if (this.spriteIndex === 1) {
+                this.networkManager.setMessageHandler((eventCode, content, actorNr) => {
+                    // Find all TestPlayerConnection components and call their handlers
+                    const scene = cc.director.getScene();
+                    const allSprites = scene.getComponentsInChildren(TestPlayerConnection);
+                    allSprites.forEach(sprite => {
+                        sprite.handleReceiveEvent(eventCode, content, actorNr);
+                    });
+                });
+                console.log("Message handler set by sprite 1");
+            }
             
             if (!this.networkManager.isConnected()) {
                 this.networkManager.connectToPhoton();
