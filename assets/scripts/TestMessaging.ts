@@ -1,5 +1,5 @@
-import NetworkManager, { PhotonEventCodes } from "./NetworkManager";
-
+import NetworkManager from "./NetworkManager";
+import { PhotonEventCodes } from "./types/PhotonEventCodes";
 const { ccclass, property } = cc._decorator;
 
 @ccclass
@@ -47,7 +47,7 @@ export default class TestMessaging extends cc.Component {
 
             if(this.changeSceneButton) {
                 this.changeSceneButton.node.on('click', () => {
-                    cc.director.loadScene("TestMessaging2");
+                    cc.director.loadScene("TestMultiplayer");
                 }, this);
             }
         }, 0.1);
