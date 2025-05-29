@@ -31805,9 +31805,7 @@
     "root": {
       "__id__": 847
     },
-    "asset": {
-      "__uuid__": "cee9ee21-2627-430a-8bf3-89261dd02d72"
-    },
+    "asset": null,
     "fileId": "67Rj+3C15AxbygWpoZh5N0",
     "sync": false
   },
@@ -31877,9 +31875,7 @@
     "root": {
       "__id__": 847
     },
-    "asset": {
-      "__uuid__": "cee9ee21-2627-430a-8bf3-89261dd02d72"
-    },
+    "asset": null,
     "fileId": "",
     "sync": false
   },
@@ -31892,7 +31888,7 @@
     },
     "_enabled": true,
     "dicePrefab": {
-      "__uuid__": "cee9ee21-2627-430a-8bf3-89261dd02d72"
+      "__uuid__": "0acc0a39-7f18-4b51-88d2-2c3e7cf71c9a"
     },
     "diceNum": 1,
     "diceSize": 128,
