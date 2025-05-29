@@ -9,4 +9,9 @@ export interface PlayerMoveEvent {
     timestamp?: number;
 }
 
-
+export enum MapNodeEvents {
+    NORMAL,
+    DESTINY,
+    CHANCE,
+    GAME,
+}
