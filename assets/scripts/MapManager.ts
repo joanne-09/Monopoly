@@ -26,6 +26,10 @@ export default class MapManager extends cc.Component {
       let coord = SpaceNodeCtrl.getCoordByIndex(this.spacesNode, spaceIndex);
       cc.log(`The Coordina of Space ${spaceIndex}: ${coord.x}, ${coord.y}`);
     }
+    
+    getCoordByIndex(index: number): cc.Vec2 {
+      return SpaceNodeCtrl.getCoordByIndex(this.spacesNode, index);
+    }
 
     // update (dt) {}
 }
