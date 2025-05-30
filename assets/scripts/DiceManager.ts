@@ -1,4 +1,4 @@
-
+import DiceRoll from "./DiceRoll";
 const {ccclass, property} = cc._decorator;
 
 @ccclass
@@ -24,7 +24,7 @@ export default class NewClass extends cc.Component {
       
     }
 
-    onDiceRollTriggered(event: cc.Event.EventTouch, diceNum: string): Promise<number> {
+    public onDiceRollTriggered(event: cc.Event.EventTouch, diceNum: string): Promise<number> {
       this.diceNum = parseInt(diceNum);
       cc.log("Dice roll triggered");
       
@@ -40,7 +40,7 @@ export default class NewClass extends cc.Component {
         
         this.node.addChild(diceNode);
 
-        const diceRoll = diceNode.getComponent("DiceRoll");
+        const diceRoll = diceNode.getComponent(DiceRoll);
         if (diceRoll) {
             const rollPromise = diceRoll.roll();
             rollPromises.push(rollPromise);
