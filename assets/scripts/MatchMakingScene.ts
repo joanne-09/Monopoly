@@ -8,7 +8,7 @@ const {ccclass, property} = cc._decorator;
 // Multiplayer Photon custom properties
 // player name and sprite needed
 // name: string
-// sprite: cc.SpriteFrame
+// sprite: string
 
 type PlayerInfo = {
     actorNr: number;
