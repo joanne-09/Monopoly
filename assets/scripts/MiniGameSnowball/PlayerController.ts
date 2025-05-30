@@ -44,6 +44,8 @@ export default class PlayerController extends cc.Component {
     private idleAnimName: string = '';
     private makeAnimName: string = '';
     private throwAnimName: string = '';
+    private runLoadedAnimName: string = '';
+    private idleLoadedAnimName: string = '';
     private handSnowball: cc.Node = null;
     private slowTimer: number = 0;
     private normalSpeed: number = 200;
@@ -69,6 +71,8 @@ export default class PlayerController extends cc.Component {
         this.idleAnimName = `Player_${type}_Idle`;
         this.makeAnimName = `Player_${type}_Make`;
         this.throwAnimName = `Player_${type}_Throw`;
+        this.runLoadedAnimName = `Player_${type}_Run_Loaded`;
+        this.idleLoadedAnimName = `Player_${type}_Idle_Loaded`;
         // 嘗試尋找手上的雪球節點（命名 handSnowball，預設隱藏）
         this.handSnowball = this.node.getChildByName('handSnowball');
         if (this.handSnowball) this.handSnowball.active = false;
@@ -174,6 +178,42 @@ export default class PlayerController extends cc.Component {
         if (dx !== 0) {
             this.faceRight = dx > 0;
             this.node.scaleX = this.faceRight ? 1 : -1;
+        }
+        // 動畫切換（Loaded 狀態優先）
+        if (this.hasSnowball) {
+            if (dx !== 0 || dy !== 0) {
+                if (this.anim && !this.anim.getAnimationState(this.runLoadedAnimName).isPlaying) {
+                    this.anim.play(this.runLoadedAnimName);
+                }
+            } else {
+                if (this.anim && !this.anim.getAnimationState(this.idleLoadedAnimName).isPlaying) {
+                    this.anim.play(this.idleLoadedAnimName);
+                }
+            }
+            // 移動與狀態切換
+            if (dx !== 0 || dy !== 0) {
+                let len = Math.sqrt(dx * dx + dy * dy);
+                dx /= len;
+                dy /= len;
+                this.node.x += dx * this.moveSpeed * dt;
+                this.node.y += dy * this.moveSpeed * dt;
+                this.state = PlayerState.HoldingSnowball;
+            } else if (this.state === PlayerState.HoldingSnowball) {
+                this.state = PlayerState.HoldingSnowball;
+            }
+            // 手上雪球顯示控制
+            if (this.handSnowball) this.handSnowball.active = true;
+            // Loaded 狀態下 return，不進入一般動畫切換
+            if (this.slowTimer > 0) {
+                this.slowTimer -= dt;
+                this.moveSpeed = this.slowSpeed;
+                this.node.color = this.slowColor;
+                if (this.slowTimer <= 0) {
+                    this.moveSpeed = this.normalSpeed;
+                    this.node.color = this.normalColor;
+                }
+            }
+            return;
         }
         if (dx !== 0 || dy !== 0) {
             if (this.anim && !this.anim.getAnimationState(this.runAnimName).isPlaying) {

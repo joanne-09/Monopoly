@@ -1,0 +1,43 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "Player_GRASS_Idle_Loaded",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.5166666666666667,
+  "sample": 60,
+  "speed": 1,
+  "wrapMode": 2,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "8845f369-870e-4e38-971d-2842b060b1ca"
+            }
+          },
+          {
+            "frame": 0.16666666666666666,
+            "value": {
+              "__uuid__": "07e5e502-d309-4af2-a0de-7f17228a9e9f"
+            }
+          },
+          {
+            "frame": 0.3333333333333333,
+            "value": {
+              "__uuid__": "14ca92f1-3e4d-47cc-a4df-a5b913caf8a9"
+            }
+          },
+          {
+            "frame": 0.5,
+            "value": {
+              "__uuid__": "31f33be9-6b25-4534-9961-cba0ebf7d025"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}

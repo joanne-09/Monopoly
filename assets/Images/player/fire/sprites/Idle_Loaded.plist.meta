@@ -1,17 +1,19 @@
 {
   "ver": "1.2.6",
-  "uuid": "f53d0b80-eb43-48c8-9810-504c7be99083",
+  "uuid": "f6cfcedc-1d11-4270-971a-4edf0dc12dcc",
   "importer": "asset",
+  "rawTextureUuid": "82e998f8-933f-4d2c-9bbf-8d028d347523",
   "size": {
-    "width": 1280,
+    "width": 1024,
     "height": 256
   },
   "type": "Texture Packer",
   "subMetas": {
-    "skill3 icecube fx01.png": {
+    "Idle_loaded01.png": {
       "ver": "1.0.6",
-      "uuid": "49ba4678-9d91-4a1f-ba36-b17f1850142e",
+      "uuid": "bc022d55-31d1-44ac-8b30-e1b08a4c0174",
       "importer": "sprite-frame",
+      "rawTextureUuid": "82e998f8-933f-4d2c-9bbf-8d028d347523",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
@@ -30,10 +32,11 @@
       "spriteType": "normal",
       "subMetas": {}
     },
-    "skill3 icecube fx02.png": {
+    "Idle_loaded02.png": {
       "ver": "1.0.6",
-      "uuid": "595160e1-5e25-42ae-a916-862b0bde44d7",
+      "uuid": "107b30b9-43f3-449d-8b4b-d2a4e31cfe65",
       "importer": "sprite-frame",
+      "rawTextureUuid": "82e998f8-933f-4d2c-9bbf-8d028d347523",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
@@ -52,10 +55,11 @@
       "spriteType": "normal",
       "subMetas": {}
     },
-    "skill3 icecube fx03.png": {
+    "Idle_loaded03.png": {
       "ver": "1.0.6",
-      "uuid": "4a8f3d0f-ec91-49ee-914b-5c8d1325a57d",
+      "uuid": "1eb458e8-3b7f-408b-9121-ed38b92ecd17",
       "importer": "sprite-frame",
+      "rawTextureUuid": "82e998f8-933f-4d2c-9bbf-8d028d347523",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
@@ -74,38 +78,17 @@
       "spriteType": "normal",
       "subMetas": {}
     },
-    "skill3 icecube fx04.png": {
+    "Idle_loaded04.png": {
       "ver": "1.0.6",
-      "uuid": "fb987ae1-40a0-4213-a71d-27b45c0a5599",
+      "uuid": "d1508448-eed0-499d-8fe2-a317fbef3f13",
       "importer": "sprite-frame",
+      "rawTextureUuid": "82e998f8-933f-4d2c-9bbf-8d028d347523",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
       "offsetX": 0,
       "offsetY": 0,
       "trimX": 768,
-      "trimY": 0,
-      "width": 256,
-      "height": 256,
-      "rawWidth": 256,
-      "rawHeight": 256,
-      "borderTop": 0,
-      "borderBottom": 0,
-      "borderLeft": 0,
-      "borderRight": 0,
-      "spriteType": "normal",
-      "subMetas": {}
-    },
-    "skill3 icecube fx05.png": {
-      "ver": "1.0.6",
-      "uuid": "65121023-8870-4040-b597-b8928fa6cfdb",
-      "importer": "sprite-frame",
-      "trimType": "auto",
-      "trimThreshold": 1,
-      "rotated": false,
-      "offsetX": 0,
-      "offsetY": 0,
-      "trimX": 1024,
       "trimY": 0,
       "width": 256,
       "height": 256,
