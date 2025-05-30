@@ -1,7 +1,7 @@
 const {ccclass, property} = cc._decorator;
 
 @ccclass
-export default class DiceCtrl extends cc.Component {
+export default class DiceRoll extends cc.Component {
 
     @property(cc.Animation)
     diceAnimation: cc.Animation = null;
