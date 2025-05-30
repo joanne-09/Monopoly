@@ -4,7 +4,7 @@
     <dict>
         <key>frames</key>
         <dict>
-            <key>Idle_Loaded01.png</key>
+            <key>Make01.png</key>
             <dict>
                 <key>aliases</key>
                 <array/>
@@ -19,7 +19,7 @@
                 <key>textureRotated</key>
                 <false/>
             </dict>
-            <key>Idle_Loaded02.png</key>
+            <key>Make02.png</key>
             <dict>
                 <key>aliases</key>
                 <array/>
@@ -34,36 +34,6 @@
                 <key>textureRotated</key>
                 <false/>
             </dict>
-            <key>Idle_loaded03.png</key>
-            <dict>
-                <key>aliases</key>
-                <array/>
-                <key>spriteOffset</key>
-                <string>{0,0}</string>
-                <key>spriteSize</key>
-                <string>{256,256}</string>
-                <key>spriteSourceSize</key>
-                <string>{256,256}</string>
-                <key>textureRect</key>
-                <string>{{512,0},{256,256}}</string>
-                <key>textureRotated</key>
-                <false/>
-            </dict>
-            <key>Idle_loaded04.png</key>
-            <dict>
-                <key>aliases</key>
-                <array/>
-                <key>spriteOffset</key>
-                <string>{0,0}</string>
-                <key>spriteSize</key>
-                <string>{256,256}</string>
-                <key>spriteSourceSize</key>
-                <string>{256,256}</string>
-                <key>textureRect</key>
-                <string>{{768,0},{256,256}}</string>
-                <key>textureRotated</key>
-                <false/>
-            </dict>
         </dict>
         <key>metadata</key>
         <dict>
@@ -74,13 +44,13 @@
             <key>premultiplyAlpha</key>
             <false/>
             <key>realTextureFileName</key>
-            <string>Idle_Loaded.png</string>
+            <string>Make.png</string>
             <key>size</key>
-            <string>{1024,256}</string>
+            <string>{512,256}</string>
             <key>smartupdate</key>
-            <string>$TexturePacker:SmartUpdate:17f1f877ad5123bc552aa9c97b33cfe2:404dadd39fc4460ba3220c2ee3f85374:cf4809e9806bc9ec901792d8870b151a$</string>
+            <string>$TexturePacker:SmartUpdate:09bc36f38d14b83563fd92cb28472e35:dd4fa0dcb7f172d1fc7a9f4dfd5f29a2:b9c9cc223ec8271cef70ea8fc91b48e6$</string>
             <key>textureFileName</key>
-            <string>Idle_Loaded.png</string>
+            <string>Make.png</string>
         </dict>
     </dict>
 </plist>

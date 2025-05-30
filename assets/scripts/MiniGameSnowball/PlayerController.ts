@@ -106,6 +106,8 @@ export default class PlayerController extends cc.Component {
                 if (!this.hasSnowball && this.state !== PlayerState.MakingSnowball) {
                     this.state = PlayerState.MakingSnowball;
                     this.snowballTimer = 0;
+                    // 立即播放製作雪球動畫
+                    if (this.anim) this.anim.play(this.makeAnimName);
                 }
                 break;
         }
@@ -268,7 +270,7 @@ export default class PlayerController extends cc.Component {
         // 播放丟擲動畫
         if (this.anim) this.anim.play(this.throwAnimName);
         const snowball = cc.instantiate(this.snowballPrefab);
-        // 只朝左右丟
+        // 只朝左右丟，依照 faceRight
         const dir = this.faceRight ? 1 : -1;
         const offset = 40;
         snowball.parent = this.node.parent;
@@ -282,6 +284,8 @@ export default class PlayerController extends cc.Component {
         this.hasSnowball = false;
         this.state = PlayerState.Idle;
         if (this.handSnowball) this.handSnowball.active = false;
+        // 丟完後切回沒拿雪球的 idle/run 動畫
+        if (this.anim) this.anim.play(this.idleAnimName);
     }
 
     setLife(life: number) {
