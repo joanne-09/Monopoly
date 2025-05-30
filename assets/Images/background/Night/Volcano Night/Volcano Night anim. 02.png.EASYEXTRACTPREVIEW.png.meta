@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "db09ba61-0e37-464a-a4af-8e6bc186554c",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 128,
+  "height": 64,
+  "platformSettings": {},
+  "subMetas": {
+    "Volcano Night anim. 02.png.EASYEXTRACTPREVIEW": {
+      "ver": "1.0.6",
+      "uuid": "b5ec4fc1-5a1c-407c-91bc-e447453a9552",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "db09ba61-0e37-464a-a4af-8e6bc186554c",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 128,
+      "height": 64,
+      "rawWidth": 128,
+      "rawHeight": 64,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "5d6a400f-c898-4727-855f-0ec31b6b9e2f",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 512,
+  "height": 256,
+  "platformSettings": {},
+  "subMetas": {
+    "Snow Night Layer 09": {
+      "ver": "1.0.6",
+      "uuid": "bdf11709-8ec9-442b-be33-72894ab52d2e",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "5d6a400f-c898-4727-855f-0ec31b6b9e2f",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": -56,
+      "trimX": 0,
+      "trimY": 112,
+      "width": 512,
+      "height": 144,
+      "rawWidth": 512,
+      "rawHeight": 256,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

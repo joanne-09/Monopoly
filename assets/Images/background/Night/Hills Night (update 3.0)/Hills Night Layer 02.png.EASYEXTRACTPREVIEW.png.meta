@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "183cf64a-1259-423e-b66e-d2e83a26b403",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 128,
+  "height": 64,
+  "platformSettings": {},
+  "subMetas": {
+    "Hills Night Layer 02.png.EASYEXTRACTPREVIEW": {
+      "ver": "1.0.6",
+      "uuid": "806cbc88-885d-4184-8f50-c3111e05eafa",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "183cf64a-1259-423e-b66e-d2e83a26b403",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": -19.5,
+      "trimX": 0,
+      "trimY": 39,
+      "width": 128,
+      "height": 25,
+      "rawWidth": 128,
+      "rawHeight": 64,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

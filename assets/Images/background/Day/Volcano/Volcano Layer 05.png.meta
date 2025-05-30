@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "97a622e8-9977-4f59-8e66-6cf94d6b8fe3",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 512,
+  "height": 256,
+  "platformSettings": {},
+  "subMetas": {
+    "Volcano Layer 05": {
+      "ver": "1.0.6",
+      "uuid": "43fec44d-b1f6-4ded-839a-f33c2cc6c2b0",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "97a622e8-9977-4f59-8e66-6cf94d6b8fe3",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 5.5,
+      "offsetY": -67.5,
+      "trimX": 35,
+      "trimY": 146,
+      "width": 453,
+      "height": 99,
+      "rawWidth": 512,
+      "rawHeight": 256,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

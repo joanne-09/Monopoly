@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "c82f8d98-2f44-464d-837e-4dc1e897151f",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 128,
+  "height": 64,
+  "platformSettings": {},
+  "subMetas": {
+    "Volcano Night Layer 01.png.EASYEXTRACTPREVIEW": {
+      "ver": "1.0.6",
+      "uuid": "2a4a0108-871f-44bf-8c9a-0c18a205749e",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "c82f8d98-2f44-464d-837e-4dc1e897151f",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": -25,
+      "trimX": 0,
+      "trimY": 50,
+      "width": 128,
+      "height": 14,
+      "rawWidth": 128,
+      "rawHeight": 64,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

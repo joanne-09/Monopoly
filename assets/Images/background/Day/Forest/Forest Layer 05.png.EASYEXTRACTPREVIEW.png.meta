@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "61bd35c1-7cc4-4ee4-be7f-5171bfda235c",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 128,
+  "height": 64,
+  "platformSettings": {},
+  "subMetas": {
+    "Forest Layer 05.png.EASYEXTRACTPREVIEW": {
+      "ver": "1.0.6",
+      "uuid": "95b427dc-0845-4981-a256-a8ec6f6472a0",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "61bd35c1-7cc4-4ee4-be7f-5171bfda235c",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": -30,
+      "trimX": 0,
+      "trimY": 60,
+      "width": 128,
+      "height": 4,
+      "rawWidth": 128,
+      "rawHeight": 64,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

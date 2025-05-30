@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "aedc4161-ecd3-4ba1-95b6-707a0bf623f1",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 512,
+  "height": 256,
+  "platformSettings": {},
+  "subMetas": {
+    "Desert Night Layer 05": {
+      "ver": "1.0.6",
+      "uuid": "625059f3-5c3a-408b-a9eb-22e50a127e2b",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "aedc4161-ecd3-4ba1-95b6-707a0bf623f1",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -20.5,
+      "offsetY": -113,
+      "trimX": 4,
+      "trimY": 226,
+      "width": 463,
+      "height": 30,
+      "rawWidth": 512,
+      "rawHeight": 256,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

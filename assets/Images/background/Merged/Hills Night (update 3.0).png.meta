@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "166d9e14-09a0-4517-8346-70848dc233b1",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 512,
+  "height": 256,
+  "platformSettings": {},
+  "subMetas": {
+    "Hills Night (update 3.0)": {
+      "ver": "1.0.6",
+      "uuid": "011a91a2-7110-44ef-9bf2-e7eee7b2359d",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "166d9e14-09a0-4517-8346-70848dc233b1",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 512,
+      "height": 256,
+      "rawWidth": 512,
+      "rawHeight": 256,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

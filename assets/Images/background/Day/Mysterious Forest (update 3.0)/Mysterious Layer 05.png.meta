@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "44bfc1a7-9f0d-47be-811d-e7f4b2dd61cc",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 512,
+  "height": 256,
+  "platformSettings": {},
+  "subMetas": {
+    "Mysterious Layer 05": {
+      "ver": "1.0.6",
+      "uuid": "e4100c52-933b-43a5-8182-ca74862ae438",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "44bfc1a7-9f0d-47be-811d-e7f4b2dd61cc",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": -118.5,
+      "trimX": 0,
+      "trimY": 237,
+      "width": 512,
+      "height": 19,
+      "rawWidth": 512,
+      "rawHeight": 256,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

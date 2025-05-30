@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "5b1b9422-903a-45cd-8789-92ec6195f874",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 128,
+  "height": 64,
+  "platformSettings": {},
+  "subMetas": {
+    "Desert Layer 06.png.EASYEXTRACTPREVIEW": {
+      "ver": "1.0.6",
+      "uuid": "54399eae-0f53-42a5-b370-0d31b31636e6",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "5b1b9422-903a-45cd-8789-92ec6195f874",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -19,
+      "offsetY": -24.5,
+      "trimX": 5,
+      "trimY": 52,
+      "width": 80,
+      "height": 9,
+      "rawWidth": 128,
+      "rawHeight": 64,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

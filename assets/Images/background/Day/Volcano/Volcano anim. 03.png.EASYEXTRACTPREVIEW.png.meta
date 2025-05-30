@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "80a98821-1998-456a-b4ca-666d9a5ebaf2",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 128,
+  "height": 64,
+  "platformSettings": {},
+  "subMetas": {
+    "Volcano anim. 03.png.EASYEXTRACTPREVIEW": {
+      "ver": "1.0.6",
+      "uuid": "b96484a2-3835-4a58-8ec1-88ada66e7c35",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "80a98821-1998-456a-b4ca-666d9a5ebaf2",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 128,
+      "height": 64,
+      "rawWidth": 128,
+      "rawHeight": 64,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

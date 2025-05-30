@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "1dc53221-cf25-467a-8213-322447c51c4b",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 512,
+  "height": 256,
+  "platformSettings": {},
+  "subMetas": {
+    "Snow Layer 03": {
+      "ver": "1.0.6",
+      "uuid": "3cb29dcf-b5ec-4eea-ad57-c7fc259b1dec",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "1dc53221-cf25-467a-8213-322447c51c4b",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": -70.5,
+      "trimX": 0,
+      "trimY": 141,
+      "width": 512,
+      "height": 115,
+      "rawWidth": 512,
+      "rawHeight": 256,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

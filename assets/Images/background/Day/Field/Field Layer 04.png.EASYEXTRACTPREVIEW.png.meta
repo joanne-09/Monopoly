@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "1fde5f86-127e-4a80-b251-0724f8d0ca97",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 128,
+  "height": 64,
+  "platformSettings": {},
+  "subMetas": {
+    "Field Layer 04.png.EASYEXTRACTPREVIEW": {
+      "ver": "1.0.6",
+      "uuid": "24e83f92-7a98-4f08-ad5a-b914ceff693a",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "1fde5f86-127e-4a80-b251-0724f8d0ca97",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": -15,
+      "trimX": 4,
+      "trimY": 30,
+      "width": 120,
+      "height": 34,
+      "rawWidth": 128,
+      "rawHeight": 64,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

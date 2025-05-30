@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "3d36159a-486e-4242-abce-c3ff91d9e0a7",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 128,
+  "height": 64,
+  "platformSettings": {},
+  "subMetas": {
+    "Field Night Layer 03.png.EASYEXTRACTPREVIEW": {
+      "ver": "1.0.6",
+      "uuid": "a6c3c03b-6481-404c-80f7-1bd4b9ee841c",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "3d36159a-486e-4242-abce-c3ff91d9e0a7",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": -18.5,
+      "trimX": 0,
+      "trimY": 37,
+      "width": 128,
+      "height": 27,
+      "rawWidth": 128,
+      "rawHeight": 64,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
