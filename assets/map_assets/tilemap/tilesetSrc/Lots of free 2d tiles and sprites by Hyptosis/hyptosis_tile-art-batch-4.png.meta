@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "db91b75f-bc82-4e1d-8434-d638bcddb8a2",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 960,
+  "height": 960,
+  "platformSettings": {},
+  "subMetas": {
+    "hyptosis_tile-art-batch-4": {
+      "ver": "1.0.6",
+      "uuid": "5b6f15dc-c04e-4a28-9eec-56ad7ecf065e",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "db91b75f-bc82-4e1d-8434-d638bcddb8a2",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -32,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 896,
+      "height": 960,
+      "rawWidth": 960,
+      "rawHeight": 960,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

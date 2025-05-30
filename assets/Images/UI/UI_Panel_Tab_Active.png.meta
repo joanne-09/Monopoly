@@ -14,7 +14,7 @@
   "subMetas": {
     "UI_Panel_Tab_Active": {
       "ver": "1.0.6",
-      "uuid": "1f8ec4e0-e3e7-4e0c-b2ec-7e02f6b018b7",
+      "uuid": "281460eb-66db-4473-a4ab-8b87d4e7e137",
       "importer": "sprite-frame",
       "rawTextureUuid": "f073892b-e0fa-4582-9078-82615a8b6433",
       "trimType": "auto",
@@ -29,9 +29,9 @@
       "rawWidth": 60,
       "rawHeight": 62,
       "borderTop": 0,
-      "borderBottom": 4,
-      "borderLeft": 2,
-      "borderRight": 2,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
       "subMetas": {}
     }
   }

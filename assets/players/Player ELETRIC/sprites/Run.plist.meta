@@ -11,7 +11,7 @@
   "subMetas": {
     "run01.png": {
       "ver": "1.0.6",
-      "uuid": "76706f56-647e-4859-af73-69e11f2f2a18",
+      "uuid": "b49b2fa7-20a0-485c-86e6-46ff761475b3",
       "importer": "sprite-frame",
       "rawTextureUuid": "29d3c8ab-b04c-40ff-ad14-2dd4fe93846e",
       "trimType": "auto",
@@ -34,7 +34,7 @@
     },
     "run02.png": {
       "ver": "1.0.6",
-      "uuid": "d7f14bbe-e78e-4a8f-ab5e-851ff264f93c",
+      "uuid": "18c3ab51-f7a7-4a50-9795-31b1f56e76b6",
       "importer": "sprite-frame",
       "rawTextureUuid": "29d3c8ab-b04c-40ff-ad14-2dd4fe93846e",
       "trimType": "auto",

@@ -11,7 +11,7 @@
   "subMetas": {
     "Run01.png": {
       "ver": "1.0.6",
-      "uuid": "e447f7ab-5ca4-4132-981f-4b9ba1609fbb",
+      "uuid": "0e11b679-51e4-430d-9260-2c7cecd2ad08",
       "importer": "sprite-frame",
       "rawTextureUuid": "1323c039-f5fb-4fba-9692-935964052ea3",
       "trimType": "auto",
@@ -34,7 +34,7 @@
     },
     "Run02.png": {
       "ver": "1.0.6",
-      "uuid": "9bbd4c8e-5353-4eb0-a9b9-783630039d75",
+      "uuid": "7663c598-1380-40be-bd7c-e6f815c70bb4",
       "importer": "sprite-frame",
       "rawTextureUuid": "1323c039-f5fb-4fba-9692-935964052ea3",
       "trimType": "auto",
@@ -57,7 +57,7 @@
     },
     "Run03.png": {
       "ver": "1.0.6",
-      "uuid": "f4b9f1af-a955-4b27-88ce-27a58d2c2a9f",
+      "uuid": "3f79420d-b399-4074-a9f6-4fbbfb12f58f",
       "importer": "sprite-frame",
       "rawTextureUuid": "1323c039-f5fb-4fba-9692-935964052ea3",
       "trimType": "auto",
@@ -80,7 +80,7 @@
     },
     "Run04.png": {
       "ver": "1.0.6",
-      "uuid": "273674bf-bd88-47bd-80d3-79f9c23eaafb",
+      "uuid": "5bccecc3-ea4b-4501-ba65-a2ca3cc21017",
       "importer": "sprite-frame",
       "rawTextureUuid": "1323c039-f5fb-4fba-9692-935964052ea3",
       "trimType": "auto",

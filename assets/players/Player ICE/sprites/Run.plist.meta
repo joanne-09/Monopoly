@@ -11,7 +11,7 @@
   "subMetas": {
     "run01.png": {
       "ver": "1.0.6",
-      "uuid": "dc38fcba-9b1e-47b8-bead-de09bc2d0403",
+      "uuid": "07186319-73c8-4bec-ad71-6bb37e499b25",
       "importer": "sprite-frame",
       "rawTextureUuid": "83eb3082-6637-4251-90a2-b25c3603fa20",
       "trimType": "auto",
@@ -34,7 +34,7 @@
     },
     "run02.png": {
       "ver": "1.0.6",
-      "uuid": "9d9a0209-221a-4839-a46b-f66e1f31e9e0",
+      "uuid": "bf51cd02-82ea-4eec-bc51-765b34a98597",
       "importer": "sprite-frame",
       "rawTextureUuid": "83eb3082-6637-4251-90a2-b25c3603fa20",
       "trimType": "auto",
@@ -57,7 +57,7 @@
     },
     "run03.png": {
       "ver": "1.0.6",
-      "uuid": "1f493274-f764-4df4-b062-f78adefa150d",
+      "uuid": "6ec0ba36-7493-48de-8ce1-ed39daab2b14",
       "importer": "sprite-frame",
       "rawTextureUuid": "83eb3082-6637-4251-90a2-b25c3603fa20",
       "trimType": "auto",
@@ -80,7 +80,7 @@
     },
     "run04.png": {
       "ver": "1.0.6",
-      "uuid": "ded0ff0a-def3-4865-80e4-60e9d8a64d1c",
+      "uuid": "3dafd22a-77cb-4664-ac50-52c54ae1596f",
       "importer": "sprite-frame",
       "rawTextureUuid": "83eb3082-6637-4251-90a2-b25c3603fa20",
       "trimType": "auto",
@@ -103,7 +103,7 @@
     },
     "run05.png": {
       "ver": "1.0.6",
-      "uuid": "37bf2213-6f17-4dc9-9b40-3b6911675eb5",
+      "uuid": "d83fc48a-961c-4937-879d-f2766b6a495b",
       "importer": "sprite-frame",
       "rawTextureUuid": "83eb3082-6637-4251-90a2-b25c3603fa20",
       "trimType": "auto",
@@ -126,7 +126,7 @@
     },
     "run06.png": {
       "ver": "1.0.6",
-      "uuid": "208e4180-3ca4-4205-b7e9-ca2f5f579b3d",
+      "uuid": "1a1154c5-8cc1-4ed1-99a9-d1a216669cc0",
       "importer": "sprite-frame",
       "rawTextureUuid": "83eb3082-6637-4251-90a2-b25c3603fa20",
       "trimType": "auto",
@@ -149,7 +149,7 @@
     },
     "run07.png": {
       "ver": "1.0.6",
-      "uuid": "e9ceaab4-77e4-4d95-8059-dc7ca4557757",
+      "uuid": "aa8b8127-b33d-48bd-bbfb-ccf29147186d",
       "importer": "sprite-frame",
       "rawTextureUuid": "83eb3082-6637-4251-90a2-b25c3603fa20",
       "trimType": "auto",
@@ -172,7 +172,7 @@
     },
     "run08.png": {
       "ver": "1.0.6",
-      "uuid": "552bb057-3804-4b8c-ae6e-4a60ee867e66",
+      "uuid": "40a63188-31fc-4158-883e-d7d3b7a06cbd",
       "importer": "sprite-frame",
       "rawTextureUuid": "83eb3082-6637-4251-90a2-b25c3603fa20",
       "trimType": "auto",
