@@ -49,7 +49,7 @@ export default class GameManager extends cc.Component {
     }
 
     
-    public setPlayerNameandAvatar(name: string, avatar: cc.Sprite) {
+    public setPlayerNameandAvatar(name: string, avatar: number) {
         const myActorNumber = this.networkManager.getMyActorNumber();
         if (myActorNumber === -1) {
             console.error("GameManager: Cannot set player name and avatar, actor number is not valid.");
@@ -63,7 +63,8 @@ export default class GameManager extends cc.Component {
         this.playerMap.set(myActorNumber, {
             actorNumber: myActorNumber,
             name: name,
-            avatar: avatar});
+            avatar: avatar
+        });
     }
 
     public getPlayerData(actorNumber: number): PlayerData | null {
