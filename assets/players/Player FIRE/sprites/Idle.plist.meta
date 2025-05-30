@@ -11,7 +11,7 @@
   "subMetas": {
     "Idle01.png": {
       "ver": "1.0.6",
-      "uuid": "df555b45-1782-47bd-8916-0d65b651dc98",
+      "uuid": "f25c93c8-1b68-4d39-b8da-d22f2b652545",
       "importer": "sprite-frame",
       "rawTextureUuid": "bb46608b-8302-4a4e-a0a5-9d4ecbe56de9",
       "trimType": "auto",
@@ -34,7 +34,7 @@
     },
     "Idle02.png": {
       "ver": "1.0.6",
-      "uuid": "8c2fd151-386d-4f27-89b3-7f63f88487e8",
+      "uuid": "89ff8994-cd5c-4fd9-8422-c5d4c6e88f3e",
       "importer": "sprite-frame",
       "rawTextureUuid": "bb46608b-8302-4a4e-a0a5-9d4ecbe56de9",
       "trimType": "auto",
@@ -57,7 +57,7 @@
     },
     "Idle03.png": {
       "ver": "1.0.6",
-      "uuid": "a220ffca-5b0d-4168-9078-acf9410c4660",
+      "uuid": "ff3e76a9-7b9b-4a2f-baa0-db67a0518ad6",
       "importer": "sprite-frame",
       "rawTextureUuid": "bb46608b-8302-4a4e-a0a5-9d4ecbe56de9",
       "trimType": "auto",
@@ -80,7 +80,7 @@
     },
     "Idle04.png": {
       "ver": "1.0.6",
-      "uuid": "a9ce6b2b-a772-4f7b-9a04-dce9d1739a0c",
+      "uuid": "edf0a2ca-863a-46a9-84c1-edf32843fdd5",
       "importer": "sprite-frame",
       "rawTextureUuid": "bb46608b-8302-4a4e-a0a5-9d4ecbe56de9",
       "trimType": "auto",
