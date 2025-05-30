@@ -21,13 +21,13 @@ export default class MapManager extends cc.Component {
 
     }
 
-    onSpaceClicked(event: cc.Event.EventTouch, index: string) {
+    public onSpaceClicked(event: cc.Event.EventTouch, index: string) {
       const spaceIndex = parseInt(index);
       let coord = SpaceNodeCtrl.getCoordByIndex(this.spacesNode, spaceIndex);
       cc.log(`The Coordina of Space ${spaceIndex}: ${coord.x}, ${coord.y}`);
     }
     
-    getCoordByIndex(index: number): cc.Vec2 {
+    public getCoordByIndex(index: number): cc.Vec2 {
       return SpaceNodeCtrl.getCoordByIndex(this.spacesNode, index);
     }
 
