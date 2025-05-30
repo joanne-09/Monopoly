@@ -194,6 +194,11 @@ export default class NetworkManager extends cc.Component {
         return this.client && this.client.isJoinedToRoom();
     }
 
+    public getPhotonID(): string {
+        if (this.client && this.client.myActor) {
+            return this.client.myActor().userId || "UNDEFINED";
+        }
+    }
     onDestroy() {
         if (NetworkManager.instance === this) {
             NetworkManager.instance = null;
