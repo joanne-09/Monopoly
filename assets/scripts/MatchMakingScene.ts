@@ -1,6 +1,21 @@
 import NetworkManager from "./NetworkManager";
 const {ccclass, property} = cc._decorator;
 
+// Start scene (player data) localStorage?
+// username
+// player sprite
+
+// Multiplayer Photon custom properties
+// player name and sprite needed
+// name: string
+// sprite: string
+
+type PlayerInfo = {
+    actorNr: number;
+    username?: string;
+    sprite?: string;
+};
+
 @ccclass
 export default class MatchMakingScene extends cc.Component {
     @property(cc.Label)
@@ -25,7 +40,7 @@ export default class MatchMakingScene extends cc.Component {
     leaveButton: cc.Node = null;
 
     private networkManager: NetworkManager = null;
-    private playerList: number[] = []; // only the actNr
+    private playerList: PlayerInfo[] = [];
     private handler: (eventCode: number, content: any, actorNr: number) => void;
 
     onLoad() {
@@ -34,16 +49,45 @@ export default class MatchMakingScene extends cc.Component {
             cc.error("NetworkManager not found!");
             return;
         }
-        this.handler = this.onPhotonEvent.bind(this);
-        this.networkManager.registerMessageHandler(this.handler);
-        this.updatePlayerCards();
-        if (this.leaveButton) {
-            this.leaveButton.on("click", this.onLeave, this);
+
+        // Connect to Photon if not already connected
+        if (!this.networkManager.isConnected()) {
+            this.networkManager.connectToPhoton();
         }
-        // Get initial player list
-        this.scheduleOnce(() => {
-            this.refreshPlayerList();
-        }, 0.2);
+
+            // Wait for connection and room join, then set custom properties
+        const setPropertiesWhenReady = () => {
+            if (
+                this.networkManager["client"] &&
+                this.networkManager["client"].isJoinedToRoom &&
+                this.networkManager["client"].isJoinedToRoom()
+            ) {
+                const username = localStorage.getItem("username") || "Player";
+                const sprite = localStorage.getItem("sprite") || "Player FIRE";
+                const myActor = this.networkManager["client"].myActor();
+                if (myActor && myActor.setCustomProperty) {
+                    myActor.setCustomProperty("username", username);
+                    myActor.setCustomProperty("sprite", sprite);
+                }
+                
+                this.handler = this.onPhotonEvent.bind(this);
+                this.networkManager.registerMessageHandler(this.handler);
+                this.updatePlayerCards();
+                
+                if (this.leaveButton) {
+                    this.leaveButton.on("click", this.onLeave, this);
+                }
+
+                this.scheduleOnce(() => {
+                    this.refreshPlayerList();
+                }, 0.2);
+            } else {
+                // Retry after a short delay
+                this.scheduleOnce(setPropertiesWhenReady, 0.2);
+            }
+        };
+
+        setPropertiesWhenReady();
     }
 
     onPhotonEvent(eventCode: number, content: any, actorNr: number) {
@@ -56,7 +100,11 @@ export default class MatchMakingScene extends cc.Component {
         const actors = this.networkManager["client"].myRoomActorsArray() || [];
         this.playerList = actors
             .filter(a => a && typeof a.actorNr === "number")
-            .map(a => a.actorNr);
+            .map(a => ({
+                actorNr: a.actorNr,
+                username: a.getCustomProperty("username"),
+                sprite: a.getCustomProperty("sprite")
+            }));
         this.updatePlayerCards();
     }
 
@@ -66,11 +114,16 @@ export default class MatchMakingScene extends cc.Component {
         for (let i = 0; i < 4; i++) {
             if (playerLabels[i]) {
                 if (i < this.playerList.length) {
-                    playerLabels[i].string = `Player ${this.playerList[i]}`;
-                    if (playerSprites[i]) playerSprites[i].node.active = true;
+                    playerLabels[i].string = this.playerList[i].username;
+                    if (playerSprites[i]) {
+                        playerSprites[i].node.active = true;
+                        if (this.playerList[i].sprite) {
+                            //playerSprites[i].spriteFrame = this.playerList[i].sprite;
+                        }
+                    }
                     // Optionally set playerSprites[i].spriteFrame = ... based on playerList[i]
                 } else {
-                    playerLabels[i].string = "Waiting for a player to join...";
+                    playerLabels[i].string = "Waiting...";
                     if (playerSprites[i]) playerSprites[i].node.active = false;
                 }
             }

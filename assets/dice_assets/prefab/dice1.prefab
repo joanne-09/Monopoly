@@ -184,7 +184,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "67Rj+3C15AxbygWpoZh5N0",
+    "fileId": "f6K6c1SWBLL47XXy4HmEqz",
     "sync": false
   },
   {
@@ -222,22 +222,22 @@
     },
     "diceFaceSprites": [
       {
-        "__uuid__": "68d66c05-e537-4d16-b0f8-9da8e85993d7"
+        "__uuid__": "bee827c7-058d-486a-839b-639179ed0015"
       },
       {
-        "__uuid__": "d4abbb7c-7ba4-4097-9e15-f44acecfa87f"
+        "__uuid__": "0b856f50-5976-4950-b312-f69677ef70d1"
       },
       {
-        "__uuid__": "d4bb1e96-1731-4f7d-8871-4752ee6fa0ed"
+        "__uuid__": "be4f2a3f-ea14-459e-8e33-ed3fc8e6526b"
       },
       {
-        "__uuid__": "fc7a71d3-3ee4-413a-a23f-615a7ea54255"
+        "__uuid__": "93e217ee-c0ca-407c-a0e1-6c6ee190bc6f"
       },
       {
-        "__uuid__": "b5972783-c449-458f-a8ec-3531921e7da3"
+        "__uuid__": "7a50d1f4-30ff-493d-a9c5-85ab4152531a"
       },
       {
-        "__uuid__": "f845f7b4-1787-4fe1-90d0-a5ef85d0efb1"
+        "__uuid__": "51847f52-7ab7-4f48-95cc-f65318b22be8"
       }
     ],
     "rollSound": {
