@@ -1,0 +1,43 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "Player_Electric_Idle_Loaded",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.5166666666666667,
+  "sample": 60,
+  "speed": 1,
+  "wrapMode": 2,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "546a1b6b-f7bb-4ea2-87ed-973f58fdefb4"
+            }
+          },
+          {
+            "frame": 0.16666666666666666,
+            "value": {
+              "__uuid__": "b3ea5ffd-9675-47f2-bc47-53374a438331"
+            }
+          },
+          {
+            "frame": 0.3333333333333333,
+            "value": {
+              "__uuid__": "472a8b64-dc2c-44c1-a4a8-c77e6813d3a5"
+            }
+          },
+          {
+            "frame": 0.5,
+            "value": {
+              "__uuid__": "c15e6b18-634d-49f2-af99-e7a72cf5e8e4"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}

@@ -1,0 +1,43 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "Player_ICE_Idle_Loaded",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.5166666666666667,
+  "sample": 60,
+  "speed": 1,
+  "wrapMode": 2,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "7ebf4efe-c757-4c2e-bbc9-a044c839fa93"
+            }
+          },
+          {
+            "frame": 0.16666666666666666,
+            "value": {
+              "__uuid__": "707c2823-e3d0-4cdd-b9c2-04293bc3a331"
+            }
+          },
+          {
+            "frame": 0.3333333333333333,
+            "value": {
+              "__uuid__": "aa616f61-e4e0-4b15-9613-ff710a1494ff"
+            }
+          },
+          {
+            "frame": 0.5,
+            "value": {
+              "__uuid__": "188a78d9-d4bf-49e4-8423-17476f55fef1"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}
