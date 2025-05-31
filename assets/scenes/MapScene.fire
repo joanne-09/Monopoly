@@ -78,10 +78,10 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 551
+        "__id__": 549
       },
       {
-        "__id__": 552
+        "__id__": 550
       }
     ],
     "_prefab": null,
@@ -27109,7 +27109,7 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 550
+        "__id__": 548
       }
     ],
     "_prefab": null,
@@ -27560,7 +27560,7 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 549
+        "__id__": 547
       }
     ],
     "_prefab": null,
@@ -27626,15 +27626,13 @@
     "_active": false,
     "_components": [
       {
-        "__id__": 546
+        "__id__": 545
       },
       {
-        "__id__": 547
+        "__id__": 546
       }
     ],
-    "_prefab": {
-      "__id__": 548
-    },
+    "_prefab": null,
     "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
@@ -27696,9 +27694,7 @@
         "__id__": 544
       }
     ],
-    "_prefab": {
-      "__id__": 545
-    },
+    "_prefab": null,
     "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
@@ -27779,17 +27775,6 @@
     "_id": "adgta1HnlIfYanWZTVsxr/"
   },
   {
-    "__type__": "cc.PrefabInfo",
-    "root": {
-      "__id__": 542
-    },
-    "asset": {
-      "__uuid__": "78059434-5885-4037-95ec-8b13f1ad3e71"
-    },
-    "fileId": "f6K6c1SWBLL47XXy4HmEqz",
-    "sync": false
-  },
-  {
     "__type__": "cc.Animation",
     "_name": "",
     "_objFlags": 0,
@@ -27817,7 +27802,7 @@
     },
     "_enabled": true,
     "diceAnimation": {
-      "__id__": 546
+      "__id__": 545
     },
     "diceSprite": {
       "__id__": 544
@@ -27851,17 +27836,6 @@
     "_id": "95Ph2vBCFEt5PH0uqZyxBL"
   },
   {
-    "__type__": "cc.PrefabInfo",
-    "root": {
-      "__id__": 542
-    },
-    "asset": {
-      "__uuid__": "78059434-5885-4037-95ec-8b13f1ad3e71"
-    },
-    "fileId": "",
-    "sync": false
-  },
-  {
     "__type__": "3f38daAMklCeoOuXFxOim+F",
     "_name": "",
     "_objFlags": 0,
@@ -27870,7 +27844,7 @@
     },
     "_enabled": true,
     "dicePrefab": {
-      "__uuid__": "78059434-5885-4037-95ec-8b13f1ad3e71"
+      "__uuid__": "6088ef67-15db-418b-9407-04fa5cd437b6"
     },
     "diceNum": 1,
     "diceSize": 128,

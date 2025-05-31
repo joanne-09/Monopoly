@@ -1,0 +1,43 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "Player_GRASS_Run_Loaded",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.5166666666666667,
+  "sample": 60,
+  "speed": 1,
+  "wrapMode": 2,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "ddea0cf7-bd9d-4fea-8c04-1b2ddebc06ce"
+            }
+          },
+          {
+            "frame": 0.16666666666666666,
+            "value": {
+              "__uuid__": "9d0fb21b-14b5-4e1e-91c7-2c4fd2312e6f"
+            }
+          },
+          {
+            "frame": 0.3333333333333333,
+            "value": {
+              "__uuid__": "2cae8354-308a-4dd5-b455-7daac8ac1318"
+            }
+          },
+          {
+            "frame": 0.5,
+            "value": {
+              "__uuid__": "bf17aa27-f31c-4a62-9620-e5168be09190"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}

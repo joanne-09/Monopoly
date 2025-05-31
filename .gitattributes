@@ -1,0 +1,7 @@
+* text=auto
+*.ts text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.meta text eol=lf
+*.prefab text eol=lf
+*.fire text eol=lf

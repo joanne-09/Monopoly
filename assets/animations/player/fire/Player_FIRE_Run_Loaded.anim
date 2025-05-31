@@ -1,0 +1,43 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "Player_FIRE_Run_Loaded",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.5166666666666667,
+  "sample": 60,
+  "speed": 1,
+  "wrapMode": 2,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "d9817c9c-4def-4537-a20b-e28917ed78dd"
+            }
+          },
+          {
+            "frame": 0.16666666666666666,
+            "value": {
+              "__uuid__": "8e176483-a750-4b1b-9103-c9ee6c220528"
+            }
+          },
+          {
+            "frame": 0.3333333333333333,
+            "value": {
+              "__uuid__": "42a56c57-d24c-4340-a125-77704eb7b8ab"
+            }
+          },
+          {
+            "frame": 0.5,
+            "value": {
+              "__uuid__": "157d69da-a326-4770-865c-73b7553761d5"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}
