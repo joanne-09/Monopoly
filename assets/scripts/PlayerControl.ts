@@ -1,6 +1,7 @@
 const {ccclass, property} = cc._decorator;
 import { PlayerData } from "./types/DataTypes";
 import { MapNodeEvents } from "./types/GameEvents";
+import NetworkManager from "./NetworkManager";
 import GameManager from "./GameManager";
 import DiceCtrl from "./DiceRoll";
 
@@ -28,6 +29,7 @@ export class PlayerControl extends cc.Component {
 
     // Life-cycle callbacks
     onLoad() {
+        this.playerId = NetworkManager.getInstance().getMyActorNumber();
         this.getPlayerInfo();
         this.initializePosition();
     }
