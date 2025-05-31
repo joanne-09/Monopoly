@@ -16,7 +16,7 @@ export default class AvatarSelect extends cc.Component {
     @property(cc.Animation)
     playerAnimation: cc.Animation = null;
 
-    private activeButton: number = 0;
+    private activeAvatar: number = 0;
     private readonly ANIMATION_INTERVAL: number = 3; // Interval in seconds for active character's random animation
 
     private playCharacterAnimation(characterNumber: number) {
@@ -41,10 +41,10 @@ export default class AvatarSelect extends cc.Component {
     }
 
     private playActiveCharacterRandomAnimationScheduled() {
-        if (this.activeButton === 0 || !this.playerNode) {
+        if (this.activeAvatar === 0 || !this.playerNode) {
             return;
         }
-        this.playCharacterAnimation(this.activeButton);
+        this.playCharacterAnimation(this.activeAvatar);
     }
 
     onCharacterSelect(selected: number = 0) {
@@ -55,13 +55,13 @@ export default class AvatarSelect extends cc.Component {
         // Stop any previously scheduled character animation
         this.unschedule(this.playActiveCharacterRandomAnimationScheduled);
 
-        this.activeButton = selected;
+        this.activeAvatar = selected;
 
         // Play animation once immediately and then schedule it
         this.playActiveCharacterRandomAnimationScheduled(); // Play once immediately
         this.schedule(this.playActiveCharacterRandomAnimationScheduled, this.ANIMATION_INTERVAL, cc.macro.REPEAT_FOREVER, 0.1);
 
-        console.log(`Character ${selected} selected. Active button set to ${this.activeButton}.`);
+        console.log(`Character ${selected} selected. Active avatar set to ${this.activeAvatar}.`);
     }
 
     // Life cycle method
