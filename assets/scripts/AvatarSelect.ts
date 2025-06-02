@@ -1,3 +1,5 @@
+import AccessUser, {UserData} from "./firebase/AccessUser";
+import GameManager from "./GameManager";
 const {ccclass, property} = cc._decorator;
 
 @ccclass
@@ -15,9 +17,15 @@ export default class AvatarSelect extends cc.Component {
     playerNode: cc.Node = null;
     @property(cc.Animation)
     playerAnimation: cc.Animation = null;
+    @property(cc.Label)
+    playerLabel: cc.Label = null;
+    @property(cc.Button)
+    createButton: cc.Button = null;
 
-    private activeAvatar: number = 0;
+    private activeAvatar: number = 1;
     private readonly ANIMATION_INTERVAL: number = 3; // Interval in seconds for active character's random animation
+
+    private playerName: string = '';
 
     private playCharacterAnimation(characterNumber: number) {
         if (!this.playerNode) {
@@ -64,6 +72,11 @@ export default class AvatarSelect extends cc.Component {
         console.log(`Character ${selected} selected. Active avatar set to ${this.activeAvatar}.`);
     }
 
+    onCreateRoom() {
+        GameManager.getInstance().setPlayerNameandAvatar(this.playerName, this.activeAvatar);
+        cc.director.loadScene("MatchMaking");
+    }
+
     // Life cycle method
     onLoad() {
         // Character button click listeners
@@ -91,6 +104,26 @@ export default class AvatarSelect extends cc.Component {
         // Optionally, set a default active button and player image
         if (this.character1) {
             this.onCharacterSelect(1);
+        }
+
+        // Load player name from user data
+        const currentUser = firebase.auth().currentUser.uid;
+        AccessUser.getUser(currentUser).then((userData: UserData | null) => {
+            if (userData) {
+                this.playerName = userData.username || "Player";
+                this.playerLabel.string = this.playerName;
+                console.log(`Player name loaded: ${this.playerName}`);
+            } else {
+                console.warn("No user data found, using default player name.");
+                this.playerName = "Player";
+            }
+        });
+
+        // Go to the next scene
+        if(this.createButton) {
+            this.createButton.node.on("click", () => {
+                this.onCreateRoom();
+            }, this);
         }
     }
 
