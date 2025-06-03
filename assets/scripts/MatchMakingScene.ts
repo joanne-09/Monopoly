@@ -144,8 +144,9 @@ export default class MatchMakingScene extends cc.Component {
         for (let i = 0; i < 4; i++) {
             if (playerLabels[i]) {
                 if (i < this.playerList.length) {
-                    playerLabels[i].string = this.playerList[i].username;
-                    if (playerSprites[i]) {
+                    if(this.playerList[i].username)
+                        playerLabels[i].string = this.playerList[i].username;
+                    if (playerSprites[i] && this.playerList[i].sprite) {
                         playerSprites[i].node.active = true;
                         // console.log("playerList[i].sprite:", this.playerList[i].sprite);
                         switch(this.playerList[i].sprite) {
@@ -167,7 +168,6 @@ export default class MatchMakingScene extends cc.Component {
                                 break;
                         }
                     }
-                    // Optionally set playerSprites[i].spriteFrame = ... based on playerList[i]
                 } else {
                     playerLabels[i].string = "Waiting...";
                     if (playerSprites[i]) playerSprites[i].node.active = false;
