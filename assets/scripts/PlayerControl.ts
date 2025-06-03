@@ -1,5 +1,5 @@
 const {ccclass, property} = cc._decorator;
-import { PlayerData } from "./types/DataTypes";
+import { PlayerData, PlayerAvatar } from "./types/DataTypes";
 import { MapNodeEvents } from "./types/GameEvents";
 import NetworkManager from "./NetworkManager";
 import GameManager from "./GameManager";
@@ -16,12 +16,10 @@ enum PlayerState {
 
 @ccclass('PlayerControl')
 export class PlayerControl extends cc.Component {
-    @property(cc.String)
     playerName: string = '';
-    @property(cc.Float)
     playerId: number = 1;
-    @property(cc.Float)
-    playerAvatar: number = 0;
+    
+    playerAvatar: PlayerAvatar = PlayerAvatar.NULL;
 
     position: cc.Vec2 = cc.v2(0, 0);
     playerState: PlayerState = PlayerState.IDLE;
