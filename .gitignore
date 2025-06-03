@@ -56,5 +56,6 @@ Thumbs.db
 # Firebase API
 #/////////////////////////////////////////////////////////////////////////////
 assets/scripts/firebase/firebase-service.ts
+assets/scripts/firebase/firebase-service.ts.meta
 public/
 
