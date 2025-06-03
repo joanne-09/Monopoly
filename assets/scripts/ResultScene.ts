@@ -6,6 +6,12 @@ export default class ResultScene extends cc.Component {
 
     @property(cc.Node)
     titleNode: cc.Node = null;
+    @property(cc.Node)
+    listNode: cc.Node = null;
+    @property(cc.Node)
+    buttonNode: cc.Node = null;
+    @property(cc.Scene)
+    nextScene: cc.Scene = null;
 
     // LIFE-CYCLE CALLBACKS:
     private listItem: cc.Node[] = [];
@@ -13,7 +19,7 @@ export default class ResultScene extends cc.Component {
 
     onLoad () {
       for(let i=0; i<this.playerNumber; i++) {
-        this.listItem[i] = this.node.getChildByName(`listItem${i+1}`) as cc.Node;
+        this.listItem[i] = this.listNode.getChildByName(`listItem${i+1}`) as cc.Node;
       }
     }
 
@@ -30,16 +36,18 @@ export default class ResultScene extends cc.Component {
       for(let i=0; i<this.playerNumber; i++) {
         this.listItem[i].y -= 500;
       }
-      // task 1: Title fade in (2 seconds)
+      this.buttonNode.opacity = 0;
+      
+      // Execute functions one by one in sequence
       this.scheduleOnce(() => { 
         this.TitleFadeIn();
         
-        // task 2: Start after title fade completes (2 seconds later)
         this.scheduleOnce(() => {
           this.animatePlayersMove(() => {
-            // task 3: Start after all players finish moving
             this.animatePlayersMedals(() => {
-              this.FadeInAvatar();
+              this.FadeInAvatar(() => {
+                this.FadeInButton(); // Finally fade in the button
+              });
             });
           });
         }, 2);
@@ -69,32 +77,60 @@ export default class ResultScene extends cc.Component {
     }
 
     private animatePlayersMedals(callback: () => void) {
+      let completedCount = 0;
+  
       for(let i = 0; i < this.playerNumber - 1; i++) {
         this.scheduleOnce(() => {
           let medal = this.listItem[i].getChildByName('Medal');
           if (medal) {
             let action = cc.scaleTo(0.5, 1).easing(cc.easeElasticInOut(1));
-            medal.runAction(action);
-          }
-          if (i === this.playerNumber - 2) {
-            callback(); // Last player finishes, call the callback
+            let callbackAction = cc.callFunc(() => {
+              completedCount++;
+              if (completedCount === this.playerNumber - 1) {
+                callback(); // All medals finished animating
+              }
+            });
+            medal.runAction(cc.sequence(action, callbackAction));
+          } else {
+            completedCount++;
+            if (completedCount === this.playerNumber - 1) {
+              callback();
+            }
           }
         }, i * 0.2);
       }
     }
 
-    private FadeInAvatar() {
+    private FadeInAvatar(callback: () => void) {
+      let completedCount = 0;
+  
       for(let i = 0; i < this.playerNumber; i++) {
         let avatar = this.listItem[i].getChildByName('avatar');
         if (avatar) {
           cc.log(`Fading in avatar for player ${i + 1}`);
-          avatar.runAction(cc.fadeIn(0.5));
+          let callbackAction = cc.callFunc(() => {
+            completedCount++;
+            if (completedCount === this.playerNumber) {
+              callback(); // All avatars finished fading in
+            }
+          });
+          avatar.runAction(cc.sequence(cc.fadeIn(0.5), callbackAction));
         } else {
           cc.error(`Avatar node not found for player ${i + 1}`);
+          completedCount++;
+          if (completedCount === this.playerNumber) {
+            callback();
+          }
         }
       }
     }
 
+    private FadeInButton() {
+      this.buttonNode.runAction(cc.fadeIn(0.5));
+      this.buttonNode.on('click', () => {
+        cc.director.loadScene(this.nextScene.name);
+      });
+    }
 
     // update (dt) {}
 }
