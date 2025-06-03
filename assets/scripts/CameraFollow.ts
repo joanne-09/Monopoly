@@ -9,6 +9,13 @@ export default class CameraFollow extends cc.Component {
     @property(cc.Float)
     smoothFollow: number = 0.1;
 
+    @property(cc.Button)
+    otherPlayer1: cc.Button = null;
+    @property(cc.Button)
+    otherPlayer2: cc.Button = null;
+    @property(cc.Button)
+    otherPlayer3: cc.Button = null;
+
     private mapMinX: number = -Infinity;
     private mapMaxX: number = Infinity;
     private mapMinY: number = -Infinity;
@@ -17,6 +24,8 @@ export default class CameraFollow extends cc.Component {
     private cameraComponent: cc.Camera = null;
 
     onLoad() {
+        this.targetPlayer = this.node.getParent();
+
         this.cameraComponent = this.getComponent(cc.Camera);
         if (!this.cameraComponent) {
             console.error("CameraFollow: cc.Camera component not found on this node!");
@@ -27,14 +36,10 @@ export default class CameraFollow extends cc.Component {
 
     lateUpdate(dt) {
         if (!this.targetPlayer) return;
-        
-        // Get target position (player position)
-        let targetX = this.targetPlayer.x;
-        let targetY = this.targetPlayer.y;
 
         // Clamp position within bounds
-        targetX = cc.misc.clampf(targetX, this.mapMinX, this.mapMaxX);
-        targetY = cc.misc.clampf(targetY, this.mapMinY, this.mapMaxY);
+        const targetX = cc.misc.clampf(0, this.mapMinX, this.mapMaxX);
+        const targetY = cc.misc.clampf(0, this.mapMinY, this.mapMaxY);
 
         // Smooth follow
         const currentX = cc.misc.lerp(this.node.x, targetX, this.smoothFollow);
