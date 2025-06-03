@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "Run",
+  "_name": "Player_GRASS_Run",
   "_objFlags": 0,
   "_native": "",
   "_duration": 0.5166666666666667,
@@ -14,25 +14,25 @@
           {
             "frame": 0,
             "value": {
-              "__uuid__": "e447f7ab-5ca4-4132-981f-4b9ba1609fbb"
+              "__uuid__": "0e11b679-51e4-430d-9260-2c7cecd2ad08"
             }
           },
           {
             "frame": 0.16666666666666666,
             "value": {
-              "__uuid__": "9bbd4c8e-5353-4eb0-a9b9-783630039d75"
+              "__uuid__": "7663c598-1380-40be-bd7c-e6f815c70bb4"
             }
           },
           {
             "frame": 0.3333333333333333,
             "value": {
-              "__uuid__": "f4b9f1af-a955-4b27-88ce-27a58d2c2a9f"
+              "__uuid__": "3f79420d-b399-4074-a9f6-4fbbfb12f58f"
             }
           },
           {
             "frame": 0.5,
             "value": {
-              "__uuid__": "273674bf-bd88-47bd-80d3-79f9c23eaafb"
+              "__uuid__": "5bccecc3-ea4b-4501-ba65-a2ca3cc21017"
             }
           }
         ]
