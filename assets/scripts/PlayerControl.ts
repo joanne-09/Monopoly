@@ -3,7 +3,7 @@ import { PlayerData } from "./types/DataTypes";
 import { MapNodeEvents } from "./types/GameEvents";
 import NetworkManager from "./NetworkManager";
 import GameManager from "./GameManager";
-import DiceManager from "./DiceManager";
+import NewClass from "./DiceManager";
 
 enum PlayerState {
     IDLE,
@@ -42,10 +42,22 @@ export class PlayerControl extends cc.Component {
     }
 
     // Handle Player Position
+    initializePosition(position: cc.Vec2 = cc.v2(0, 0)) {
+        this.position = position;
+        this.node.setPosition(position);
+        this.playerState = PlayerState.IDLE;
+        console.log(`Player ${this.playerId} initialized at position:`, position);
+
+    }
+
     setPlayerPosition(position: cc.Vec2) {
         this.position = position;
         this.node.setPosition(position);
 
+    }
+
+    getPlayerPosition(): cc.Vec2 {
+        return this.position;
     }
 
     // Handle Player Move
@@ -62,16 +74,11 @@ export class PlayerControl extends cc.Component {
         }
     }
 
-    getPlayerPosition(): cc.Vec2 {
-        return this.position;
-    }
-
-    initializePosition(position: cc.Vec2 = cc.v2(0, 0)) {
-        this.position = position;
-        this.node.setPosition(position);
-        this.playerState = PlayerState.IDLE;
-        console.log(`Player ${this.playerId} initialized at position:`, position);
-
+    // Handle Roll Dice
+    async rollDice(): Promise<number> {
+        const result = await NewClass.getInstance().onDiceRollTriggered(this.node, 1);
+        console.log(`Player ${this.playerId} rolled:`, result);
+        return result;
     }
 
     // Life-cycle callbacks
