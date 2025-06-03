@@ -3503,6 +3503,23 @@
       "__id__": 64
     },
     "nextScene": null,
+    "avatarAnimation": [
+      {
+        "__uuid__": "041ec7d3-d0a0-4a99-b05f-5a81df6b5aaa"
+      },
+      {
+        "__uuid__": "041ec7d3-d0a0-4a99-b05f-5a81df6b5aaa"
+      },
+      {
+        "__uuid__": "9feb0005-0771-45cf-945d-0f229142af02"
+      },
+      {
+        "__uuid__": "e6c4d23b-4b71-477e-8a7b-2b51873bc95f"
+      },
+      {
+        "__uuid__": "7e3383f8-cb5c-44de-b2e4-2d7b42d4f0d8"
+      }
+    ],
     "_id": "7cB5tGIPhAiLbyOK4yllVs"
   }
 ]
