@@ -50,6 +50,7 @@ export default class MatchMakingScene extends cc.Component {
     private handler: (eventCode: number, content: any, actorNr: number) => void;
 
     onLoad() {
+
         this.networkManager = NetworkManager.getInstance();
         if (!this.networkManager) {
             cc.error("NetworkManager not found!");
@@ -61,41 +62,43 @@ export default class MatchMakingScene extends cc.Component {
             this.networkManager.connectToPhoton();
         }
 
+        this.handler = this.onPhotonEvent.bind(this);
+        this.networkManager.registerMessageHandler(this.handler);
             // Wait for connection and room join, then set custom properties
         console.log(GameManager.getInstance().getPlayerData(this.networkManager.getMyActorNumber()))
-
-        const setPropertiesWhenReady = () => {
-            if (
-                this.networkManager["client"] &&
-                this.networkManager["client"].isJoinedToRoom &&
-                this.networkManager["client"].isJoinedToRoom()
-            ) {
-                const username = localStorage.getItem("username") || "Player";
-                const sprite = localStorage.getItem("sprite") || "Player FIRE";
-                const myActor = this.networkManager["client"].myActor();
-                if (myActor && myActor.setCustomProperty) {
-                    myActor.setCustomProperty("username", username);
-                    myActor.setCustomProperty("sprite", sprite);
-                }
+        console.log(GameManager.getInstance().getPlayerList());
+        // const setPropertiesWhenReady = () => {
+        //     if (
+        //         this.networkManager["client"] &&
+        //         this.networkManager["client"].isJoinedToRoom &&
+        //         this.networkManager["client"].isJoinedToRoom()
+        //     ) {
+        //         const username = localStorage.getItem("username") || "Player";
+        //         const sprite = localStorage.getItem("sprite") || "Player FIRE";
+        //         const myActor = this.networkManager["client"].myActor();
+        //         if (myActor && myActor.setCustomProperty) {
+        //             myActor.setCustomProperty("username", username);
+        //             myActor.setCustomProperty("sprite", sprite);
+        //         }
                 
-                this.handler = this.onPhotonEvent.bind(this);
-                this.networkManager.registerMessageHandler(this.handler);
-                this.updatePlayerCards();
+        //         this.handler = this.onPhotonEvent.bind(this);
+        //         this.networkManager.registerMessageHandler(this.handler);
+        //         this.updatePlayerCards();
                 
-                if (this.leaveButton) {
-                    this.leaveButton.on("click", this.onLeave, this);
-                }
+        //         if (this.leaveButton) {
+        //             this.leaveButton.on("click", this.onLeave, this);
+        //         }
 
-                this.scheduleOnce(() => {
-                    this.refreshPlayerList();
-                }, 0.2);
-            } else {
-                // Retry after a short delay
-                this.scheduleOnce(setPropertiesWhenReady, 0.2);
-            }
-        };
+        //         this.scheduleOnce(() => {
+        //             this.refreshPlayerList();
+        //         }, 0.2);
+        //     } else {
+        //         // Retry after a short delay
+        //         this.scheduleOnce(setPropertiesWhenReady, 0.2);
+        //     }
+        // };
 
-        setPropertiesWhenReady();
+        // setPropertiesWhenReady();
     }
 
     onPhotonEvent(eventCode: number, content: any, actorNr: number) {
@@ -105,12 +108,14 @@ export default class MatchMakingScene extends cc.Component {
         // the calling sender is : this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_JOINED, GameManager.getInstance().whoAmI());
         // where whoAmI returns the playerdata object, provided in DataTypes.ts
         console.log("Photon event received:", eventCode, content, actorNr);
-        this.refreshPlayerList();
+        console.log(GameManager.getInstance().getPlayerList());
+        //this.refreshPlayerList();
     }
 
     refreshPlayerList() {
         if (!this.networkManager || !this.networkManager["client"]) return;
         const actors = this.networkManager["client"].myRoomActorsArray() || [];
+        console.log("myRoomActorsArray:", actors);
         this.playerList = actors
             .filter(a => a && typeof a.actorNr === "number")
             .map(a => ({
