@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "Run",
+  "_name": "Player_Electric_Run",
   "_objFlags": 0,
   "_native": "",
   "_duration": 0.35,
@@ -14,19 +14,19 @@
           {
             "frame": 0,
             "value": {
-              "__uuid__": "76706f56-647e-4859-af73-69e11f2f2a18"
+              "__uuid__": "b49b2fa7-20a0-485c-86e6-46ff761475b3"
             }
           },
           {
             "frame": 0.16666666666666666,
             "value": {
-              "__uuid__": "d7f14bbe-e78e-4a8f-ab5e-851ff264f93c"
+              "__uuid__": "18c3ab51-f7a7-4a50-9795-31b1f56e76b6"
             }
           },
           {
             "frame": 0.3333333333333333,
             "value": {
-              "__uuid__": "76706f56-647e-4859-af73-69e11f2f2a18"
+              "__uuid__": "b49b2fa7-20a0-485c-86e6-46ff761475b3"
             }
           }
         ]
