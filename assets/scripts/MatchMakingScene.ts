@@ -1,3 +1,4 @@
+import GameManager from "./GameManager";
 import NetworkManager from "./NetworkManager";
 const {ccclass, property} = cc._decorator;
 
@@ -39,6 +40,11 @@ export default class MatchMakingScene extends cc.Component {
     @property(cc.Node)
     leaveButton: cc.Node = null;
 
+    @property([cc.SpriteFrame])
+    avatarSpriteFrames: cc.SpriteFrame[] = [];
+
+    avatarNames: string[] = ["Player ELECTRIC", "Player FIRE", "Player GRASS", "Player ICE"];
+
     private networkManager: NetworkManager = null;
     private playerList: PlayerInfo[] = [];
     private handler: (eventCode: number, content: any, actorNr: number) => void;
@@ -56,6 +62,8 @@ export default class MatchMakingScene extends cc.Component {
         }
 
             // Wait for connection and room join, then set custom properties
+        console.log(GameManager.getInstance().getPlayerData(this.networkManager.getMyActorNumber()))
+
         const setPropertiesWhenReady = () => {
             if (
                 this.networkManager["client"] &&
@@ -92,6 +100,11 @@ export default class MatchMakingScene extends cc.Component {
 
     onPhotonEvent(eventCode: number, content: any, actorNr: number) {
         // Listen for player join/leave events
+        // When a second player joins, we'll receive an event like the following:
+        // {actorNumber: 2, name: 'eason', avatar: 'GRASS'}
+        // the calling sender is : this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_JOINED, GameManager.getInstance().whoAmI());
+        // where whoAmI returns the playerdata object, provided in DataTypes.ts
+        console.log("Photon event received:", eventCode, content, actorNr);
         this.refreshPlayerList();
     }
 
@@ -106,6 +119,7 @@ export default class MatchMakingScene extends cc.Component {
                 sprite: a.getCustomProperty("sprite")
             }));
         this.updatePlayerCards();
+        console.log("Player list updated:", this.playerList);
     }
 
     updatePlayerCards() {
@@ -114,11 +128,17 @@ export default class MatchMakingScene extends cc.Component {
         for (let i = 0; i < 4; i++) {
             if (playerLabels[i]) {
                 if (i < this.playerList.length) {
-                    playerLabels[i].string = this.playerList[i].username;
+                    playerLabels[i].string = "Player";
                     if (playerSprites[i]) {
                         playerSprites[i].node.active = true;
+                        console.log("avatarNames:", this.avatarNames);
+                        console.log("playerList[i].sprite:", this.playerList[i].sprite);
                         if (this.playerList[i].sprite) {
-                            //playerSprites[i].spriteFrame = this.playerList[i].sprite;
+                            const spriteFrame = this.getAvatarSpriteFrame(this.playerList[i].sprite);
+                            if (spriteFrame) {
+                                playerSprites[i].spriteFrame = spriteFrame;
+                                playerSprites[i].node.scale = 2;
+                            }
                         }
                     }
                     // Optionally set playerSprites[i].spriteFrame = ... based on playerList[i]
@@ -151,5 +171,10 @@ export default class MatchMakingScene extends cc.Component {
         if (this.leaveButton) {
             this.leaveButton.off("click", this.onLeave, this);
         }
+    }
+
+    private getAvatarSpriteFrame(spriteName: string): cc.SpriteFrame | null {
+        const idx = this.avatarNames.indexOf(spriteName);
+        return idx !== -1 ? this.avatarSpriteFrames[idx] : null;
     }
 }

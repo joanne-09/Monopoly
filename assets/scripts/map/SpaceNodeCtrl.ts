@@ -1,4 +1,4 @@
-// Learn TypeScript:
+
 const {ccclass, property} = cc._decorator;
 
 @ccclass

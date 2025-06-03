@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "Idle",
+  "_name": "Player_Electric_Idle",
   "_objFlags": 0,
   "_native": "",
   "_duration": 0.5166666666666667,
@@ -14,25 +14,25 @@
           {
             "frame": 0,
             "value": {
-              "__uuid__": "a12f8cb1-fbee-44c8-b3b4-9d58faf6e6fa"
+              "__uuid__": "00ba008c-93ec-4e3b-89ad-4106bb1f639b"
             }
           },
           {
             "frame": 0.16666666666666666,
             "value": {
-              "__uuid__": "1d89a322-73ff-4eb6-8565-e3009f67adb5"
+              "__uuid__": "cee878b9-e88c-46dd-8e44-989cc281ac1a"
             }
           },
           {
             "frame": 0.3333333333333333,
             "value": {
-              "__uuid__": "68d2ac40-33e6-4b7d-81d9-e9f7c218e816"
+              "__uuid__": "1d3e5ff5-1751-4c54-91c9-c035f2fc548c"
             }
           },
           {
             "frame": 0.5,
             "value": {
-              "__uuid__": "23dd33cf-44eb-4bc9-9464-43cbc94bc0ff"
+              "__uuid__": "c1c33473-47a2-49eb-b3c2-c7229db9631e"
             }
           }
         ]
