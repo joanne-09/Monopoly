@@ -1,3 +1,5 @@
+import AccessUser, {UserData} from "./firebase/AccessUser";
+import GameManager from "./GameManager";
 const {ccclass, property} = cc._decorator;
 
 @ccclass
@@ -15,9 +17,15 @@ export default class AvatarSelect extends cc.Component {
     playerNode: cc.Node = null;
     @property(cc.Animation)
     playerAnimation: cc.Animation = null;
+    @property(cc.Label)
+    playerLabel: cc.Label = null;
+    @property(cc.Button)
+    createButton: cc.Button = null;
 
-    private activeButton: number = 0;
+    private activeAvatar: number = 1;
     private readonly ANIMATION_INTERVAL: number = 3; // Interval in seconds for active character's random animation
+
+    private playerName: string = '';
 
     private playCharacterAnimation(characterNumber: number) {
         if (!this.playerNode) {
@@ -41,10 +49,10 @@ export default class AvatarSelect extends cc.Component {
     }
 
     private playActiveCharacterRandomAnimationScheduled() {
-        if (this.activeButton === 0 || !this.playerNode) {
+        if (this.activeAvatar === 0 || !this.playerNode) {
             return;
         }
-        this.playCharacterAnimation(this.activeButton);
+        this.playCharacterAnimation(this.activeAvatar);
     }
 
     onCharacterSelect(selected: number = 0) {
@@ -55,13 +63,18 @@ export default class AvatarSelect extends cc.Component {
         // Stop any previously scheduled character animation
         this.unschedule(this.playActiveCharacterRandomAnimationScheduled);
 
-        this.activeButton = selected;
+        this.activeAvatar = selected;
 
         // Play animation once immediately and then schedule it
         this.playActiveCharacterRandomAnimationScheduled(); // Play once immediately
         this.schedule(this.playActiveCharacterRandomAnimationScheduled, this.ANIMATION_INTERVAL, cc.macro.REPEAT_FOREVER, 0.1);
 
-        console.log(`Character ${selected} selected. Active button set to ${this.activeButton}.`);
+        console.log(`Character ${selected} selected. Active avatar set to ${this.activeAvatar}.`);
+    }
+
+    onCreateRoom() {
+        GameManager.getInstance().setPlayerNameandAvatar(this.playerName, this.activeAvatar);
+        cc.director.loadScene("MatchMaking");
     }
 
     // Life cycle method
@@ -91,6 +104,26 @@ export default class AvatarSelect extends cc.Component {
         // Optionally, set a default active button and player image
         if (this.character1) {
             this.onCharacterSelect(1);
+        }
+
+        // Load player name from user data
+        const currentUser = firebase.auth().currentUser.uid;
+        AccessUser.getUser(currentUser).then((userData: UserData | null) => {
+            if (userData) {
+                this.playerName = userData.username || "Player";
+                this.playerLabel.string = this.playerName;
+                console.log(`Player name loaded: ${this.playerName}`);
+            } else {
+                console.warn("No user data found, using default player name.");
+                this.playerName = "Player";
+            }
+        });
+
+        // Go to the next scene
+        if(this.createButton) {
+            this.createButton.node.on("click", () => {
+                this.onCreateRoom();
+            }, this);
         }
     }
 
