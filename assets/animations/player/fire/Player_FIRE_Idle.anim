@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "Idle",
+  "_name": "Player_FIRE_Idle",
   "_objFlags": 0,
   "_native": "",
   "_duration": 0.5166666666666667,
@@ -14,25 +14,25 @@
           {
             "frame": 0,
             "value": {
-              "__uuid__": "df555b45-1782-47bd-8916-0d65b651dc98"
+              "__uuid__": "f25c93c8-1b68-4d39-b8da-d22f2b652545"
             }
           },
           {
             "frame": 0.16666666666666666,
             "value": {
-              "__uuid__": "8c2fd151-386d-4f27-89b3-7f63f88487e8"
+              "__uuid__": "89ff8994-cd5c-4fd9-8422-c5d4c6e88f3e"
             }
           },
           {
             "frame": 0.3333333333333333,
             "value": {
-              "__uuid__": "a220ffca-5b0d-4168-9078-acf9410c4660"
+              "__uuid__": "ff3e76a9-7b9b-4a2f-baa0-db67a0518ad6"
             }
           },
           {
             "frame": 0.5,
             "value": {
-              "__uuid__": "a9ce6b2b-a772-4f7b-9a04-dce9d1739a0c"
+              "__uuid__": "edf0a2ca-863a-46a9-84c1-edf32843fdd5"
             }
           }
         ]

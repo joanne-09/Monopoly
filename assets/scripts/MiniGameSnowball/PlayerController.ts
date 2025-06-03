@@ -52,6 +52,7 @@ export default class PlayerController extends cc.Component {
     private slowSpeed: number = 80;
     private normalColor: cc.Color = cc.Color.WHITE;
     private slowColor: cc.Color = new cc.Color(100, 100, 255);
+    private rb: cc.RigidBody = null;
 
     // LIFE-CYCLE CALLBACKS:
 
@@ -76,6 +77,11 @@ export default class PlayerController extends cc.Component {
         // 嘗試尋找手上的雪球節點（命名 handSnowball，預設隱藏）
         this.handSnowball = this.node.getChildByName('handSnowball');
         if (this.handSnowball) this.handSnowball.active = false;
+        this.rb = this.node.getComponent(cc.RigidBody);
+        if (this.rb) {
+            this.rb.linearDamping = 0.25; // 冰上滑行感(調高一點)
+            this.rb.fixedRotation = true; // 不會旋轉
+        }
     }
 
     onDestroy() {
@@ -133,9 +139,10 @@ export default class PlayerController extends cc.Component {
                 break;
             case cc.macro.KEY.space:
                 if (this.state === PlayerState.MakingSnowball) {
-                    // 提前放开，取消製作
+                    // 提前放開，取消製作
                     this.state = PlayerState.Idle;
                     this.snowballTimer = 0;
+                    if (this.anim) this.anim.play(this.idleAnimName); // 強制回到Idle動畫
                 } else if (this.state === PlayerState.HoldingSnowball) {
                     // 丟出雪球
                     this.throwSnowball();
@@ -146,6 +153,17 @@ export default class PlayerController extends cc.Component {
 
     start () {
 
+    }
+
+    // 生命減少與顯示
+    loseLife() {
+        this.life = Math.max(0, this.life - 1);
+        if (this.lifeNode) {
+            for (let i = 0; i < this.lifeNode.children.length; i++) {
+                this.lifeNode.children[i].active = i < this.life;
+            }
+        }
+        // TODO: 死亡處理
     }
 
     update(dt: number) {
@@ -166,7 +184,9 @@ export default class PlayerController extends cc.Component {
             if (this.anim && !this.anim.getAnimationState(this.makeAnimName).isPlaying) {
                 this.anim.play(this.makeAnimName);
             }
-            return; // 製作雪球時不能移動
+            // 製作雪球時不 applyForce，不再滑行
+            if (this.rb) this.rb.linearVelocity = cc.v2(0, 0);
+            return;
         } else if (this.snowballBar) {
             this.snowballBar.node.active = false;
         }
@@ -197,11 +217,16 @@ export default class PlayerController extends cc.Component {
                 let len = Math.sqrt(dx * dx + dy * dy);
                 dx /= len;
                 dy /= len;
-                this.node.x += dx * this.moveSpeed * dt;
-                this.node.y += dy * this.moveSpeed * dt;
+                if (this.rb) {
+                    // 冰上滑行感：用較小力道
+                    this.rb.applyForceToCenter(cc.v2(dx * this.moveSpeed * 5, dy * this.moveSpeed * 5), true);
+                }
                 this.state = PlayerState.HoldingSnowball;
-            } else if (this.state === PlayerState.HoldingSnowball) {
-                this.state = PlayerState.HoldingSnowball;
+            } else {
+                // 不主動設 linearVelocity = 0，讓滑行自然減速
+                if (this.state === PlayerState.HoldingSnowball) {
+                    this.state = PlayerState.HoldingSnowball;
+                }
             }
             // 手上雪球顯示控制
             if (this.handSnowball) this.handSnowball.active = true;
@@ -224,14 +249,19 @@ export default class PlayerController extends cc.Component {
             let len = Math.sqrt(dx * dx + dy * dy);
             dx /= len;
             dy /= len;
-            this.node.x += dx * this.moveSpeed * dt;
-            this.node.y += dy * this.moveSpeed * dt;
-            this.state = this.hasSnowball ? PlayerState.HoldingSnowball : PlayerState.Moving;
-        } else if (this.state === PlayerState.Moving) {
-            if (this.anim && !this.anim.getAnimationState(this.idleAnimName).isPlaying) {
-                this.anim.play(this.idleAnimName);
+            if (this.rb) {
+                // 冰上滑行感：用較小力道
+                this.rb.applyForceToCenter(cc.v2(dx * this.moveSpeed * 5, dy * this.moveSpeed * 5), true);
             }
-            this.state = PlayerState.Idle;
+            this.state = this.hasSnowball ? PlayerState.HoldingSnowball : PlayerState.Moving;
+        } else {
+            // 不主動設 linearVelocity = 0，讓滑行自然減速
+            if (this.state === PlayerState.Moving) {
+                if (this.anim && !this.anim.getAnimationState(this.idleAnimName).isPlaying) {
+                    this.anim.play(this.idleAnimName);
+                }
+                this.state = PlayerState.Idle;
+            }
         }
 
         if (this.slowTimer > 0) {
@@ -261,51 +291,31 @@ export default class PlayerController extends cc.Component {
             }
             // 緩速與變藍
             this.slowTimer = 2.0; // 2秒緩速
-            // TODO: 扣血、判斷冰凍
+            // 扣血
+            this.loseLife();
+            // 不要改變玩家速度，不會被打歪
         }
     }
 
+    @property
+    team: string = 'A'; // 玩家隊伍，可在編輯器設定
     throwSnowball() {
         if (!this.hasSnowball || !this.snowballPrefab) return;
-        // 播放丟擲動畫
         if (this.anim) this.anim.play(this.throwAnimName);
         const snowball = cc.instantiate(this.snowballPrefab);
-        // 只朝左右丟，依照 faceRight
         const dir = this.faceRight ? 1 : -1;
         const offset = 40;
         snowball.parent = this.node.parent;
         snowball.x = this.node.x + dir * offset;
         snowball.y = this.node.y;
-        const rb = snowball.getComponent(cc.RigidBody);
-        if (rb) {
-            const force = 1200;
-            rb.linearVelocity = cc.v2(dir * force, 0);
+        // 初始化雪球方向與發射者 team
+        const snowballScript = snowball.getComponent('SnowBall');
+        if (snowballScript) {
+            snowballScript.init(cc.v2(dir, 0), this.team);
         }
         this.hasSnowball = false;
         this.state = PlayerState.Idle;
         if (this.handSnowball) this.handSnowball.active = false;
-        // 丟完後切回沒拿雪球的 idle/run 動畫
         if (this.anim) this.anim.play(this.idleAnimName);
-    }
-
-    setLife(life: number) {
-        this.life = Math.max(0, Math.min(3, life));
-        if (this.lifeNode) {
-            for (let i = 0; i < this.lifeNode.childrenCount; i++) {
-                this.lifeNode.children[i].active = i < this.life;
-            }
-        }
-    }
-
-    // 取得目前移動方向，若靜止則預設向上
-    getMoveDirection(): cc.Vec2 {
-        let dx = 0, dy = 0;
-        if (this.keys['up']) dy += 1;
-        if (this.keys['down']) dy -= 1;
-        if (this.keys['left']) dx -= 1;
-        if (this.keys['right']) dx += 1;
-        if (dx === 0 && dy === 0) return cc.v2(0, 1); // 預設向上
-        let len = Math.sqrt(dx * dx + dy * dy);
-        return cc.v2(dx / len, dy / len);
     }
 }
