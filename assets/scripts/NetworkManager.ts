@@ -171,13 +171,14 @@ export default class NetworkManager extends cc.Component {
         });
     }
 
-    public getMyActorName(): string {
-        if (this.client && this.client.myActor) {
-            return this.client.myActor.name
-        }
-        return "UNDEFINED"; // Default if not connected
-    }
+    // public getMyActorName(): string {
+    //     if (this.client && this.client.myActor) {
+    //         return this.client.myActor.name
+    //     }
+    //     return "UNDEFINED"; // Default if not connected
+    // }
 
+    //used to get actor number of the current player
     public getMyActorNumber(): number {
         if (this.client && typeof this.client.myActor === 'function') {
             const actor = this.client.myActor();
