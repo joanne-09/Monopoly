@@ -73,26 +73,15 @@ export default class GameManager extends cc.Component {
             console.error("GameManager: Cannot set player name and avatar, actor number is not valid.");
             return;
         }
-        // this.playerData.push({
-        //     actorNumber: myActorNumber,
-        //     name: name,
-        //     avatar: avatar,
-        // });
         this.localPlayerInfo = {
             actorNumber: myActorNumber,
             name: name,
             avatar: avatar
         };
-        // this.playerMap.set(myActorNumber, {
-        //     actorNumber: myActorNumber,
-        //     name: name,
-        //     avatar: avatar
-        // });
     }
 
 
-    //Find who am I, returns PlayerData
-
+    //Find who am I, returns PlayerData of local player
     public whoAmI(): PlayerData | null {
         const myActorNumber = this.networkManager.getMyActorNumber();
         // if (myActorNumber === -1) {
@@ -121,9 +110,11 @@ export default class GameManager extends cc.Component {
         }
     }
 
+    // Returns a list of all players in the game
     public getPlayerList(): PlayerData[] {
         return Array.from(this.playerMap.values());
     }
+    // Returns the player data for a specific actor number
     public getPlayerData(actorNumber: number): PlayerData | null {
         return this.playerMap.get(actorNumber) || null;
     }
