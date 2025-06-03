@@ -186,7 +186,7 @@ export default class NetworkManager extends cc.Component {
         }
         return -1; // Default if not connected
     }
-
+    
     public static getInstance(): NetworkManager {
         return NetworkManager.instance;
     }
