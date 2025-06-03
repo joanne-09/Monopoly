@@ -1,13 +1,13 @@
 const {ccclass, property} = cc._decorator;
 import NetworkManager from "./NetworkManager";
 import { PlayerData } from "./types/DataTypes";
+import { config } from "./firebase/firebase-service";
 @ccclass
 export default class GameManager extends cc.Component {
     private static instance: GameManager = null;
 
     @property(cc.Label)
     statusLabel: cc.Label = null;
-    
     private playerData: PlayerData[] = []; // Store player data, e.g., actorNumber, name, avatar
     private playerMap: Map<number, PlayerData> = new Map(); // Map actorNumber to avatar sprites
     //private mapPhotonIDto
