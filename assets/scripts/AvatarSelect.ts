@@ -95,6 +95,7 @@ export default class AvatarSelect extends cc.Component {
                 activeAvatarEnum = PlayerAvatar.NULL
         }
 
+        //Will set player name and avatar in GameManager
         GameManager.getInstance().setPlayerNameandAvatar(this.playerName, activeAvatarEnum);
         console.log("WHO AM I: ", GameManager.getInstance().whoAmI());
         this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_JOINED, GameManager.getInstance().whoAmI());
