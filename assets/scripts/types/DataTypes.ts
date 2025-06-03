@@ -5,8 +5,9 @@ export interface PlayerData {
 }
 
 export enum PlayerAvatar {
-    ELECTRIC = 1,
-    FIRE = 2,
-    GRASS = 3,
-    ICE = 4,
+    NULL = 0,
+    ELECTRIC = "ELECTRIC",
+    FIRE = "FIRE",
+    GRASS = "GRASS",
+    ICE = "ICE",
 }

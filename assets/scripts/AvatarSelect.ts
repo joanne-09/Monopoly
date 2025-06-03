@@ -1,5 +1,8 @@
 import AccessUser, {UserData} from "./firebase/AccessUser";
 import GameManager from "./GameManager";
+import NetworkManager from "./NetworkManager";
+import { PlayerAvatar } from "./types/DataTypes";
+import { PhotonEventCodes } from "./types/PhotonEventCodes";
 const {ccclass, property} = cc._decorator;
 
 @ccclass
@@ -26,7 +29,7 @@ export default class AvatarSelect extends cc.Component {
     private readonly ANIMATION_INTERVAL: number = 3; // Interval in seconds for active character's random animation
 
     private playerName: string = '';
-
+    private networkManager: NetworkManager = NetworkManager.getInstance();
     private playCharacterAnimation(characterNumber: number) {
         if (!this.playerNode) {
             console.warn("PlayerNode not assigned for character animation play.");
@@ -42,7 +45,7 @@ export default class AvatarSelect extends cc.Component {
             if (this.playerAnimation.currentClip !== clipToPlay) {
                 this.playerAnimation.play(clipToPlay.name);
             }
-            console.log(`Playing animation clip: ${clipToPlay.name} for character ${characterNumber}.`);
+            //console.log(`Playing animation clip: ${clipToPlay.name} for character ${characterNumber}.`);
         } else {
             console.warn(`Animation clip at index ${baseIndex + randomIndex} is null for character ${characterNumber}.`);
         }
@@ -73,7 +76,29 @@ export default class AvatarSelect extends cc.Component {
     }
 
     onCreateRoom() {
-        GameManager.getInstance().setPlayerNameandAvatar(this.playerName, this.activeAvatar);
+        let activeAvatarEnum: PlayerAvatar;
+        switch (this.activeAvatar) {
+            case 1:
+                activeAvatarEnum = PlayerAvatar.ELECTRIC;
+                break;
+            case 2:
+                activeAvatarEnum = PlayerAvatar.FIRE;
+                break;
+            case 3:
+                activeAvatarEnum = PlayerAvatar.GRASS;
+                break;
+            case 4:
+                activeAvatarEnum = PlayerAvatar.ICE;
+                break;
+            default:
+                console.error("Invalid character selection, defaulting to ELECTRIC.");
+                activeAvatarEnum = PlayerAvatar.NULL
+        }
+
+        //Will set player name and avatar in GameManager
+        GameManager.getInstance().setPlayerNameandAvatar(this.playerName, activeAvatarEnum);
+        console.log("WHO AM I: ", GameManager.getInstance().whoAmI());
+        this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_JOINED, GameManager.getInstance().whoAmI());
         cc.director.loadScene("MatchMaking");
     }
 
@@ -132,9 +157,9 @@ export default class AvatarSelect extends cc.Component {
     }
 
     onDestroy() {
-        this.character1?.node.off("click", () => this.onCharacterSelect(1), this);
-        this.character2?.node.off("click", () => this.onCharacterSelect(2), this);
-        this.character3?.node.off("click", () => this.onCharacterSelect(3), this);
-        this.character4?.node.off("click", () => this.onCharacterSelect(4), this);
+        // this.character1?.node.off("click", () => this.onCharacterSelect(1), this);
+        // this.character2?.node.off("click", () => this.onCharacterSelect(2), this);
+        // this.character3?.node.off("click", () => this.onCharacterSelect(3), this);
+        // this.character4?.node.off("click", () => this.onCharacterSelect(4), this);
     }
 }

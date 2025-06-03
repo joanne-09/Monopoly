@@ -30,7 +30,7 @@ export default class NetworkManager extends cc.Component {
         // Make this node persistent across scenes
         if (!cc.game.isPersistRootNode(this.node)) {
             cc.game.addPersistRootNode(this.node);
-            // console.log("NetworkManager: Persist root node set.");
+            //console.log("NetworkManager: Persist root node set.");
         }
 
         this.initializePhoton();
@@ -47,6 +47,7 @@ export default class NetworkManager extends cc.Component {
         // Initialize Photon client only once
         this.client = new Photon.LoadBalancing.LoadBalancingClient(Photon.ConnectionProtocol.Ws, this.APP_ID, this.APP_VERSION);
         // console.log("NetworkManager: Photon client initialized.");
+        console.log(this.client);
         this.client.setLogLevel(Photon.LogLevel.WARN); // Options: ERROR, WARN, INFO, DEBUG
         this.setupPhotonCallbacks();
     }
@@ -66,7 +67,7 @@ export default class NetworkManager extends cc.Component {
             console.error("NetworkManager: Client not initialized, cannot setup callbacks.");
             return;
         }
-
+        
         this.client.onStateChange = (state: number) => {
             // Essential: log state changes
             console.log("Photon State Change: " + state);
@@ -105,7 +106,7 @@ export default class NetworkManager extends cc.Component {
             // Comment out verbose leave logging
             // console.log(`NetworkManager: Player ${actor.actorNr} (${actor.userId || 'No UserId'}) left the room. Cleanup: ${cleanup}`);
         };
-        // console.log("NetworkManager: Photon callbacks set up successfully.");
+
     }
 
     joinOrCreateMonopolyRoom() {
@@ -170,13 +171,14 @@ export default class NetworkManager extends cc.Component {
         });
     }
 
-    public getMyActorName(): string {
-        if (this.client && this.client.myActor) {
-            return this.client.myActor.name
-        }
-        return "UNDEFINED"; // Default if not connected
-    }
+    // public getMyActorName(): string {
+    //     if (this.client && this.client.myActor) {
+    //         return this.client.myActor.name
+    //     }
+    //     return "UNDEFINED"; // Default if not connected
+    // }
 
+    //used to get actor number of the current player
     public getMyActorNumber(): number {
         if (this.client && typeof this.client.myActor === 'function') {
             const actor = this.client.myActor();
@@ -185,7 +187,7 @@ export default class NetworkManager extends cc.Component {
         }
         return -1; // Default if not connected
     }
-
+    
     public static getInstance(): NetworkManager {
         return NetworkManager.instance;
     }
