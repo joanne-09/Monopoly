@@ -132,9 +132,9 @@ export default class AvatarSelect extends cc.Component {
     }
 
     onDestroy() {
-        this.character1?.node.off("click", () => this.onCharacterSelect(1), this);
-        this.character2?.node.off("click", () => this.onCharacterSelect(2), this);
-        this.character3?.node.off("click", () => this.onCharacterSelect(3), this);
-        this.character4?.node.off("click", () => this.onCharacterSelect(4), this);
+        // this.character1?.node.off("click", () => this.onCharacterSelect(1), this);
+        // this.character2?.node.off("click", () => this.onCharacterSelect(2), this);
+        // this.character3?.node.off("click", () => this.onCharacterSelect(3), this);
+        // this.character4?.node.off("click", () => this.onCharacterSelect(4), this);
     }
 }
