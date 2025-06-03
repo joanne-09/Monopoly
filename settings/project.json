@@ -1,4 +1,55 @@
 {
+  "start-scene": "85794f1a-41c3-4396-bd1d-6797d4e8e594",
+  "group-list": [
+    "Wall",
+    "Snowball",
+    "Player"
+  ],
+  "collision-matrix": [
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ]
+  ],
+  "excluded-modules": [
+    "3D Physics/Builtin"
+  ],
+  "preview-port": 7456,
+  "design-resolution-width": 960,
+  "design-resolution-height": 640,
+  "fit-width": false,
+  "fit-height": true,
+  "use-project-simulator-setting": false,
+  "simulator-orientation": false,
+  "use-customize-simulator": true,
+  "simulator-resolution": {
+    "width": 960,
+    "height": 640
+  },
+  "clear-simulator-cache": true,
+  "facebook": {
+    "enable": false,
+    "appID": "",
+    "live": {
+      "enable": false
+    },
+    "audience": {
+      "enable": false
+    }
+  }
+}
   "last-module-event-record-time": 1748073642177,
   "start-scene": "3138b2bf-7086-41f9-9a46-2926d8c51159"
 }
+
