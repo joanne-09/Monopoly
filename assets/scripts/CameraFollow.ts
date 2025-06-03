@@ -2,46 +2,58 @@ const {ccclass, property} = cc._decorator;
 
 @ccclass
 export default class CameraFollow extends cc.Component {
-
     @property(cc.Node)
     targetPlayer: cc.Node = null;
-
-    // Optional: Offset the camera from the target's center if needed.
-    // For a 2D game, this usually means how the player is framed.
-    // A (0,0) offset means the player will be centered in this camera's view.
     @property(cc.Vec2)
     followOffset: cc.Vec2 = cc.v2(0, 0);
+    @property(cc.Float)
+    smoothFollow: number = 0.1;
 
-    // Optional: Smoothing factor for camera movement (0 to 1). 1 is instant, lower values are smoother.
-    // @property({type: cc.Float, range: [0, 1], slide: true, step: 0.01})
-    // smoothSpeed: number = 1; // Set to 1 for direct follow initially
+    private mapMinX: number = -Infinity;
+    private mapMaxX: number = Infinity;
+    private mapMinY: number = -Infinity;
+    private mapMaxY: number = Infinity;
 
-    lateUpdate(dt: number) {
-        if (!this.targetPlayer) {
-            return;
+    private cameraComponent: cc.Camera = null;
+
+    onLoad() {
+        this.cameraComponent = this.getComponent(cc.Camera);
+        if (!this.cameraComponent) {
+            console.error("CameraFollow: cc.Camera component not found on this node!");
         }
 
-        // Get the target's world position
-        const targetWorldPosition = this.targetPlayer.convertToWorldSpaceAR(cc.Vec2.ZERO);
+        this.setMapBoundaries();
+    }
 
-        // The camera's node is typically a root node or child of the canvas.
-        // We want the camera's (x, y) to match the target's world (x, y), adjusted by followOffset.
-        // The camera's z position usually remains fixed for a 2D view.
+    lateUpdate(dt) {
+        if (!this.targetPlayer) return;
         
-        let desiredX = targetWorldPosition.x - this.followOffset.x;
-        let desiredY = targetWorldPosition.y - this.followOffset.y;
+        // Get target position (player position)
+        let targetX = this.targetPlayer.x;
+        let targetY = this.targetPlayer.y;
 
-        // For direct follow:
-        this.node.setPosition(desiredX, desiredY);
+        // Clamp position within bounds
+        targetX = cc.misc.clampf(targetX, this.mapMinX, this.mapMaxX);
+        targetY = cc.misc.clampf(targetY, this.mapMinY, this.mapMaxY);
 
-        // Optional: For smooth follow (uncomment smoothSpeed property too):
-        // if (this.smoothSpeed < 1) {
-        //     let currentPos = this.node.getPosition();
-        //     let smoothedX = cc.misc.lerp(currentPos.x, desiredX, this.smoothSpeed);
-        //     let smoothedY = cc.misc.lerp(currentPos.y, desiredY, this.smoothSpeed);
-        //     this.node.setPosition(smoothedX, smoothedY);
-        // } else {
-        //     this.node.setPosition(desiredX, desiredY);
-        // }
+        // Smooth follow
+        const currentX = cc.misc.lerp(this.node.x, targetX, this.smoothFollow);
+        const currentY = cc.misc.lerp(this.node.y, targetY, this.smoothFollow);
+        
+        // Apply position to camera
+        this.node.setPosition(currentX, currentY);
+    }
+
+    setMapBoundaries() {
+        // Get the viewport size
+        const visibleSize = cc.view.getVisibleSize();
+        const halfWidth = visibleSize.width / 2;
+        const halfHeight = visibleSize.height / 2;
+        
+        // Adjust bounds based on background size
+        this.mapMinX = -1600 + halfWidth;
+        this.mapMaxX = 1600 - halfWidth;
+        this.mapMinY = -1600 + halfHeight;
+        this.mapMaxY = 1600 - halfHeight;
     }
 }
