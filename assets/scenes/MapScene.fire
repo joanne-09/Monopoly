@@ -8678,7 +8678,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "spaceFrame",
+    "_name": "spaceFrame_destiny",
     "_objFlags": 0,
     "_parent": {
       "__id__": 179
@@ -11662,7 +11662,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "spaceFrame",
+    "_name": "spaceFrame_chance",
     "_objFlags": 0,
     "_parent": {
       "__id__": 249
@@ -30972,7 +30972,9 @@
       "__id__": 693
     },
     "_enabled": true,
-    "dicePrefab": null,
+    "dicePrefab": {
+      "__uuid__": "7510bb9e-472e-44dd-8202-6196a83d87e5"
+    },
     "diceNum": 1,
     "diceSize": 128,
     "dicesSpacing": 30,
