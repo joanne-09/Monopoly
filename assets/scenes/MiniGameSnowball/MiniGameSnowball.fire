@@ -85,7 +85,11 @@
       }
     ],
     "_active": true,
-    "_components": [],
+    "_components": [
+      {
+        "__id__": 137
+      }
+    ],
     "_prefab": null,
     "_opacity": 255,
     "_color": {
@@ -4964,5 +4968,24 @@
     },
     "fileId": "",
     "sync": false
+  },
+  {
+    "__type__": "f17cfeMSFdNG5rd2FM1mb9o",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 2
+    },
+    "_enabled": true,
+    "timerLabel": {
+      "__id__": 17
+    },
+    "scoreLabelA": {
+      "__id__": 19
+    },
+    "scoreLabelB": {
+      "__id__": 21
+    },
+    "_id": "56dXjwpaZFzY01TuryGwTE"
   }
 ]
