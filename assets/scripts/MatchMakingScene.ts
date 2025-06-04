@@ -37,6 +37,10 @@ export default class MatchMakingScene extends cc.Component {
     @property(cc.Sprite)
     playerSprite4: cc.Sprite = null;
 
+    // Button to transition to the game scene
+    @property(cc.Button)
+    startGameButton: cc.Button = null;
+
     @property(cc.Node)
     leaveButton: cc.Node = null;
 
@@ -98,6 +102,9 @@ export default class MatchMakingScene extends cc.Component {
                     this.leaveButton.on("click", this.onLeave, this);
                 }
 
+                if(this.startGameButton) {
+                    this.startGameButton.node.on("click", this.onStartGame, this);
+                }
                 this.scheduleOnce(() => {
                     this.refreshPlayerList();
                 }, 0.2);
@@ -179,7 +186,7 @@ export default class MatchMakingScene extends cc.Component {
         }
         if (this.playerList.length === 4) {
             this.scheduleOnce(() => {
-                cc.director.loadScene("TestMultiplayer");
+                cc.director.loadScene("MapScene");
             }, 3.0);
         }
     }
@@ -188,6 +195,11 @@ export default class MatchMakingScene extends cc.Component {
         // Optionally: leave the Photon room here
         cc.log("leave button clicked");
         cc.director.loadScene("Start");
+    }
+
+    onStartGame() {
+        cc.log("start game button clicked");
+        cc.director.loadScene("MapScene");
     }
 
     onDestroy() {
