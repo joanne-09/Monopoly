@@ -65,6 +65,7 @@ export default class MatchMakingScene extends cc.Component {
         this.handler = this.onPhotonEvent.bind(this);
         this.networkManager.registerMessageHandler(this.handler);
             // Wait for connection and room join, then set custom properties
+
         // console.log(GameManager.getInstance().getPlayerData(this.networkManager.getMyActorNumber()))
         // console.log("hello! ",GameManager.getInstance().getPlayerList());
         const list = GameManager.getInstance().getPlayerList();
@@ -89,25 +90,26 @@ export default class MatchMakingScene extends cc.Component {
                     myActor.setCustomProperty("username", username);
                     myActor.setCustomProperty("sprite", sprite);
                 }
-                
-                this.handler = this.onPhotonEvent.bind(this);
-                this.networkManager.registerMessageHandler(this.handler);
-                this.updatePlayerCards();
-                
-                if (this.leaveButton) {
-                    this.leaveButton.on("click", this.onLeave, this);
-                }
 
-                this.scheduleOnce(() => {
-                    this.refreshPlayerList();
-                }, 0.2);
-            } else {
-                // Retry after a short delay
-                this.scheduleOnce(setPropertiesWhenReady, 0.2);
-            }
-        };
+                
+        //         this.handler = this.onPhotonEvent.bind(this);
+        //         this.networkManager.registerMessageHandler(this.handler);
+        //         this.updatePlayerCards();
+                
+        //         if (this.leaveButton) {
+        //             this.leaveButton.on("click", this.onLeave, this);
+        //         }
 
-        setPropertiesWhenReady();
+        //         this.scheduleOnce(() => {
+        //             this.refreshPlayerList();
+        //         }, 0.2);
+        //     } else {
+        //         // Retry after a short delay
+        //         this.scheduleOnce(setPropertiesWhenReady, 0.2);
+        //     }
+        // };
+
+        // setPropertiesWhenReady();
     }
 
     onPhotonEvent(eventCode: number, content: any, actorNr: number) {
@@ -116,9 +118,11 @@ export default class MatchMakingScene extends cc.Component {
         // {actorNumber: 2, name: 'eason', avatar: 'GRASS'}
         // the calling sender is : this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_JOINED, GameManager.getInstance().whoAmI());
         // where whoAmI returns the playerdata object, provided in DataTypes.ts
+
         // console.log("Photon event received:", eventCode, content, actorNr);
         // console.log(GameManager.getInstance().getPlayerList());
         this.refreshPlayerList();
+]
     }
 
     refreshPlayerList() {
