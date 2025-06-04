@@ -65,21 +65,32 @@ export default class MatchMakingScene extends cc.Component {
         this.handler = this.onPhotonEvent.bind(this);
         this.networkManager.registerMessageHandler(this.handler);
             // Wait for connection and room join, then set custom properties
-        console.log(GameManager.getInstance().getPlayerData(this.networkManager.getMyActorNumber()))
-        console.log(GameManager.getInstance().getPlayerList());
-        // const setPropertiesWhenReady = () => {
-        //     if (
-        //         this.networkManager["client"] &&
-        //         this.networkManager["client"].isJoinedToRoom &&
-        //         this.networkManager["client"].isJoinedToRoom()
-        //     ) {
-        //         const username = localStorage.getItem("username") || "Player";
-        //         const sprite = localStorage.getItem("sprite") || "Player FIRE";
-        //         const myActor = this.networkManager["client"].myActor();
-        //         if (myActor && myActor.setCustomProperty) {
-        //             myActor.setCustomProperty("username", username);
-        //             myActor.setCustomProperty("sprite", sprite);
-        //         }
+
+        // console.log(GameManager.getInstance().getPlayerData(this.networkManager.getMyActorNumber()))
+        // console.log("hello! ",GameManager.getInstance().getPlayerList());
+        const list = GameManager.getInstance().getPlayerList();
+        const myActorNr = this.networkManager.getMyActorNumber();
+        const setPropertiesWhenReady = () => {
+            if (
+                this.networkManager["client"] &&
+                this.networkManager["client"].isJoinedToRoom &&
+                this.networkManager["client"].isJoinedToRoom()
+            ) {
+                let username, sprite;
+
+                for(let i = 0; i < list.length; i++) {
+                    if(list[i].actorNumber == myActorNr) {
+                        username = list[i].name;
+                        sprite = list[i].avatar;
+                    }
+                }
+
+                const myActor = this.networkManager["client"].myActor();
+                if (myActor && myActor.setCustomProperty) {
+                    myActor.setCustomProperty("username", username);
+                    myActor.setCustomProperty("sprite", sprite);
+                }
+
                 
         //         this.handler = this.onPhotonEvent.bind(this);
         //         this.networkManager.registerMessageHandler(this.handler);
@@ -107,9 +118,11 @@ export default class MatchMakingScene extends cc.Component {
         // {actorNumber: 2, name: 'eason', avatar: 'GRASS'}
         // the calling sender is : this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_JOINED, GameManager.getInstance().whoAmI());
         // where whoAmI returns the playerdata object, provided in DataTypes.ts
-        console.log("Photon event received:", eventCode, content, actorNr);
-        console.log(GameManager.getInstance().getPlayerList());
-        //this.refreshPlayerList();
+
+        // console.log("Photon event received:", eventCode, content, actorNr);
+        // console.log(GameManager.getInstance().getPlayerList());
+        this.refreshPlayerList();
+]
     }
 
     refreshPlayerList() {
@@ -117,12 +130,14 @@ export default class MatchMakingScene extends cc.Component {
         const actors = this.networkManager["client"].myRoomActorsArray() || [];
         console.log("myRoomActorsArray:", actors);
         this.playerList = actors
-            .filter(a => a && typeof a.actorNr === "number")
             .map(a => ({
                 actorNr: a.actorNr,
                 username: a.getCustomProperty("username"),
                 sprite: a.getCustomProperty("sprite")
-            }));
+            })).sort((a, b) => a.actorNr - b.actorNr);
+        if (this.playerList.some(p => !p.username || !p.sprite)) {
+            this.scheduleOnce(() => this.refreshPlayerList(), 0.2);
+        }
         this.updatePlayerCards();
         console.log("Player list updated:", this.playerList);
     }
@@ -133,20 +148,30 @@ export default class MatchMakingScene extends cc.Component {
         for (let i = 0; i < 4; i++) {
             if (playerLabels[i]) {
                 if (i < this.playerList.length) {
-                    playerLabels[i].string = "Player";
-                    if (playerSprites[i]) {
+                    if(this.playerList[i].username)
+                        playerLabels[i].string = this.playerList[i].username;
+                    if (playerSprites[i] && this.playerList[i].sprite) {
                         playerSprites[i].node.active = true;
-                        console.log("avatarNames:", this.avatarNames);
-                        console.log("playerList[i].sprite:", this.playerList[i].sprite);
-                        if (this.playerList[i].sprite) {
-                            const spriteFrame = this.getAvatarSpriteFrame(this.playerList[i].sprite);
-                            if (spriteFrame) {
-                                playerSprites[i].spriteFrame = spriteFrame;
-                                playerSprites[i].node.scale = 2;
-                            }
+                        // console.log("playerList[i].sprite:", this.playerList[i].sprite);
+                        switch(this.playerList[i].sprite) {
+                            case "ELECTRIC":
+                                playerSprites[i].spriteFrame = this.avatarSpriteFrames[0];
+                                playerSprites[i].node.setScale(2);
+                                break;
+                            case "FIRE":
+                                playerSprites[i].spriteFrame = this.avatarSpriteFrames[1];
+                                playerSprites[i].node.setScale(2);
+                                break;
+                            case "GRASS":
+                                playerSprites[i].spriteFrame = this.avatarSpriteFrames[2];
+                                playerSprites[i].node.setScale(2);
+                                break;
+                            case "ICE":
+                                playerSprites[i].spriteFrame = this.avatarSpriteFrames[3];
+                                playerSprites[i].node.setScale(2);
+                                break;
                         }
                     }
-                    // Optionally set playerSprites[i].spriteFrame = ... based on playerList[i]
                 } else {
                     playerLabels[i].string = "Waiting...";
                     if (playerSprites[i]) playerSprites[i].node.active = false;
