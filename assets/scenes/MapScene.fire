@@ -30972,9 +30972,7 @@
       "__id__": 693
     },
     "_enabled": true,
-    "dicePrefab": {
-      "__uuid__": "6088ef67-15db-418b-9407-04fa5cd437b6"
-    },
+    "dicePrefab": null,
     "diceNum": 1,
     "diceSize": 128,
     "dicesSpacing": 30,
