@@ -1,25 +1,24 @@
 const {ccclass, property} = cc._decorator;
-import { PlayerData, PlayerAvatar } from "./types/DataTypes";
+import { PlayerData, PlayerAvatar, PlayerState } from "./types/DataTypes";
+import { PhotonEventCodes } from "./types/PhotonEventCodes";
 import { MapNodeEvents } from "./types/GameEvents";
 import NetworkManager from "./NetworkManager";
 import GameManager from "./GameManager";
 import NewClass from "./DiceManager";
-
-enum PlayerState {
-    IDLE,
-    MYTURN,
-    ROLLDICE,
-    MOVING,
-    GAMING,
-    WAITING,
-}
+import OtherPlayers from "./OtherPlayers";
 
 @ccclass('PlayerControl')
 export class PlayerControl extends cc.Component {
+    @property(cc.Prefab)
+    otherPlayerPrefab: cc.Prefab = null;
+
     playerName: string = '';
-    playerId: number = 1;
+    playerId: number = 0;
     
     playerAvatar: PlayerAvatar = PlayerAvatar.NULL;
+
+    whosTurn: number = 0;
+    otherPlayerMap: Map<number, cc.Node> = new Map();
 
     position: cc.Vec2 = cc.v2(0, 0);
     playerState: PlayerState = PlayerState.IDLE;
@@ -28,33 +27,46 @@ export class PlayerControl extends cc.Component {
     private movementIndex: number = 0;
     private moveSpeed: number = 100;
 
-    getPlayerInfo() {
-        const playerData: PlayerData = GameManager.getInstance().getPlayerData(this.playerId);
-        this.playerName = playerData.name;
-        this.playerAvatar = playerData.avatar;
+    // Send message to the network
+    private sendMessageToNetwork(eventCode: number, content: any) {
+        NetworkManager.getInstance().sendGameAction(eventCode, content);
+    }
+
+    private networkManagerHandler(eventCode: number, content: any, actorNr: number) {
+        //Will listen to all events on photon
+        switch(eventCode) {
+            case PhotonEventCodes.PLAYER_TURN:
+                this.setPlayerTurn(actorNr);
+                break;
+            case PhotonEventCodes.PLAYER_MOVEMENT:
+                break;
+        }
     }
 
     // Handle Player State
-    setPlayerTurn() {
-        this.playerState = PlayerState.MYTURN;
-    }
-
-    // Handle Player Position
-    initializePosition(position: cc.Vec2 = cc.v2(0, 0)) {
-        this.position = position;
-        this.node.setPosition(position);
-        this.playerState = PlayerState.IDLE;
-        console.log(`Player ${this.playerId} initialized at position:`, position);
-
+    setPlayerTurn(turn: number) {
+        this.whosTurn = turn;
+        if (this.whosTurn === this.playerId) {
+            this.playerState = PlayerState.MYTURN;
+            console.log(`Player ${this.playerId} is now MYTURN and should roll the dice.`);
+        }else{
+            this.playerState = PlayerState.IDLE;
+            this.otherPlayerMap.get(this.whosTurn).getComponent(OtherPlayers).setPlayerState(PlayerState.MYTURN);
+            console.log(`Player ${this.whosTurn} is now MYTURN and wait for PlayerControl to move it.`);
+        }
     }
 
     setPlayerPosition(position: cc.Vec2) {
         this.position = position;
         this.node.setPosition(position);
-
     }
 
-    getPlayerPosition(): cc.Vec2 {
+    /*
+    * Get the current position of the player.
+    * @returns {cc.Vec2} - The current position of the player.
+    * This method returns the position of the player as a cc.Vec2 object.
+    */
+    public getPlayerPosition(): cc.Vec2 {
         return this.position;
     }
 
@@ -72,6 +84,28 @@ export class PlayerControl extends cc.Component {
         }
     }
 
+    setOtherPlayerMoveBuffer(actorNumber: number, newMovement: cc.Vec2[]) {
+        const otherPlayerNode = this.otherPlayerMap.get(actorNumber);
+        otherPlayerNode.getComponent(OtherPlayers).setPlayerMoveBuffer(newMovement);
+    }
+
+    // Handle Other Players Init
+    initPlayers(playerList: PlayerData[]) {
+        playerList.forEach(player => {
+            if (player.actorNumber !== this.playerId) {
+                const otherPlayerNode = cc.instantiate(this.otherPlayerPrefab);
+                const playerControl = otherPlayerNode.getComponent(OtherPlayers);
+                playerControl.initPlayer(player);
+                this.otherPlayerMap.set(player.actorNumber, otherPlayerNode);
+                this.node.parent.addChild(otherPlayerNode);
+            }else{
+                this.playerName = player.name;
+                this.playerAvatar = player.avatar;
+                this.position = player.position;
+            }
+        });
+    }
+
     // Handle Roll Dice
     async rollDice(): Promise<number> {
         const result = await NewClass.getInstance().onDiceRollTriggered(this.node, 1);
@@ -81,9 +115,13 @@ export class PlayerControl extends cc.Component {
 
     // Life-cycle callbacks
     onLoad() {
+        // Find player id and add other players to its child
         this.playerId = NetworkManager.getInstance().getMyActorNumber();
-        this.getPlayerInfo();
-        this.initializePosition();
+        this.initPlayers(GameManager.getInstance().getPlayerList());
+
+        // Connect to the network manager and register the message handler
+        this.networkManagerHandler = this.networkManagerHandler.bind(this);
+        NetworkManager.getInstance().registerMessageHandler(this.networkManagerHandler);
     }
 
     update(dt: number){
@@ -110,8 +148,6 @@ export class PlayerControl extends cc.Component {
                     const moveVector = direction.mul(distance);
                     this.setPlayerPosition(currentPosition.add(moveVector));
                 }
-
-                this.node.setPosition(this.position);
             }else if(this.moveBuffer.length > 0) {
                 this.playerState = PlayerState.IDLE;
                 this.moveBuffer = [];

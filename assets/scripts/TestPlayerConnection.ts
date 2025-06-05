@@ -1,3 +1,4 @@
+import GameManager from "./GameManager";
 import NetworkManager from "./NetworkManager";
 import { PlayerMoveEvent } from "./types/GameEvents";
 import { PhotonEventCodes } from "./types/PhotonEventCodes";

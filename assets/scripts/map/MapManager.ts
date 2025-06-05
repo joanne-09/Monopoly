@@ -1,7 +1,8 @@
 import SpaceNodeCtrl from "./SpaceNodeCtrl";
 import SpaceNodeItem from "./SpaceNodeItem";
 import { MapNodeEvents } from "../types/GameEvents";
-
+import GameManager from "../GameManager";
+import { PlayerData } from "../types/DataTypes";
 const {ccclass, property} = cc._decorator;
 
 @ccclass
@@ -9,18 +10,25 @@ export default class MapManager extends cc.Component {
 
     @property(cc.Node)
     spacesNode: cc.Node = null;
-
+    
+    @property(cc.Label)
+    moneyLabel: cc.Label = null;
     private spaceNum: number = 60;
     private spaceNodeCtrl = new SpaceNodeCtrl();
-
+    private gameManager: GameManager = GameManager.getInstance();
+    private localPlayerData: PlayerData;
+    private lastMoney: number = null;
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
-      
+
     }
 
     start() {
-
+      this.gameManager.startGame();
+      this.schedule(() => {
+        this.localPlayerData = this.gameManager.getLocalPlayerData();
+      }, 0.5);
     }
 
     protected getSpaceNodeItemByIndex(index: number) {
@@ -56,6 +64,15 @@ export default class MapManager extends cc.Component {
       cc.log(`Map node event for index ${index}: ${spaceNodeItem.getMapNodeEvent()}`);
       return spaceNodeItem.getMapNodeEvent();
     }
-
-    // update (dt) {}
+    
+    update (dt) {
+        if (this.localPlayerData && this.moneyLabel) {
+            if (this.localPlayerData.money !== this.lastMoney) {
+                this.moneyLabel.string = `Money: ${this.localPlayerData.money}`;
+                this.lastMoney = this.localPlayerData.money;
+            }
+        } else {
+            cc.warn("Local player data or money label is not set.");
+        }
+    }
 }
