@@ -1,5 +1,10 @@
 const {ccclass, property} = cc._decorator;
 
+enum CameraState {
+    FOLLOW_PLAYER,
+    FOLLOW_OTHER,
+}
+
 @ccclass
 export default class CameraFollow extends cc.Component {
     @property(cc.Node)
@@ -16,6 +21,8 @@ export default class CameraFollow extends cc.Component {
     @property(cc.Button)
     otherPlayer3: cc.Button = null;
 
+    private currentCameraState: CameraState = CameraState.FOLLOW_PLAYER;
+
     private mapMinX: number = -Infinity;
     private mapMaxX: number = Infinity;
     private mapMinY: number = -Infinity;
@@ -30,6 +37,11 @@ export default class CameraFollow extends cc.Component {
         if (!this.cameraComponent) {
             console.error("CameraFollow: cc.Camera component not found on this node!");
         }
+
+        // Handle button clicks to switch camera state
+        this.otherPlayer1.node.on('click', () => this.switchToOtherPlayer(1));
+        this.otherPlayer2.node.on('click', () => this.switchToOtherPlayer(2));
+        this.otherPlayer3.node.on('click', () => this.switchToOtherPlayer(3));
 
         this.setMapBoundaries();
     }

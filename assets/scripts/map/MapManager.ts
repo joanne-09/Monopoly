@@ -7,6 +7,7 @@ const {ccclass, property} = cc._decorator;
 
 @ccclass
 export default class MapManager extends cc.Component {
+    private static instance: MapManager = null;
 
     @property(cc.Node)
     spacesNode: cc.Node = null;
@@ -15,13 +16,23 @@ export default class MapManager extends cc.Component {
     moneyLabel: cc.Label = null;
     private spaceNum: number = 60;
     private spaceNodeCtrl = new SpaceNodeCtrl();
-    private gameManager: GameManager = GameManager.getInstance();
+    private gameManager: GameManager;
     private localPlayerData: PlayerData;
     private lastMoney: number = null;
+
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
+        if (MapManager.instance) {
+            this.node.destroy();
+            return;
+        }
+        MapManager.instance = this;
+        this.gameManager = GameManager.getInstance();
+    }
 
+    public static getInstance(): MapManager {
+        return MapManager.instance;
     }
 
     start() {
@@ -64,6 +75,7 @@ export default class MapManager extends cc.Component {
       cc.log(`Map node event for index ${index}: ${spaceNodeItem.getMapNodeEvent()}`);
       return spaceNodeItem.getMapNodeEvent();
     }
+
     
     update (dt) {
         if (this.localPlayerData && this.moneyLabel) {

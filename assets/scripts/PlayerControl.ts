@@ -27,6 +27,7 @@ export class PlayerControl extends cc.Component {
     private movementIndex: number = 0;
     private moveSpeed: number = 100;
 
+    private networkManager: NetworkManager = null;
     // Send message to the network
     private sendMessageToNetwork(eventCode: number, content: any) {
         NetworkManager.getInstance().sendGameAction(eventCode, content);
@@ -102,8 +103,28 @@ export class PlayerControl extends cc.Component {
                 this.playerName = player.name;
                 this.playerAvatar = player.avatar;
                 this.position = player.position;
+                this.initPlayerAnimation();
             }
         });
+    }
+
+    initPlayerAnimation() {
+        const animation = this.node.getComponent(cc.Animation);
+        const clips = animation.getClips();
+        switch (this.playerAvatar) {
+            case PlayerAvatar.ELECTRIC:
+                animation.play(clips[0].name);
+                break;
+            case PlayerAvatar.FIRE:
+                animation.play(clips[2].name);
+                break;
+            case PlayerAvatar.GRASS:
+                animation.play(clips[4].name);
+                break;
+            case PlayerAvatar.ICE:
+                animation.play(clips[6].name);
+                break;
+        }
     }
 
     // Handle Roll Dice
@@ -116,6 +137,7 @@ export class PlayerControl extends cc.Component {
     // Life-cycle callbacks
     onLoad() {
         // Find player id and add other players to its child
+        this.networkManager = NetworkManager.getInstance();
         this.playerId = NetworkManager.getInstance().getMyActorNumber();
         this.initPlayers(GameManager.getInstance().getPlayerList());
 
@@ -155,5 +177,8 @@ export class PlayerControl extends cc.Component {
                 return;
             }
         }
+    }
+    protected onDestroy(): void {
+        this.networkManager.unregisterMessageHandler(this.networkManagerHandler);
     }
 }
