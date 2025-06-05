@@ -2,7 +2,7 @@ const {ccclass, property} = cc._decorator;
 import NetworkManager from "./NetworkManager";
 import { PlayerAvatar, PlayerData } from "./types/DataTypes";
 import { config } from "./firebase/firebase-service";
-import { PhotonEventCodes } from "./types/PhotonEventCodes";
+import { PhotonEventCodes } from "./types/PhotonEventCodes"; // Make sure this is correctly imported
 import MapManager from "./map/MapManager";
 import { MapNodeEvents } from "./types/GameEvents";
 @ccclass
@@ -71,12 +71,56 @@ export default class GameManager extends cc.Component {
         } else if(eventCode == PhotonEventCodes.PLAYER_DATA) {
             console.log("GameManager: Received player data from network manager handler.");
             this.playerMap = new Map(content.map((player: PlayerData) => [player.actorNumber, player]));
+            // Potentially update this.playerList if game is active and master client
+            if (this.isGameActive && this.networkManager.isMasterClient()) {
+                this.playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
+                console.log("GameManager: playerList updated due to PLAYER_DATA event on master.", this.playerList);
+            }
         } else if(eventCode == PhotonEventCodes.PLAYER_MOVEMENT) { 
             console.log("GameManager: Received player movement from network manager handler.");
             //no need to update since player movement is already updated in playerController
         } else if(eventCode == PhotonEventCodes.PLAYER_TURN) {
             console.log("GameManager: Received player turn from network manager handler.");
             this.currentTurnPlayer = content;
+        } else if (eventCode == PhotonEventCodes.PLAYER_MOVE_COMPLETED) {
+            console.log(`GameManager: Received PLAYER_MOVE_COMPLETED event from actorNr: ${actorNr}. Content:`, content);
+            if (this.networkManager.isMasterClient()) {
+                // actorNr is the player who completed their move.
+                if (this.currentTurnPlayer && this.currentTurnPlayer.actorNumber === actorNr) {
+                    if (this.playerList.length === 0) {
+                        console.error("GameManager (Master, on PLAYER_MOVE_COMPLETED): playerList is empty. Attempting to re-initialize.");
+                        this.playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
+                        if (this.playerList.length === 0) {
+                            console.error("GameManager (Master, on PLAYER_MOVE_COMPLETED): playerList is STILL empty. Cannot advance turn.");
+                            return;
+                        }
+                        // Ensure currentTurnIndex is valid if playerList was re-initialized
+                        // This might need more robust logic if players can drop mid-turn.
+                        const currentTurnPlayerExistsInNewList = this.playerList.find(p => p.actorNumber === this.currentTurnPlayer.actorNumber);
+                        if (!currentTurnPlayerExistsInNewList) {
+                            console.error("GameManager (Master, on PLAYER_MOVE_COMPLETED): Current turn player not in re-initialized list. Resetting turn.");
+                            this.currentTurnIndex = 0; // Or some other recovery logic
+                        } else {
+                             // find current player's index in the potentially new list
+                            this.currentTurnIndex = this.playerList.findIndex(p => p.actorNumber === this.currentTurnPlayer.actorNumber);
+                            if(this.currentTurnIndex === -1) this.currentTurnIndex = 0; // fallback
+                        }
+
+                    }
+
+                    console.log(`GameManager (Master): Processing PLAYER_MOVE_COMPLETED for actorNr ${actorNr}. Current turn player: ${this.currentTurnPlayer.name} (Actor: ${this.currentTurnPlayer.actorNumber}). PlayerList length: ${this.playerList.length}, CurrentTurnIndex: ${this.currentTurnIndex}`);
+
+                    this.currentTurnIndex = (this.currentTurnIndex + 1) % this.playerList.length;
+                    this.currentTurnPlayer = this.playerList[this.currentTurnIndex];
+                    this.round++;
+
+                    console.log(`GameManager (Master): Turn advanced via event. New round: ${this.round}. New turn for player: ${this.currentTurnPlayer.name} (Actor: ${this.currentTurnPlayer.actorNumber}).`);
+                    this.broadcastPlayerData(); // Broadcast any state changes
+                    this.broadcastTurn();     // Broadcast the new turn
+                } else {
+                    console.warn(`GameManager (Master): Received PLAYER_MOVE_COMPLETED for actorNr ${actorNr}, but current turn is for ${this.currentTurnPlayer?.name} (Actor: ${this.currentTurnPlayer?.actorNumber}) or actorNr mismatch. Ignoring.`);
+                }
+            }
         }
     }
 
@@ -86,12 +130,18 @@ export default class GameManager extends cc.Component {
             return;
         }
         if (!this.currentTurnPlayer) {
-            console.error(`GameManager: No player data found for actor number ${this.currentTurnIndex}.`);
-            return;
+            // It's possible currentTurnIndex is out of bounds if playerList changed, ensure currentTurnPlayer is valid.
+            if (this.playerList && this.playerList.length > 0) {
+                 this.currentTurnPlayer = this.playerList[this.currentTurnIndex % this.playerList.length];
+            }
+            if (!this.currentTurnPlayer) {
+                console.error(`GameManager: No player data found for currentTurnIndex ${this.currentTurnIndex}. PlayerList length: ${this.playerList?.length}. Cannot broadcast turn.`);
+                return;
+            }
         }
         // Broadcast the current player's turn to all clients
         this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_TURN, this.currentTurnPlayer);
-        console.log(`GameManager: Broadcasting turn for player ${this.currentTurnPlayer}.`);
+        console.log(`GameManager: Broadcasting turn for player ${this.currentTurnPlayer.name} (Actor: ${this.currentTurnPlayer.actorNumber}).`);
     }
 
     private broadcastPlayerData(){ //broadcast updated player data to call clients (gameManagers)
@@ -110,6 +160,7 @@ export default class GameManager extends cc.Component {
             return;
         }
         this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_MOVEMENT, playerMovement);
+        console.log("Player movement broadcasted to Photon: ", playerMovement);
     }
 
 
@@ -198,21 +249,50 @@ export default class GameManager extends cc.Component {
         this.currentTurnPlayer = this.playerList[this.currentTurnIndex];
 
         this.mapManager = MapManager.getInstance();
+        if (!this.mapManager) {
+            console.error("GameManager: MapManager instance not found!");
+            // Potentially try to get it again or handle the error
+            this.mapManager = MapManager.getInstance(); // Retry
+            if (!this.mapManager) return; // Still not found, exit
+        }
 
-        // Initialize playerData
-        this.playerMap.forEach((playerData: PlayerData) => {
-            if (playerData.actorNumber === this.networkManager.getMyActorNumber()) {
-                playerData.islocal = true;
-            }
-            if (playerData.islocal) {
-                playerData.positionIndex = 0; 
-                playerData.position = this.mapManager.getCoordByIndex(0);
+
+        // Initialize playerData for ALL players on the Master Client
+        if (this.networkManager.isMasterClient()) {
+            this.playerMap.forEach((playerData: PlayerData) => {
+                // Set islocal flag based on the current client's perspective,
+                // but this part of the loop is for master client's initialization of shared state.
+                // The actual 'islocal' for each client will be determined by them based on their actorNumber.
+                // However, the master client needs to prepare the full initial state.
+
+                playerData.positionIndex = 1; 
+                playerData.position = this.mapManager.getCoordByIndex(1);
                 playerData.money = 1500;
-                this.broadcastPlayerData();
+                // 'islocal' will be correctly determined by each client upon receiving the data
+                // or can be set here if we are careful, but the primary goal is to ensure
+                // position and money are set for everyone by the master.
+            });
+            this.broadcastPlayerData(); // Broadcast once after all players are initialized
+        }
+        
+        // Each client will set its own 'islocal' property correctly when processing received player data
+        // or when their PlayerControl initializes.
+        // For the local player on this client instance:
+        const myActorNumber = this.networkManager.getMyActorNumber();
+        const localPlayerData = this.playerMap.get(myActorNumber);
+        if (localPlayerData) {
+            localPlayerData.islocal = true;
+            // If the master client didn't run the above block (e.g., if this client *is* master but data wasn't broadcast yet),
+            // ensure local data is set. However, the broadcast from master should be the authority.
+            if (localPlayerData.position === undefined) { // Fallback if not set by master broadcast yet
+                 localPlayerData.positionIndex = 1;
+                 localPlayerData.position = this.mapManager.getCoordByIndex(1);
+                 localPlayerData.money = 1500;
             }
-        });
+        }
 
-        this.broadcastTurn();
+
+        this.broadcastTurn(); // Master client should typically manage turns
     }
 
     public rolledDice(diceValue: number) {
@@ -225,32 +305,84 @@ export default class GameManager extends cc.Component {
             return;
         }
 
-        // Get the current player data
-        const currentPlayerData = this.currentTurnPlayer;
-        if (!currentPlayerData) {
-            console.error("GameManager: No current player data found for rolling dice.");
+        // Ensure currentTurnPlayer and its actorNumber are valid
+        if (!this.currentTurnPlayer || typeof this.currentTurnPlayer.actorNumber !== 'number') {
+            console.error("GameManager: currentTurnPlayer is not properly set or actorNumber is missing.");
             return;
         }
-        let prevPlayerPositionIndex = currentPlayerData.positionIndex;
-        let playerMovement: cc.Vec2[] = [];
-        for (let i = 0; i < diceValue; i++) {
-            // Move the player forward by one position
-            currentPlayerData.positionIndex = prevPlayerPositionIndex + 1;
-            currentPlayerData.position = this.mapManager.getCoordByIndex(currentPlayerData.positionIndex);
-            playerMovement.push(currentPlayerData.position);
+
+        // Get the most up-to-date player data from the playerMap using the actorNumber from currentTurnPlayer
+        const playerToMove = this.playerMap.get(this.currentTurnPlayer.actorNumber);
+
+        if (!playerToMove) {
+            console.error(`GameManager: Player data not found in playerMap for current turn player actorNr: ${this.currentTurnPlayer.actorNumber}`);
+            return;
         }
-        this.broadcastPlayerData();
-        this.broadcastPlayerMovement(playerMovement);   
+
+        // Log the starting state using the data from playerMap
+        console.log(`GameManager: Player ${playerToMove.name} (Actor: ${playerToMove.actorNumber}) rolling dice. Value: ${diceValue}. Starting positionIndex: ${playerToMove.positionIndex}, Starting world position: (${playerToMove.position?.x?.toFixed(2)}, ${playerToMove.position?.y?.toFixed(2)})`);
+
+        let playerMovement: cc.Vec2[] = [];
+        // This will be the logical, potentially ever-increasing, position index.
+        // MapManager.getCoordByIndex is expected to handle wrapping this to a board coordinate.
+        let newLogicalPositionIndex = playerToMove.positionIndex; 
+
+        for (let i = 0; i < diceValue; i++) {
+            newLogicalPositionIndex++; // Increment the logical position index for the next step
+            const stepPosition = this.mapManager.getCoordByIndex(newLogicalPositionIndex);
+
+            if (!stepPosition) {
+                console.error(`GameManager: mapManager.getCoordByIndex(${newLogicalPositionIndex}) returned undefined for step ${i + 1}! Player: ${playerToMove.name}`);
+                // Abort movement calculation if a coordinate is invalid
+                return;
+            }
+            playerMovement.push(stepPosition.clone()); // Clone to ensure unique Vec2 objects in the array
+        }
+
+        // Update the PlayerData in the playerMap with the final logical positionIndex 
+        // and its corresponding Vec2 position from the MapManager.
+        playerToMove.positionIndex = newLogicalPositionIndex; 
+        const finalPositionVec = this.mapManager.getCoordByIndex(playerToMove.positionIndex);
+        
+        if (!finalPositionVec) {
+            console.error(`GameManager: mapManager.getCoordByIndex(${playerToMove.positionIndex}) for final position returned undefined! Player: ${playerToMove.name}`);
+            // Attempt to use the last position in playerMovement if available
+            if (playerMovement.length > 0) {
+                playerToMove.position = playerMovement[playerMovement.length - 1].clone();
+            } else if (playerToMove.position === undefined || playerToMove.position === null) {
+                // If there's no movement and position is bad, this is a critical state.
+                // For now, log and potentially revert positionIndex if necessary, or rely on last good broadcast.
+                console.error(`GameManager: Critical - final position for ${playerToMove.name} is undefined and no movement path was generated.`);
+                // playerToMove.positionIndex = playerToMove.positionIndex - diceValue; // Revert index if diceValue > 0
+            }
+        } else {
+            playerToMove.position = finalPositionVec.clone();
+        }
+
+        console.log(`GameManager: Player ${playerToMove.name} finished rolling. Final positionIndex: ${playerToMove.positionIndex}. Final world position: (${playerToMove.position?.x?.toFixed(2)}, ${playerToMove.position?.y?.toFixed(2)}). Movement path items: ${playerMovement.length}`);
+
+        this.broadcastPlayerData(); // playerMap now contains the updated playerToMove
+        this.broadcastPlayerMovement(playerMovement);
     }
 
     // Called when player movement is completed in playerController
     public playerMovementCompleted() {
-        this.currentTurnIndex = (this.currentTurnIndex + 1) % this.getPlayerList().length;
-        this.currentTurnPlayer = this.playerList[this.currentTurnIndex];
-        this.round++;
-        console.log(`GameManager: Player movement completed. Moving to next round: ${this.round}`);
-        this.broadcastPlayerData();
-        this.broadcastTurn();
+        if (!this.isGameActive) {
+            console.warn("GameManager: playerMovementCompleted called, but game is not active.");
+            return;
+        }
+
+        const myActorNumber = this.networkManager.getMyActorNumber();
+        // Check if it's actually this player's turn before sending the event
+        if (this.currentTurnPlayer && this.currentTurnPlayer.actorNumber === myActorNumber) {
+            console.log(`GameManager (Client ${myActorNumber}): My movement completed. Sending PLAYER_MOVE_COMPLETED event.`);
+            // All clients (including master if it's its turn) send this event.
+            // The master client's networkManagerHandler will process it.
+            // The actorNr in the networkManagerHandler callback will be myActorNumber.
+            this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_MOVE_COMPLETED, { /* actorWhoMoved: myActorNumber */ }); // Content is optional
+        } else {
+            console.warn(`GameManager (Client ${myActorNumber}): playerMovementCompleted called, but it's not my turn (current: ${this.currentTurnPlayer?.name} (Actor: ${this.currentTurnPlayer?.actorNumber})).`);
+        }
     }
 
     public getMapEventofCurrentPlayer(): MapNodeEvents | null { 

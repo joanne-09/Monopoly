@@ -35,6 +35,7 @@ export class PlayerControl extends cc.Component {
 
     private networkManager: NetworkManager = null;
     private gameManager: GameManager = GameManager.getInstance();
+
     // Send message to the network
     private sendMessageToNetwork(eventCode: number, content: any) {
         NetworkManager.getInstance().sendGameAction(eventCode, content);
@@ -44,7 +45,7 @@ export class PlayerControl extends cc.Component {
         //Will listen to all events on photon
         switch(eventCode) {
             case PhotonEventCodes.PLAYER_TURN:
-                this.setPlayerTurn(actorNr);
+                this.setPlayerTurn(content.actorNumber);
                 break;
             case PhotonEventCodes.PLAYER_MOVEMENT:
                 if(this.playerState === PlayerState.ROLLDICE) {
@@ -92,13 +93,13 @@ export class PlayerControl extends cc.Component {
     }
 
     // Handle Player Move
-    setPlayerMoveBuffer(newMovement: cc.Vec2[]) {
+    setPlayerMoveBuffer(newMovement: any[]) {
         if (newMovement.length > 0) {
-            this.moveBuffer = newMovement.map(move => move.clone());
+            this.moveBuffer = newMovement.map(move => cc.v2(move.x, move.y));
             this.movementIndex = 0;
             this.playerState = PlayerState.MOVING;
             console.log(`Player ${this.playerId} move buffer set:`, this.moveBuffer);
-        }else{
+        } else {
             this.moveBuffer = [];
             this.playerState = PlayerState.IDLE;
             console.log(`Player ${this.playerId} move buffer cleared.`);
@@ -113,6 +114,7 @@ export class PlayerControl extends cc.Component {
     // Handle Other Players Init
     initPlayers(playerList: PlayerData[]) {
         playerList.forEach(player => {
+            console.log("PlayerControl initPlayers", player);
             if (player.actorNumber !== this.playerId) {
                 const otherPlayerNode = cc.instantiate(this.otherPlayerPrefab);
                 const playerControl = otherPlayerNode.getComponent(OtherPlayers);
@@ -122,8 +124,18 @@ export class PlayerControl extends cc.Component {
             }else{
                 this.playerName = player.name;
                 this.playerAvatar = player.avatar;
-                this.position = player.position;
                 this.initPlayerAnimation();
+            }
+        });
+    }
+
+    initPlayersPosition(playerList: PlayerData[]) {
+        playerList.forEach(player => {
+            if (player.actorNumber !== this.playerId) {
+                const otherPlayerNode = this.otherPlayerMap.get(player.actorNumber);
+                otherPlayerNode.getComponent(OtherPlayers).initPlayerPosition(cc.v2(player.position.x, player.position.y));
+            } else {
+                this.setPlayerPosition(cc.v2(player.position.x, player.position.y));
             }
         });
     }
@@ -159,7 +171,7 @@ export class PlayerControl extends cc.Component {
         // Find player id and add other players to its child
         this.networkManager = NetworkManager.getInstance();
         this.playerId = NetworkManager.getInstance().getMyActorNumber();
-        this.initPlayers(GameManager.getInstance().getPlayerList());
+        this.initPlayers(this.gameManager.getPlayerList());
 
         // Connect to the network manager and register the message handler
         this.networkManagerHandler = this.networkManagerHandler.bind(this);
@@ -182,6 +194,10 @@ export class PlayerControl extends cc.Component {
                 }
             });
         }
+    }
+
+    start(){
+        this.initPlayersPosition(this.gameManager.getPlayerList());
     }
 
     update(dt: number){
@@ -214,6 +230,8 @@ export class PlayerControl extends cc.Component {
                 this.playerState = PlayerState.IDLE;
                 this.moveBuffer = [];
                 this.movementIndex = 0;
+
+                this.gameManager.playerMovementCompleted();
                 return;
             }
         }

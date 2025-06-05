@@ -1,5 +1,6 @@
 import GameManager from "./GameManager";
 import NetworkManager from "./NetworkManager";
+import { PhotonEventCodes } from "./types/PhotonEventCodes";
 const {ccclass, property} = cc._decorator;
 
 // Start scene (player data) localStorage?
@@ -125,6 +126,9 @@ export default class MatchMakingScene extends cc.Component {
         // where whoAmI returns the playerdata object, provided in DataTypes.ts
         // console.log("Photon event received:", eventCode, content, actorNr);
         // console.log(GameManager.getInstance().getPlayerList());
+        if(eventCode === PhotonEventCodes.START_GAME) {
+            cc.director.loadScene("MapScene");
+        }
         this.refreshPlayerList();
     }
 
@@ -199,6 +203,8 @@ export default class MatchMakingScene extends cc.Component {
 
     onStartGame() {
         cc.log("start game button clicked");
+        this.networkManager.sendGameAction(PhotonEventCodes.START_GAME, null);
+    
         cc.director.loadScene("MapScene");
     }
 
