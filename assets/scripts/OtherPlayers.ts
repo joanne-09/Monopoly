@@ -20,6 +20,7 @@ export default class OtherPlayers extends cc.Component {
         this.playerName = playerData.name;
         this.playerAvatar = playerData.avatar;
         this.position = playerData.position;
+        this.node.setPosition(this.position);
         this.initPlayerAnimation();
     }
 
@@ -43,13 +44,22 @@ export default class OtherPlayers extends cc.Component {
     }
 
     // Handle Player Move
-    public setPlayerMoveBuffer(newMovement: cc.Vec2[]) {
+    public setPlayerMoveBuffer(newMovement: any[]) {
         if (newMovement.length > 0) {
-            this.moveBuffer = newMovement.map(move => move.clone());
+            this.moveBuffer = newMovement.map(move => {
+                if (move instanceof cc.Vec2) {
+                    return move.clone();
+                } else if (move && typeof move.x === "number" && typeof move.y === "number") {
+                    return cc.v2(move.x, move.y);
+                } else {
+                    console.error("OtherPlayers: Invalid move data received:", move);
+                    return cc.v2(0, 0);
+                }
+            });
             this.movementIndex = 0;
             this.playerState = PlayerState.MOVING;
             console.log(`Player ${this.playerId} move buffer set:`, this.moveBuffer);
-        }else{
+        } else {
             this.moveBuffer = [];
             this.playerState = PlayerState.IDLE;
             console.log(`Player ${this.playerId} move buffer cleared.`);

@@ -110,6 +110,7 @@ export default class GameManager extends cc.Component {
             return;
         }
         this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_MOVEMENT, playerMovement);
+        console.log("Player movement broadcasted to Photon: ", playerMovement);
     }
 
 
@@ -205,8 +206,8 @@ export default class GameManager extends cc.Component {
                 playerData.islocal = true;
             }
             if (playerData.islocal) {
-                playerData.positionIndex = 0; 
-                playerData.position = this.mapManager.getCoordByIndex(0);
+                playerData.positionIndex = 1; 
+                playerData.position = this.mapManager.getCoordByIndex(1);
                 playerData.money = 1500;
                 this.broadcastPlayerData();
             }
@@ -231,11 +232,10 @@ export default class GameManager extends cc.Component {
             console.error("GameManager: No current player data found for rolling dice.");
             return;
         }
-        let prevPlayerPositionIndex = currentPlayerData.positionIndex;
         let playerMovement: cc.Vec2[] = [];
         for (let i = 0; i < diceValue; i++) {
             // Move the player forward by one position
-            currentPlayerData.positionIndex = prevPlayerPositionIndex + 1;
+            currentPlayerData.positionIndex = (currentPlayerData.positionIndex + 1); // Might overflow, should handle in the future
             currentPlayerData.position = this.mapManager.getCoordByIndex(currentPlayerData.positionIndex);
             playerMovement.push(currentPlayerData.position);
         }
@@ -245,6 +245,7 @@ export default class GameManager extends cc.Component {
 
     // Called when player movement is completed in playerController
     public playerMovementCompleted() {
+        if (!this.networkManager.isMasterClient()) return; 
         this.currentTurnIndex = (this.currentTurnIndex + 1) % this.getPlayerList().length;
         this.currentTurnPlayer = this.playerList[this.currentTurnIndex];
         this.round++;

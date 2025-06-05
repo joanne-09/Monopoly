@@ -62,7 +62,7 @@ export default class SpaceNodeCtrl extends cc.Component {
       }
 
       const targetSpace = spacesNode.getChildByName(`space${index.toString().padStart(3, '0')}`);
-      return targetSpace ? new cc.Vec2(targetSpace.position.x, targetSpace.position.y) : null;
+      return targetSpace ? new cc.Vec2(targetSpace.position.x -132, targetSpace.position.y+293) : null;
     }
 
     // update (dt) {}

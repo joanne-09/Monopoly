@@ -57,7 +57,7 @@ export default class NetworkManager extends cc.Component {
         if (this.client) {
             // Essential: log only when actually attempting to connect
             console.log("NetworkManager: Attempting to connect to Photon...");
-            this.client.connectToRegionMaster("asia"); // e.g., "us", "eu", "asia"
+            this.client.connectToRegionMaster("hk"); // e.g., "us", "eu", "asia"
         } else {
             console.error("NetworkManager: Photon client not initialized, cannot connect.");
         }
@@ -152,6 +152,10 @@ export default class NetworkManager extends cc.Component {
         } else {
             console.warn("NetworkManager: Not in a room, cannot send event.");
         }
+    }
+
+    public isMasterClient(): boolean {
+        return this.getMyActorNumber() === 1;
     }
 
     public registerMessageHandler(handler: (eventCode: number, content: any, actorNr: number) => void) {
