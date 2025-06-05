@@ -13,7 +13,7 @@ export default class GameManager extends cc.Component {
     private playerMap: Map<number, PlayerData> = new Map(); // Map actorNumber to avatar sprites
     private localPlayerInfo: PlayerData = null;
     private networkManager: NetworkManager = null;
-
+    private mapManager: MapManager = null; // For managing map-related logic
     // For handling gameplay events and logic
     private round = 0;
     private currentTurnIndex = 0; // Index of the player whose turn it is
@@ -173,20 +173,28 @@ export default class GameManager extends cc.Component {
         this.isGameActive = true;
         this.round = 1;
         this.currentTurnIndex = 0;
-        this.currentTurnPlayer = this.getPlayerData(this.currentTurnIndex+1); //Since getPlayerData should be mapped using ActorNumber, we suppose P1 starts first
 
-        //initialize playerData
+        const playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
+        if (playerList.length === 0) {
+            console.error("GameManager: No players found in playerMap. Cannot start game.");
+            return;
+        }
+        this.currentTurnPlayer = playerList[this.currentTurnIndex];
+
+        this.mapManager = MapManager.getInstance();
+
+        // Initialize playerData
         this.playerMap.forEach((playerData: PlayerData) => {
-            if(playerData.actorNumber === this.networkManager.getMyActorNumber()) {
-                playerData.islocal = true; // Mark the local player
+            if (playerData.actorNumber === this.networkManager.getMyActorNumber()) {
+                playerData.islocal = true;
             }
-            if(playerData.islocal){
-                
-                playerData.position = cc.v2(0, 0);
-                playerData.money = 1500; 
-                this.broadcastPlayerData(); 
+            if (playerData.islocal) {
+                playerData.position = this.mapManager.getCoordByIndex(0);
+                playerData.money = 1500;
+                this.broadcastPlayerData();
             }
         });
+
         this.broadcastTurn();
     }
 }
