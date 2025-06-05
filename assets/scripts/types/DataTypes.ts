@@ -3,6 +3,7 @@ export interface PlayerData {
     name: string; // Player's name
     avatar: PlayerAvatar; // Player's avatar ID
     position?: cc.Vec2; // Player's position in the game world
+    positionIndex?: number;
     islocal?: boolean;
     money?: number;
 }

@@ -4,6 +4,7 @@ import { PlayerAvatar, PlayerData } from "./types/DataTypes";
 import { config } from "./firebase/firebase-service";
 import { PhotonEventCodes } from "./types/PhotonEventCodes";
 import MapManager from "./map/MapManager";
+import { MapNodeEvents } from "./types/GameEvents";
 @ccclass
 export default class GameManager extends cc.Component {
     private static instance: GameManager = null;
@@ -14,6 +15,7 @@ export default class GameManager extends cc.Component {
     private localPlayerInfo: PlayerData = null;
     private networkManager: NetworkManager = null;
     private mapManager: MapManager = null; // For managing map-related logic
+    private playerList: PlayerData[] = [];
     // For handling gameplay events and logic
     private round = 0;
     private currentTurnIndex = 0; // Index of the player whose turn it is
@@ -69,6 +71,12 @@ export default class GameManager extends cc.Component {
         } else if(eventCode == PhotonEventCodes.PLAYER_DATA) {
             console.log("GameManager: Received player data from network manager handler.");
             this.playerMap = new Map(content.map((player: PlayerData) => [player.actorNumber, player]));
+        } else if(eventCode == PhotonEventCodes.PLAYER_MOVEMENT) { 
+            console.log("GameManager: Received player movement from network manager handler.");
+            //no need to update since player movement is already updated in playerController
+        } else if(eventCode == PhotonEventCodes.PLAYER_TURN) {
+            console.log("GameManager: Received player turn from network manager handler.");
+            this.currentTurnPlayer = content;
         }
     }
 
@@ -94,6 +102,14 @@ export default class GameManager extends cc.Component {
         // Broadcast the player data to all clients
         this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_DATA, Array.from(this.playerMap.values()));
         console.log("GameManager: Broadcasting player data to all clients.");
+    }
+
+    private broadcastPlayerMovement(playerMovement: cc.Vec2[]) {
+        if (!this.isGameActive) {
+            console.warn("GameManager: Cannot broadcast player movement, game is not active.");
+            return;
+        }
+        this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_MOVEMENT, playerMovement);
     }
 
 
@@ -174,12 +190,12 @@ export default class GameManager extends cc.Component {
         this.round = 1;
         this.currentTurnIndex = 0;
 
-        const playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
-        if (playerList.length === 0) {
+        this.playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
+        if (this.playerList.length === 0) {
             console.error("GameManager: No players found in playerMap. Cannot start game.");
             return;
         }
-        this.currentTurnPlayer = playerList[this.currentTurnIndex];
+        this.currentTurnPlayer = this.playerList[this.currentTurnIndex];
 
         this.mapManager = MapManager.getInstance();
 
@@ -189,6 +205,7 @@ export default class GameManager extends cc.Component {
                 playerData.islocal = true;
             }
             if (playerData.islocal) {
+                playerData.positionIndex = 0; 
                 playerData.position = this.mapManager.getCoordByIndex(0);
                 playerData.money = 1500;
                 this.broadcastPlayerData();
@@ -196,6 +213,54 @@ export default class GameManager extends cc.Component {
         });
 
         this.broadcastTurn();
+    }
+
+    public rolledDice(diceValue: number) {
+        if (!this.isGameActive) {
+            console.warn("GameManager: Cannot roll dice, game is not active.");
+            return;
+        }
+        if (diceValue <= 0) {
+            console.error("GameManager: Invalid dice value rolled:", diceValue);
+            return;
+        }
+
+        // Get the current player data
+        const currentPlayerData = this.currentTurnPlayer;
+        if (!currentPlayerData) {
+            console.error("GameManager: No current player data found for rolling dice.");
+            return;
+        }
+        let prevPlayerPositionIndex = currentPlayerData.positionIndex;
+        let playerMovement: cc.Vec2[] = [];
+        for (let i = 0; i < diceValue; i++) {
+            // Move the player forward by one position
+            currentPlayerData.positionIndex = prevPlayerPositionIndex + 1;
+            currentPlayerData.position = this.mapManager.getCoordByIndex(currentPlayerData.positionIndex);
+            playerMovement.push(currentPlayerData.position);
+        }
+        this.broadcastPlayerData();
+        this.broadcastPlayerMovement(playerMovement);   
+    }
+
+    // Called when player movement is completed in playerController
+    public playerMovementCompleted() {
+        this.currentTurnIndex = (this.currentTurnIndex + 1) % this.getPlayerList().length;
+        this.currentTurnPlayer = this.playerList[this.currentTurnIndex];
+        this.round++;
+        console.log(`GameManager: Player movement completed. Moving to next round: ${this.round}`);
+        this.broadcastPlayerData();
+        this.broadcastTurn();
+    }
+
+    public getMapEventofCurrentPlayer(): MapNodeEvents | null { 
+        const currentPlayerData = this.currentTurnPlayer;
+
+        if (!currentPlayerData) {
+            console.error("GameManager: No current player data found for getting map event.");
+            return null;
+        }
+        return this.mapManager.getMapNodeEventByIndex(currentPlayerData.positionIndex);
     }
 }
 
