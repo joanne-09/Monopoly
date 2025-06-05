@@ -45,7 +45,7 @@ export class PlayerControl extends cc.Component {
         //Will listen to all events on photon
         switch(eventCode) {
             case PhotonEventCodes.PLAYER_TURN:
-                this.setPlayerTurn(actorNr);
+                this.setPlayerTurn(content.actorNumber);
                 break;
             case PhotonEventCodes.PLAYER_MOVEMENT:
                 if(this.playerState === PlayerState.ROLLDICE) {
@@ -124,12 +124,18 @@ export class PlayerControl extends cc.Component {
             }else{
                 this.playerName = player.name;
                 this.playerAvatar = player.avatar;
-                this.position.x = player.position.x;
-                this.position.y = player.position.y;
-                console.log(`PlayerControl position:`, this.position);
-                console.log("this.position's type", typeof this.position, this.position instanceof cc.Vec2);
-                this.node.setPosition(player.position);
                 this.initPlayerAnimation();
+            }
+        });
+    }
+
+    initPlayersPosition(playerList: PlayerData[]) {
+        playerList.forEach(player => {
+            if (player.actorNumber !== this.playerId) {
+                const otherPlayerNode = this.otherPlayerMap.get(player.actorNumber);
+                otherPlayerNode.getComponent(OtherPlayers).initPlayerPosition(cc.v2(player.position.x, player.position.y));
+            } else {
+                this.setPlayerPosition(cc.v2(player.position.x, player.position.y));
             }
         });
     }
@@ -165,7 +171,7 @@ export class PlayerControl extends cc.Component {
         // Find player id and add other players to its child
         this.networkManager = NetworkManager.getInstance();
         this.playerId = NetworkManager.getInstance().getMyActorNumber();
-        
+        this.initPlayers(this.gameManager.getPlayerList());
 
         // Connect to the network manager and register the message handler
         this.networkManagerHandler = this.networkManagerHandler.bind(this);
@@ -191,7 +197,7 @@ export class PlayerControl extends cc.Component {
     }
 
     start(){
-        this.initPlayers(GameManager.getInstance().getPlayerList());
+        this.initPlayersPosition(this.gameManager.getPlayerList());
     }
 
     update(dt: number){

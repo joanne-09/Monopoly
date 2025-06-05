@@ -19,9 +19,11 @@ export default class OtherPlayers extends cc.Component {
         this.playerId = playerData.actorNumber;
         this.playerName = playerData.name;
         this.playerAvatar = playerData.avatar;
-        this.position = playerData.position;
-        this.node.setPosition(this.position);
         this.initPlayerAnimation();
+    }
+
+    public initPlayerPosition(position: cc.Vec2) {
+        this.setPlayerPosition(position);
     }
 
     initPlayerAnimation() {
