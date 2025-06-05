@@ -2,7 +2,7 @@ import DiceRoll from "./DiceRoll";
 const {ccclass, property} = cc._decorator;
 
 @ccclass
-export default class NewClass extends cc.Component {
+export default class DiceManager extends cc.Component {
 
     @property(cc.Prefab)
     dicePrefab: cc.Prefab = null;
