@@ -4,13 +4,19 @@ import { PhotonEventCodes } from "./types/PhotonEventCodes";
 import { MapNodeEvents } from "./types/GameEvents";
 import NetworkManager from "./NetworkManager";
 import GameManager from "./GameManager";
-import NewClass from "./DiceManager";
+import DiceManager from "./DiceManager";
 import OtherPlayers from "./OtherPlayers";
 
 @ccclass('PlayerControl')
 export class PlayerControl extends cc.Component {
     @property(cc.Prefab)
     otherPlayerPrefab: cc.Prefab = null;
+    @property(DiceManager)
+    diceManager: DiceManager = null;
+    @property(cc.Button)
+    rollDiceButton: cc.Button = null;
+
+    private playerCamera: cc.Node = null;
 
     playerName: string = '';
     playerId: number = 0;
@@ -28,6 +34,7 @@ export class PlayerControl extends cc.Component {
     private moveSpeed: number = 100;
 
     private networkManager: NetworkManager = null;
+    private gameManager: GameManager = GameManager.getInstance();
     // Send message to the network
     private sendMessageToNetwork(eventCode: number, content: any) {
         NetworkManager.getInstance().sendGameAction(eventCode, content);
@@ -40,6 +47,11 @@ export class PlayerControl extends cc.Component {
                 this.setPlayerTurn(actorNr);
                 break;
             case PhotonEventCodes.PLAYER_MOVEMENT:
+                if(this.playerState === PlayerState.ROLLDICE) {
+                    this.setPlayerMoveBuffer(content);
+                }else{
+                    this.setOtherPlayerMoveBuffer(this.whosTurn, content);
+                }
                 break;
         }
     }
@@ -67,8 +79,16 @@ export class PlayerControl extends cc.Component {
     * @returns {cc.Vec2} - The current position of the player.
     * This method returns the position of the player as a cc.Vec2 object.
     */
-    public getPlayerPosition(): cc.Vec2 {
-        return this.position;
+    public getPlayerPosition(playerId: number): cc.Vec2 {
+        if (playerId === this.playerId) {
+            return this.position;
+        } else {
+            const otherPlayerNode = this.otherPlayerMap.get(playerId);
+            if (otherPlayerNode) {
+                return otherPlayerNode.getPosition();
+            }
+        }
+        return cc.v2(0, 0);
     }
 
     // Handle Player Move
@@ -129,7 +149,7 @@ export class PlayerControl extends cc.Component {
 
     // Handle Roll Dice
     async rollDice(): Promise<number> {
-        const result = await NewClass.getInstance().onDiceRollTriggered(this.node, 1);
+        const result = await this.diceManager.onDiceRollTriggered(null, "1");
         console.log(`Player ${this.playerId} rolled:`, result);
         return result;
     }
@@ -144,10 +164,30 @@ export class PlayerControl extends cc.Component {
         // Connect to the network manager and register the message handler
         this.networkManagerHandler = this.networkManagerHandler.bind(this);
         NetworkManager.getInstance().registerMessageHandler(this.networkManagerHandler);
+
+        // Find the player camera
+        this.playerCamera = this.node.getChildByName('PlayerCamera');
+
+        // Bind the rollDiceButton click event
+        if (this.rollDiceButton) {
+            this.rollDiceButton.node.on('click', async () => {
+                if (this.playerState === PlayerState.MYTURN) {
+                    this.playerState = PlayerState.ROLLDICE;
+                    const rollResult = await this.rollDice();
+                    console.log(`Player ${this.playerId} rolled:`, rollResult);
+
+                    this.gameManager.rolledDice(rollResult);
+                } else {
+                    console.warn(`Player ${this.playerId} tried to roll dice but it's not their turn.`);
+                }
+            });
+        }
     }
 
     update(dt: number){
-        if(this.playerState === PlayerState.MOVING){
+        if(this.playerState === PlayerState.MYTURN) {
+
+        }else if(this.playerState === PlayerState.MOVING){
             if(this.movementIndex < this.moveBuffer.length) {
                 // get current move from the buffer
                 const nextMove = this.moveBuffer[this.movementIndex];
@@ -176,6 +216,11 @@ export class PlayerControl extends cc.Component {
                 this.movementIndex = 0;
                 return;
             }
+        }
+
+        // Show/hide rollDiceButton based on playerState
+        if (this.rollDiceButton) {
+            this.rollDiceButton.node.active = (this.playerState === PlayerState.MYTURN);
         }
     }
     protected onDestroy(): void {
