@@ -3,18 +3,23 @@ import NetworkManager from "./NetworkManager";
 import { PlayerAvatar, PlayerData } from "./types/DataTypes";
 import { config } from "./firebase/firebase-service";
 import { PhotonEventCodes } from "./types/PhotonEventCodes";
+import MapManager from "./map/MapManager";
 @ccclass
 export default class GameManager extends cc.Component {
     private static instance: GameManager = null;
 
     @property(cc.Label)
     statusLabel: cc.Label = null;
-    private playerData: PlayerData[] = []; // Store player data, e.g., actorNumber, name, avatar
     private playerMap: Map<number, PlayerData> = new Map(); // Map actorNumber to avatar sprites
     private localPlayerInfo: PlayerData = null;
-    //private mapPhotonIDto
     private networkManager: NetworkManager = null;
-    private networkHandler: (eventCode: number, content: any, actorNr: number) => void = null;
+
+    // For handling gameplay events and logic
+    private round = 0;
+    private currentTurnIndex = 0; // Index of the player whose turn it is
+    private currentTurnPlayer: PlayerData = null; // The player whose turn it is currently
+    private isGameActive = false; // Flag to check if the game is active
+
     
     onLoad() {
         // Prevent duplicate instances
@@ -53,14 +58,44 @@ export default class GameManager extends cc.Component {
         }
     }
 
+    // Network broadcast and listening
     //content is playerData type
     private networkManagerHandler(eventCode: number, content: any, actorNr: number) {
-        if(eventCode != PhotonEventCodes.PLAYER_JOINED) return;
-        let clients = this.networkManager["client"];
-        console.log("GameManager: Network manager handler called with event code:", eventCode, "content:", content, "actorNr:", actorNr);
-        //console.log("GameManager: Current clients:", clients);
-        this.playerMap.set(actorNr, content);
+        if(eventCode == PhotonEventCodes.PLAYER_JOINED) {
+            let clients = this.networkManager["client"];
+            console.log("GameManager: Network manager handler called with event code:", eventCode, "content:", content, "actorNr:", actorNr);
+            //console.log("GameManager: Current clients:", clients);
+            this.playerMap.set(actorNr, content);
+        } else if(eventCode == PhotonEventCodes.PLAYER_DATA) {
+            console.log("GameManager: Received player data from network manager handler.");
+            this.playerMap = new Map(content.map((player: PlayerData) => [player.actorNumber, player]));
+        }
     }
+
+    private broadcastTurn() {
+        if (!this.isGameActive) {
+            console.warn("GameManager: Cannot broadcast turn, game is not active.");
+            return;
+        }
+        if (!this.currentTurnPlayer) {
+            console.error(`GameManager: No player data found for actor number ${this.currentTurnIndex}.`);
+            return;
+        }
+        // Broadcast the current player's turn to all clients
+        this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_TURN, this.currentTurnPlayer);
+        console.log(`GameManager: Broadcasting turn for player ${this.currentTurnPlayer}.`);
+    }
+
+    private broadcastPlayerData(){ //broadcast updated player data to call clients (gameManagers)
+        if (!this.isGameActive) {
+            console.warn("GameManager: Cannot broadcast player data, game is not active.");
+            return;
+        }
+        // Broadcast the player data to all clients
+        this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_DATA, Array.from(this.playerMap.values()));
+        console.log("GameManager: Broadcasting player data to all clients.");
+    }
+
 
     public static getInstance(): GameManager {
         return GameManager.instance;
@@ -79,7 +114,6 @@ export default class GameManager extends cc.Component {
             avatar: avatar
         };
     }
-
 
     //Find who am I, returns PlayerData of local player
     public whoAmI(): PlayerData | null {
@@ -114,8 +148,67 @@ export default class GameManager extends cc.Component {
     public getPlayerList(): PlayerData[] {
         return Array.from(this.playerMap.values());
     }
+
+    public getLocalPlayerData(): PlayerData | null {
+        const myActorNumber = this.networkManager.getMyActorNumber();
+        if (myActorNumber === -1) {
+            console.error("GameManager: Cannot retrieve local player data, actor number is not valid.");
+            return null;
+        }
+        const localPlayerData = this.playerMap.get(myActorNumber);
+        if (!localPlayerData) {
+            console.warn(`GameManager: No local player data found for actor number ${myActorNumber}.`);
+            return null;
+        }
+
+        return localPlayerData;
+    }
     // Returns the player data for a specific actor number
     public getPlayerData(actorNumber: number): PlayerData | null {
         return this.playerMap.get(actorNumber) || null;
     }
+
+    // gameplay logic
+    public startGame() {
+        this.isGameActive = true;
+        this.round = 1;
+        this.currentTurnIndex = 0;
+        this.currentTurnPlayer = this.getPlayerData(this.currentTurnIndex+1); //Since getPlayerData should be mapped using ActorNumber, we suppose P1 starts first
+
+        //initialize playerData
+        this.playerMap.forEach((playerData: PlayerData) => {
+            if(playerData.actorNumber === this.networkManager.getMyActorNumber()) {
+                playerData.islocal = true; // Mark the local player
+            }
+            if(playerData.islocal){
+                
+                playerData.position = cc.v2(0, 0);
+                playerData.money = 1500; 
+                this.broadcastPlayerData(); 
+            }
+        });
+        this.broadcastTurn();
+    }
 }
+
+// TODO 
+/*
+1. Implement who's round is it (including player turn logic)
+    send this information to playercontroller
+2. Roll a dice in player controller
+    sends the result to gamemanager, gamemanger invokes mapcontroller to get data
+3. After gettign data form mapController, broadcast data to Photon
+   includes who's movement and its movign positions in a cc.vec2 array
+4. In playerController, receive data and update player position
+    will need to handle which players are local and which are remote (use islocal and whoamI function in GameManager)
+
+Notes:
+In each round
+    1. Invoke roll dice playerController
+    2. Get the result and send it to GameManager
+    3. GameManager invokes MapController to get data
+    4. MapController returns data to GameManager
+    5. GameManager broadcasts data to Photon
+
+
+*/

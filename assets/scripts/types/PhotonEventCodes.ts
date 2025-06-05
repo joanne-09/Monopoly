@@ -4,4 +4,6 @@ export enum PhotonEventCodes {
     PLAYER_JOINED = 3,
     PLAYER_THROW_ACTION = 4, // Added
     PLAYER_HIT_ACTION = 5,   // Added
+    PLAYER_TURN = 6,      // Added
+    PLAYER_DATA = 7,
 }
