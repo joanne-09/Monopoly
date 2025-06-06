@@ -125,12 +125,7 @@ export default class GameManager extends cc.Component {
         switch(mapEvent) {
             case MapNodeEvents.NORMAL:
                 console.log("GameManager: Handling NORMAL map event.");
-                this.playerMap.forEach((playerData: PlayerData) => {
-                    if(playerData.actorNumber === this.currentTurnPlayer.actorNumber) {
-                        playerData.money += 100;
-                    }
-                });
-                this.broadcastPlayerData();
+
                 break;
             case MapNodeEvents.DESTINY:
                 console.log("GameManager: Handling DESTINY map event.");
@@ -143,12 +138,30 @@ export default class GameManager extends cc.Component {
                 break;
             case MapNodeEvents.ADDMONEY:
                 console.log("GameManager: Handling ADDMONEY map event.");
+                this.playerMap.forEach((playerData: PlayerData) => {
+                    if (playerData.actorNumber === this.currentTurnPlayer.actorNumber) {
+                        playerData.money += 100;
+                    }
+                });
+                this.broadcastPlayerData();
                 break;
             case MapNodeEvents.DEDUCTMONEY:
                 console.log("GameManager: Handling DEDUCTMONEY map event.");
+                this.playerMap.forEach((playerData: PlayerData) => {
+                    if (playerData.actorNumber === this.currentTurnPlayer.actorNumber) {
+                        playerData.money -= 100;
+                    }
+                }
+                );
+                this.broadcastPlayerData();
                 break;
             case MapNodeEvents.STAR:
                 console.log("GameManager: Handling STAR map event.");
+                this.playerMap.forEach((playerData: PlayerData) => {
+                    if (playerData.actorNumber === this.currentTurnPlayer.actorNumber) {
+                        playerData.stars += 1;
+                    }
+                });
                 break;
         }
         this.broadcastNextRound();

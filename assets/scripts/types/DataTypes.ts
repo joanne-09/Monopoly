@@ -14,6 +14,7 @@ export interface PlayerData {
     isready?: boolean; // Indicates if the player is ready to start the game
     money?: number;
     gadgets?: number[]; // List of gadgets the player has
+    stars?: number;
 }
 export interface PlayerMovement {
     actorNumber: number; // Unique identifier for the player
