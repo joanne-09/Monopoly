@@ -56,8 +56,8 @@ export default class MapManager extends cc.Component {
         cc.error(`Spaces node ${index} is not set!`);
         return null;
       }
-      if (index < 0 || index >= this.spaceNum) {
-        cc.error(`Invalid index: ${index}. It should be between 0 and ${this.spaceNum - 1}.`);
+      if (index <= 0 || index > this.spaceNum) {
+        cc.error(`Invalid index: ${index}. It should be between 1 and ${this.spaceNum}.`);
         return null;
       }
       let childNode = this.spacesNode.getChildByName(`space${index.toString().padStart(3, '0')}`);
