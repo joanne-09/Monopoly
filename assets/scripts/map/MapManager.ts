@@ -117,6 +117,7 @@ export default class MapManager extends cc.Component {
         return cc.v2(0, 0); // Return a default value or handle the error as needed
       }
       const coord = spaceNodeItem.getCoord();
+      coord.x -= 132; coord.y += 293;
       cc.log(`Coord for index ${index}: ${coord}`);
       return coord;
     }
