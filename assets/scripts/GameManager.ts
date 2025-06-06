@@ -48,7 +48,6 @@ export default class GameManager extends cc.Component {
             cc.game.addPersistRootNode(this.node);
             console.log("GameManager: Persist root node set.");
         }
-
         this.initialize();
     }
 
@@ -93,34 +92,6 @@ export default class GameManager extends cc.Component {
                 this.broadcastPlayerData(); // Broadcast any state changes
                 this.broadcastTurn();     // Broadcast the new turn
             }
-
-
-            //if (this.networkManager.isMasterClient()) {
-                // actorNr is the player who completed their move.
-
-                    // if (this.playerList.length === 0) {
-                    //     console.error("GameManager (Master, on PLAYER_MOVE_COMPLETED): playerList is empty. Attempting to re-initialize.");
-                    //     this.playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
-                    //     if (this.playerList.length === 0) {
-                    //         console.error("GameManager (Master, on PLAYER_MOVE_COMPLETED): playerList is STILL empty. Cannot advance turn.");
-                    //         return;
-                    //     }
-                    //     // Ensure currentTurnIndex is valid if playerList was re-initialized
-                    //     // This might need more robust logic if players can drop mid-turn.
-                    //     const currentTurnPlayerExistsInNewList = this.playerList.find(p => p.actorNumber === this.currentTurnPlayer.actorNumber);
-                    //     if (!currentTurnPlayerExistsInNewList) {
-                    //         console.error("GameManager (Master, on PLAYER_MOVE_COMPLETED): Current turn player not in re-initialized list. Resetting turn.");
-                    //         this.currentTurnIndex = 0; // Or some other recovery logic
-                    //     } else {
-                    //          // find current player's index in the potentially new list
-                    //         this.currentTurnIndex = this.playerList.findIndex(p => p.actorNumber === this.currentTurnPlayer.actorNumber);
-                    //         if(this.currentTurnIndex === -1) this.currentTurnIndex = 0; // fallback
-                    //     }
-
-                    // }
-
-
-               // } 
             
         } else if(eventCode == PhotonEventCodes.PLAYER_TRIGGERED_MAP_EVENT) {
             if(this.networkManager.isMasterClient()) {
@@ -290,16 +261,22 @@ export default class GameManager extends cc.Component {
             this.mapManager = MapManager.getInstance(); // Retry
             if (!this.mapManager) return; // Still not found, exit
         }
-
+        
 
         // Initialize playerData for ALL players on the Master Client
+        this.playerMap.forEach((playerData: PlayerData) => {
+            if(playerData.actorNumber === this.networkManager.getMyActorNumber()) {
+                playerData.islocal = true; // Set local player flag
+                playerData.isready = true; // Set local player as ready
+                this.broadcastPlayerData();
+            }
+        })
         if (this.networkManager.isMasterClient()) {
             this.playerMap.forEach((playerData: PlayerData) => {
                 // Set islocal flag based on the current client's perspective,
                 // but this part of the loop is for master client's initialization of shared state.
                 // The actual 'islocal' for each client will be determined by them based on their actorNumber.
                 // However, the master client needs to prepare the full initial state.
-
                 playerData.positionIndex = 1; 
                 playerData.position = this.mapManager.getCoordByIndex(1);
                 playerData.money = 1500;
@@ -313,19 +290,6 @@ export default class GameManager extends cc.Component {
         // Each client will set its own 'islocal' property correctly when processing received player data
         // or when their PlayerControl initializes.
         // For the local player on this client instance:
-        const myActorNumber = this.networkManager.getMyActorNumber();
-        const localPlayerData = this.playerMap.get(myActorNumber);
-        if (localPlayerData) {
-            localPlayerData.islocal = true;
-            // If the master client didn't run the above block (e.g., if this client *is* master but data wasn't broadcast yet),
-            // ensure local data is set. However, the broadcast from master should be the authority.
-            if (localPlayerData.position === undefined) { // Fallback if not set by master broadcast yet
-                 localPlayerData.positionIndex = 1;
-                 localPlayerData.position = this.mapManager.getCoordByIndex(1);
-                 localPlayerData.money = 1500;
-            }
-        }
-
 
         this.broadcastTurn(); // Master client should typically manage turns
     }

@@ -5,6 +5,7 @@ export interface PlayerData {
     position?: cc.Vec2; // Player's position in the game world
     positionIndex?: number;
     islocal?: boolean;
+    isready?: boolean; // Indicates if the player is ready to start the game
     money?: number;
 }
 export interface PlayerMovement {
