@@ -452,7 +452,7 @@
         1,
         1,
         1,
-        1
+        0
       ]
     },
     "_eulerAngles": {
@@ -581,7 +581,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "2783b3fc-0318-428d-ba11-77bb11c194ac"
+      "__uuid__": "9aeaea18-a8a0-46fc-a55e-03e626bdf811"
     },
     "_type": 1,
     "_sizeMode": 0,
@@ -639,8 +639,8 @@
     "clickEvents": [],
     "_N$interactable": true,
     "_N$enableAutoGrayEffect": false,
-    "_N$transition": 2,
-    "transition": 2,
+    "_N$transition": 3,
+    "transition": 3,
     "_N$normalColor": {
       "__type__": "cc.Color",
       "r": 230,

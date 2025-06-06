@@ -27,6 +27,9 @@ export default class StorePopup extends cc.Component {
     @property({type:cc.AudioClip})
     clickSfx: cc.AudioClip = null;
 
+    @property(cc.ParticleSystem)
+    purchaseParticle: cc.ParticleSystem = null;
+
     private gadgetPrices = [200, 200, 300, 400];
     private selectedAmounts = [0, 0, 0, 0];
     private playerMoney = 0;
@@ -91,6 +94,15 @@ export default class StorePopup extends cc.Component {
         this.updateUI();
         if(total != 0) {
             cc.audioEngine.playEffect(this.cachierSfx, false);
+            if (this.purchaseParticle) {
+                this.purchaseParticle.node.active = false; // Reset in case it's still active
+                this.purchaseParticle.node.active = true;
+                this.purchaseParticle.resetSystem();
+                this.scheduleOnce(() => {
+                this.purchaseParticle.stopSystem();
+                    this.purchaseParticle.node.active = false;
+                }, 2);
+            }
             alert("Purchase successful!");
         }
     }
