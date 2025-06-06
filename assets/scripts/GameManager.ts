@@ -79,48 +79,49 @@ export default class GameManager extends cc.Component {
         } else if(eventCode == PhotonEventCodes.PLAYER_MOVEMENT) { 
             console.log("GameManager: Received player movement from network manager handler.");
             //no need to update since player movement is already updated in playerController
-        } else if(eventCode == PhotonEventCodes.PLAYER_TURN) {
+        } else if(eventCode == PhotonEventCodes.CURRNET_TURN_PLAYER) {
             console.log("GameManager: Received player turn from network manager handler.");
             this.currentTurnPlayer = content;
-        } else if (eventCode == PhotonEventCodes.PLAYER_MOVE_COMPLETED) {
-            console.log(`GameManager: Received PLAYER_MOVE_COMPLETED event from actorNr: ${actorNr}. Content:`, content);
+        } else if (eventCode == PhotonEventCodes.START_NEXT_ROUND) {
+            console.log(`GameManager: Received STARTNEXTROUND event from actorNr: ${actorNr}. Content:`, content);
+            console.log(`GameManager (Master): Processing PLAYER_MOVE_COMPLETED for actorNr ${actorNr}. Current turn player: ${this.currentTurnPlayer.name} (Actor: ${this.currentTurnPlayer.actorNumber}). PlayerList length: ${this.playerList.length}, CurrentTurnIndex: ${this.currentTurnIndex}`);
             if (this.networkManager.isMasterClient()) {
-                // actorNr is the player who completed their move.
-                if (this.currentTurnPlayer && this.currentTurnPlayer.actorNumber === actorNr) {
-                    if (this.playerList.length === 0) {
-                        console.error("GameManager (Master, on PLAYER_MOVE_COMPLETED): playerList is empty. Attempting to re-initialize.");
-                        this.playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
-                        if (this.playerList.length === 0) {
-                            console.error("GameManager (Master, on PLAYER_MOVE_COMPLETED): playerList is STILL empty. Cannot advance turn.");
-                            return;
-                        }
-                        // Ensure currentTurnIndex is valid if playerList was re-initialized
-                        // This might need more robust logic if players can drop mid-turn.
-                        const currentTurnPlayerExistsInNewList = this.playerList.find(p => p.actorNumber === this.currentTurnPlayer.actorNumber);
-                        if (!currentTurnPlayerExistsInNewList) {
-                            console.error("GameManager (Master, on PLAYER_MOVE_COMPLETED): Current turn player not in re-initialized list. Resetting turn.");
-                            this.currentTurnIndex = 0; // Or some other recovery logic
-                        } else {
-                             // find current player's index in the potentially new list
-                            this.currentTurnIndex = this.playerList.findIndex(p => p.actorNumber === this.currentTurnPlayer.actorNumber);
-                            if(this.currentTurnIndex === -1) this.currentTurnIndex = 0; // fallback
-                        }
-
-                    }
-
-                    console.log(`GameManager (Master): Processing PLAYER_MOVE_COMPLETED for actorNr ${actorNr}. Current turn player: ${this.currentTurnPlayer.name} (Actor: ${this.currentTurnPlayer.actorNumber}). PlayerList length: ${this.playerList.length}, CurrentTurnIndex: ${this.currentTurnIndex}`);
-
-                    this.currentTurnIndex = (this.currentTurnIndex + 1) % this.playerList.length;
-                    this.currentTurnPlayer = this.playerList[this.currentTurnIndex];
-                    this.round++;
-
-                    console.log(`GameManager (Master): Turn advanced via event. New round: ${this.round}. New turn for player: ${this.currentTurnPlayer.name} (Actor: ${this.currentTurnPlayer.actorNumber}).`);
-                    this.broadcastPlayerData(); // Broadcast any state changes
-                    this.broadcastTurn();     // Broadcast the new turn
-                } else {
-                    console.warn(`GameManager (Master): Received PLAYER_MOVE_COMPLETED for actorNr ${actorNr}, but current turn is for ${this.currentTurnPlayer?.name} (Actor: ${this.currentTurnPlayer?.actorNumber}) or actorNr mismatch. Ignoring.`);
-                }
+                this.currentTurnIndex = (content + 1) % this.playerList.length;
+                this.currentTurnPlayer = this.playerList[this.currentTurnIndex];
+                this.round++;
+                console.log(`GameManager (Master): Turn advanced via event. New round: ${this.round}. New turn for player: ${this.currentTurnPlayer.name} (Actor: ${this.currentTurnPlayer.actorNumber}).`);
+                this.broadcastPlayerData(); // Broadcast any state changes
+                this.broadcastTurn();     // Broadcast the new turn
             }
+
+
+            //if (this.networkManager.isMasterClient()) {
+                // actorNr is the player who completed their move.
+
+                    // if (this.playerList.length === 0) {
+                    //     console.error("GameManager (Master, on PLAYER_MOVE_COMPLETED): playerList is empty. Attempting to re-initialize.");
+                    //     this.playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
+                    //     if (this.playerList.length === 0) {
+                    //         console.error("GameManager (Master, on PLAYER_MOVE_COMPLETED): playerList is STILL empty. Cannot advance turn.");
+                    //         return;
+                    //     }
+                    //     // Ensure currentTurnIndex is valid if playerList was re-initialized
+                    //     // This might need more robust logic if players can drop mid-turn.
+                    //     const currentTurnPlayerExistsInNewList = this.playerList.find(p => p.actorNumber === this.currentTurnPlayer.actorNumber);
+                    //     if (!currentTurnPlayerExistsInNewList) {
+                    //         console.error("GameManager (Master, on PLAYER_MOVE_COMPLETED): Current turn player not in re-initialized list. Resetting turn.");
+                    //         this.currentTurnIndex = 0; // Or some other recovery logic
+                    //     } else {
+                    //          // find current player's index in the potentially new list
+                    //         this.currentTurnIndex = this.playerList.findIndex(p => p.actorNumber === this.currentTurnPlayer.actorNumber);
+                    //         if(this.currentTurnIndex === -1) this.currentTurnIndex = 0; // fallback
+                    //     }
+
+                    // }
+
+
+               // } 
+            
         } else if(eventCode == PhotonEventCodes.PLAYER_TRIGGERED_MAP_EVENT) {
             if(this.networkManager.isMasterClient()) {
                 console.log("GameManager: Received PLAYER_TRIGGERED_MAP_EVENT from network manager handler.");
@@ -156,7 +157,7 @@ export default class GameManager extends cc.Component {
     }
 
     private broadcastNextRound() {
-        this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_MOVE_COMPLETED, null); // PLAYER_MOVE_COMPLETED is used to broadcast the next round
+        this.networkManager.sendGameAction(PhotonEventCodes.START_NEXT_ROUND, this.currentTurnIndex); // PLAYER_MOVE_COMPLETED is used to broadcast the next round
     }
     private broadcastTurn() {
         if (!this.isGameActive) {
@@ -174,7 +175,7 @@ export default class GameManager extends cc.Component {
             }
         }
         // Broadcast the current player's turn to all clients
-        this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_TURN, this.currentTurnPlayer);
+        this.networkManager.sendGameAction(PhotonEventCodes.CURRNET_TURN_PLAYER, this.currentTurnPlayer);
         console.log(`GameManager: Broadcasting turn for player ${this.currentTurnPlayer.name} (Actor: ${this.currentTurnPlayer.actorNumber}).`);
     }
 
