@@ -1,6 +1,17 @@
 const {ccclass, property} = cc._decorator;
 import { config } from "./firebase/firebase-service";
 import NetworkManager from "./NetworkManager";
+
+const BACKGROUND_STATE_KEY = "startSceneBackgroundState";
+interface BackgroundState {
+    bg1x: number;
+    bg1y: number;
+    bg2x: number;
+    bg2y: number;
+    firstBG: boolean;
+    timestamp: number; // To potentially invalidate old data
+}
+
 @ccclass
 export default class Start extends cc.Component {
     @property(cc.Button)
@@ -21,13 +32,32 @@ export default class Start extends cc.Component {
 
     private screenLeftEdgeX: number = 0;
 
+    private saveBackgroundState() {
+        if (!this.background || !this.background2) {
+            cc.warn("Start.ts: Cannot save background state, nodes are missing.");
+            return;
+        }
+        const state: BackgroundState = {
+            bg1x: this.background.x,
+            bg1y: this.background.y,
+            bg2x: this.background2.x,
+            bg2y: this.background2.y,
+            firstBG: this.firstBG,
+            timestamp: Date.now()
+        };
+        cc.sys.localStorage.setItem(BACKGROUND_STATE_KEY, JSON.stringify(state));
+        cc.log("Start.ts: Background state saved.", state);
+    }
+
     onLogin() {
         cc.log("Login button clicked");
+        this.saveBackgroundState();
         cc.director.loadScene("Login");
     }
 
     onSignup() {
         cc.log("Signup button clicked");
+        this.saveBackgroundState();
         cc.director.loadScene("Signup");
     }
 
@@ -112,5 +142,11 @@ export default class Start extends cc.Component {
         if (this.background2.x + this.background2.width / 2 < this.screenLeftEdgeX) {
             this.background2.x = this.background.x + this.background.width;
         }
+    }
+
+    onDestroy() {
+        // Optional: Save state on destroy as a fallback, 
+        // though onLogin/onSignup should cover the main cases.
+        // this.saveBackgroundState(); 
     }
 }
