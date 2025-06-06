@@ -42,16 +42,18 @@ export default class CameraFollow extends cc.Component {
 
     private cameraComponent: cc.Camera = null;
 
-    public initPlayers(players: Map<number, PlayerData>) {
-        if (!players || players.size === 0) {
+    public initPlayers(players: PlayerData[], parentIndex: number) {
+        if (!players || players.length === 0) {
             console.error("No players provided to initialize camera.");
             return;
         }
 
         let index = 1;
-        players.forEach((playerData, playerId) => {
-            this.playerIndex.set(index, playerId);
-            index++;
+        players.forEach((playerData) => {
+            if(playerData.actorNumber !== parentIndex) {
+                this.playerIndex.set(index, playerData.actorNumber);
+                index++;
+            }
         });
     }
 
