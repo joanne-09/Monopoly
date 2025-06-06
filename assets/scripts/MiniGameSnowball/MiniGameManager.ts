@@ -199,11 +199,11 @@ export default class GameManager extends cc.Component {
 
             case PhotonEventCodes.PLAYER_THROW_ACTION:
             case PhotonEventCodes.PLAYER_HIT_ACTION: 
-                const { data } = content; 
+                // 這裡要改成 content.data
                 const actionType = eventCode === PhotonEventCodes.PLAYER_THROW_ACTION ? 'THROW' : 'HIT';
-                cc.log(`[MiniGameManager] Received PLAYER_ACTION: ${actionType} for ${this.playerNames[targetPlayerId]} (ID: ${targetPlayerId}), data:`, data);
+                cc.log(`[MiniGameManager] Received PLAYER_ACTION: ${actionType} for ${this.playerNames[targetPlayerId]} (ID: ${targetPlayerId}), data:`, content.data);
                 if (playerController.getActorNumber() === targetPlayerId && !playerController.getIsLocalPlayer()) {
-                    playerController.handleRemoteAction(eventCode, data); 
+                    playerController.handleRemoteAction(eventCode, content.data); 
                 } else {
                     cc.log(`[MiniGameManager] PlayerController check failed for ${actionType} on ${this.playerNames[targetPlayerId]}. Controller actorNumber: ${playerController.getActorNumber()}, isLocal: ${playerController.getIsLocalPlayer()}`);
                 }
