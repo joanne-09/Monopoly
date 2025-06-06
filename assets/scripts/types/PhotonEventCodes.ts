@@ -9,4 +9,5 @@ export enum PhotonEventCodes {
     START_GAME = 8,
     START_NEXT_ROUND = 9, // Added
     PLAYER_TRIGGERED_MAP_EVENT = 10, // Added
+    PLAYER_MAP_JOINED = 11, // Check if player new player joined the map
 }
