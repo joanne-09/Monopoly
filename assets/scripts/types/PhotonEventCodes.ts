@@ -8,4 +8,5 @@ export enum PhotonEventCodes {
     PLAYER_DATA = 7,
     START_GAME = 8,
     PLAYER_MOVE_COMPLETED = 9, // Added
+    PLAYER_TRIGGERED_MAP_EVENT = 10, // Added
 }

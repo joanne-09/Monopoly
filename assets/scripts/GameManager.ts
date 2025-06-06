@@ -72,7 +72,7 @@ export default class GameManager extends cc.Component {
             console.log("GameManager: Received player data from network manager handler.");
             this.playerMap = new Map(content.map((player: PlayerData) => [player.actorNumber, player]));
             // Potentially update this.playerList if game is active and master client
-            if (this.isGameActive && this.networkManager.isMasterClient()) {
+            if (this.isGameActive) {
                 this.playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
                 console.log("GameManager: playerList updated due to PLAYER_DATA event on master.", this.playerList);
             }
@@ -121,9 +121,43 @@ export default class GameManager extends cc.Component {
                     console.warn(`GameManager (Master): Received PLAYER_MOVE_COMPLETED for actorNr ${actorNr}, but current turn is for ${this.currentTurnPlayer?.name} (Actor: ${this.currentTurnPlayer?.actorNumber}) or actorNr mismatch. Ignoring.`);
                 }
             }
+        } else if(eventCode == PhotonEventCodes.PLAYER_TRIGGERED_MAP_EVENT) {
+            if(this.networkManager.isMasterClient()) {
+                console.log("GameManager: Received PLAYER_TRIGGERED_MAP_EVENT from network manager handler.");
+                this.handleMapEvent(content);
+            } else {
+                console.warn("GameManager: Received PLAYER_TRIGGERED_MAP_EVENT, but this client is not the master client. Ignoring event.");
+            }
         }
     }
 
+    private handleMapEvent(mapEvent: MapNodeEvents) {
+        switch(mapEvent) {
+            case MapNodeEvents.NORMAL:
+                console.log("GameManager: Handling NORMAL map event.");
+                this.playerMap.forEach((playerData: PlayerData) => {
+                    if(playerData.actorNumber === this.currentTurnPlayer.actorNumber) {
+                        playerData.money += 100;
+                    }
+                });
+                this.broadcastPlayerData();
+                break;
+            case MapNodeEvents.DESTINY:
+                console.log("GameManager: Handling DESTINY map event.");
+                break;
+            case MapNodeEvents.CHANCE:
+                console.log("GameManager: Handling CHANCE map event.");
+                break;
+            case MapNodeEvents.GAME:
+                console.log("GameManager: Handling GAME map event.");
+                break;
+        }
+        this.broadcastNextRound();
+    }
+
+    private broadcastNextRound() {
+        this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_MOVE_COMPLETED, null); // PLAYER_MOVE_COMPLETED is used to broadcast the next round
+    }
     private broadcastTurn() {
         if (!this.isGameActive) {
             console.warn("GameManager: Cannot broadcast turn, game is not active.");
@@ -375,11 +409,15 @@ export default class GameManager extends cc.Component {
         const myActorNumber = this.networkManager.getMyActorNumber();
         // Check if it's actually this player's turn before sending the event
         if (this.currentTurnPlayer && this.currentTurnPlayer.actorNumber === myActorNumber) {
-            console.log(`GameManager (Client ${myActorNumber}): My movement completed. Sending PLAYER_MOVE_COMPLETED event.`);
-            // All clients (including master if it's its turn) send this event.
-            // The master client's networkManagerHandler will process it.
-            // The actorNr in the networkManagerHandler callback will be myActorNumber.
-            this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_MOVE_COMPLETED, { /* actorWhoMoved: myActorNumber */ }); // Content is optional
+            console.log(`GameManager (Client ${myActorNumber}): My movement completed.`);
+
+            // Handle map events
+            const currentPlayerMapEvent: MapNodeEvents = this.getMapEventofCurrentPlayer();
+            console.log(`GameManager (Client ${myActorNumber}): Current player map event: ${currentPlayerMapEvent}`);
+            if(currentPlayerMapEvent !== null) {
+                this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_TRIGGERED_MAP_EVENT, currentPlayerMapEvent);
+            }  
+            //this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_MOVE_COMPLETED, { /* actorWhoMoved: myActorNumber */ }); // Content is optional
         } else {
             console.warn(`GameManager (Client ${myActorNumber}): playerMovementCompleted called, but it's not my turn (current: ${this.currentTurnPlayer?.name} (Actor: ${this.currentTurnPlayer?.actorNumber})).`);
         }
