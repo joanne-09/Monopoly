@@ -206,6 +206,10 @@ export default class NetworkManager extends cc.Component {
         }
         return -1; 
     }
+
+    public getPhotonClient(): Photon.LoadBalancing.LoadBalancingClient {
+        return this.client;
+    }
     
     public static getInstance(): NetworkManager {
         return NetworkManager.instance;

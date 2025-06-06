@@ -1,25 +1,24 @@
 // filepath: c:\Monopoly Game\Monopoly\assets\scripts\MiniGameBalloon\Balloon.ts
 const {ccclass, property} = cc._decorator;
+import BalloonGameManager from "./BalloonGameManager";
 
-export enum BalloonOperation {
-    ADD = '+',
-    SUBTRACT = '-',
-    MULTIPLY = '*',
-    DIVIDE = '/',
-    NONE = ''
-}
-
-// Enum for key codes to make it clearer
 export enum BalloonKeyCode {
+    UP = cc.macro.KEY.up,
+    DOWN = cc.macro.KEY.down,
+    LEFT = cc.macro.KEY.left,
+    RIGHT = cc.macro.KEY.right,
     W = cc.macro.KEY.w,
     A = cc.macro.KEY.a,
     S = cc.macro.KEY.s,
-    D = cc.macro.KEY.d,
-    UP = cc.macro.KEY.up,
-    LEFT = cc.macro.KEY.left,
-    DOWN = cc.macro.KEY.down,
-    RIGHT = cc.macro.KEY.right,
-    UNKNOWN = 0
+    D = cc.macro.KEY.d
+}
+
+export enum BalloonOperation {
+    NONE,
+    ADD,
+    SUBTRACT,
+    MULTIPLY,
+    DIVIDE
 }
 
 @ccclass
@@ -29,157 +28,174 @@ export default class Balloon extends cc.Component {
     valueLabel: cc.Label = null;
 
     @property(cc.Sprite)
-    iconSprite: cc.Sprite = null; // Sprite to show which key to press
+    keyIconSprite: cc.Sprite = null;
 
-    // Optional: Link these in the editor if you have specific sprite frames for each key
     @property(cc.SpriteFrame)
-    keyWIcon: cc.SpriteFrame = null;
+    upArrowSprite: cc.SpriteFrame = null;
     @property(cc.SpriteFrame)
-    keyAIcon: cc.SpriteFrame = null;
+    downArrowSprite: cc.SpriteFrame = null;
     @property(cc.SpriteFrame)
-    keySIcon: cc.SpriteFrame = null;
+    leftArrowSprite: cc.SpriteFrame = null;
     @property(cc.SpriteFrame)
-    keyDIcon: cc.SpriteFrame = null;
-    @property(cc.SpriteFrame)
-    keyUpIcon: cc.SpriteFrame = null;
-    @property(cc.SpriteFrame)
-    keyLeftIcon: cc.SpriteFrame = null;
-    @property(cc.SpriteFrame)
-    keyDownIcon: cc.SpriteFrame = null;
-    @property(cc.SpriteFrame)
-    keyRightIcon: cc.SpriteFrame = null;
+    rightArrowSprite: cc.SpriteFrame = null;
 
-
-    public speed: number = 100; // Pixels per second
-    public points: number = 10;
+    public balloonId: string = "";
+    public points: number = 0;
     public operation: BalloonOperation = BalloonOperation.NONE;
-    public operationValue: number = 0; // Value for operations like *2, /2
-    public requiredKeyCode: BalloonKeyCode = BalloonKeyCode.UNKNOWN; // The cc.macro.KEY code
-    public balloonId: string = ''; // Unique ID for network identification
+    public operationValue: number = 0;
+    public requiredKeyCode: BalloonKeyCode = null;
+    public speed: number = 100; 
+    public isPopped: boolean = false;
 
-    private gameManager: any = null; // Reference to BalloonGameManager
+    private gameManager: BalloonGameManager = null;
+    private gameHeightValue: number = 0; // Renamed to avoid conflict with Cocos internal gameHeight
+    private gameWidthValue: number = 0; // Renamed to avoid conflict with Cocos internal gameWidth
 
-    // More robust key code list
-    private availableKeyCodes: BalloonKeyCode[] = [
-        BalloonKeyCode.W, BalloonKeyCode.A, BalloonKeyCode.S, BalloonKeyCode.D,
-        BalloonKeyCode.UP, BalloonKeyCode.LEFT, BalloonKeyCode.DOWN, BalloonKeyCode.RIGHT
-    ];
 
-    // Call this to initialize the balloon after instantiation
-    init(id: string, startPos: cc.Vec2, gameWidth: number, gameHeight: number, manager: any) {
+    init(
+        id: string,
+        startPosition: cc.Vec2,
+        gameWidth: number,
+        gameHeight: number,
+        manager: BalloonGameManager,
+        points: number,
+        operation: BalloonOperation,
+        operationValue: number,
+        keyCode: BalloonKeyCode,
+        speed: number
+    ) {
         this.balloonId = id;
-        this.node.setPosition(startPos);
+        this.node.setPosition(startPosition);
+        this.gameWidthValue = gameWidth;
+        this.gameHeightValue = gameHeight;
         this.gameManager = manager;
 
-        // Randomize properties
-        this.points = (Math.floor(Math.random() * 3) + 1) * 10; // 10, 20, 30 points base
+        this.points = points;
+        this.operation = operation;
+        this.operationValue = operationValue;
+        this.requiredKeyCode = keyCode;
+        this.speed = speed;
+        this.isPopped = false;
 
-        const operationRoll = Math.random();
-        if (operationRoll < 0.15) { // 15% chance for multiply
-            this.operation = BalloonOperation.MULTIPLY;
-            this.operationValue = Math.floor(Math.random() * 2) + 2; // *2 or *3
-        } else if (operationRoll < 0.3) { // 15% chance for divide
-            this.operation = BalloonOperation.DIVIDE;
-            this.operationValue = Math.floor(Math.random() * 2) + 2; // /2 or /3 (ensure points are divisible or handle float)
-        } else if (operationRoll < 0.5) { // 20% chance for add/subtract small fixed amounts
-            if (Math.random() < 0.5) {
-                this.operation = BalloonOperation.ADD;
-                this.operationValue = (Math.floor(Math.random() * 2) + 1) * 5; // +5 or +10
-            } else {
-                this.operation = BalloonOperation.SUBTRACT;
-                this.operationValue = (Math.floor(Math.random() * 2) + 1) * 5; // -5 or -10
-            }
-        }
-        else { // 50% chance of no operation
-            this.operation = BalloonOperation.NONE;
-        }
-
-        // Assign a random key
-        this.requiredKeyCode = this.availableKeyCodes[Math.floor(Math.random() * this.availableKeyCodes.length)];
         this.updateDisplay();
     }
 
-    updateDisplay() {
-        let displayText = `${this.points}`;
-        if (this.operation !== BalloonOperation.NONE) {
-            // Display like "x2 (10)" or "+5 (20)"
-            displayText = `${this.operation}${this.operationValue} (base:${this.points})`;
+    update(dt: number) {
+        if (this.isPopped) return;
+
+        this.node.y += this.speed * dt;
+
+        const balloonTopEdge = this.node.y + (this.node.height * this.node.scaleY / 2);
+        if (balloonTopEdge > this.gameHeightValue / 2) {
+            this.despawn();
         }
+    }
+
+    updateDisplay() {
         if (this.valueLabel) {
-            this.valueLabel.string = displayText;
+            let opSymbol = "";
+            if (this.operation !== BalloonOperation.NONE && this.operationValue !== 0) {
+                switch (this.operation) {
+                    case BalloonOperation.ADD: opSymbol = "+"; break;
+                    case BalloonOperation.SUBTRACT: opSymbol = "-"; break;
+                    case BalloonOperation.MULTIPLY: opSymbol = "x"; break;
+                    case BalloonOperation.DIVIDE: opSymbol = "/"; break;
+                }
+                this.valueLabel.string = `${this.points}\n${opSymbol}${this.operationValue}`;
+            } else {
+                this.valueLabel.string = this.points.toString();
+            }
         }
 
-        if (this.iconSprite) {
-            // Update the iconSprite based on this.requiredKeyCode
-            // This requires you to have SpriteFrames linked in the editor or a way to load them dynamically
+        if (this.keyIconSprite) {
+            let targetSpriteFrame: cc.SpriteFrame = null;
             switch (this.requiredKeyCode) {
-                case BalloonKeyCode.W: this.iconSprite.spriteFrame = this.keyWIcon; break;
-                case BalloonKeyCode.A: this.iconSprite.spriteFrame = this.keyAIcon; break;
-                case BalloonKeyCode.S: this.iconSprite.spriteFrame = this.keySIcon; break;
-                case BalloonKeyCode.D: this.iconSprite.spriteFrame = this.keyDIcon; break;
-                case BalloonKeyCode.UP: this.iconSprite.spriteFrame = this.keyUpIcon; break;
-                case BalloonKeyCode.LEFT: this.iconSprite.spriteFrame = this.keyLeftIcon; break;
-                case BalloonKeyCode.DOWN: this.iconSprite.spriteFrame = this.keyDownIcon; break;
-                case BalloonKeyCode.RIGHT: this.iconSprite.spriteFrame = this.keyRightIcon; break;
-                default: if(this.iconSprite) this.iconSprite.spriteFrame = null; break; // Or a default question mark icon
+                case BalloonKeyCode.UP:
+                case BalloonKeyCode.W:
+                    targetSpriteFrame = this.upArrowSprite;
+                    break;
+                case BalloonKeyCode.DOWN:
+                case BalloonKeyCode.S:
+                    targetSpriteFrame = this.downArrowSprite;
+                    break;
+                case BalloonKeyCode.LEFT:
+                case BalloonKeyCode.A:
+                    targetSpriteFrame = this.leftArrowSprite;
+                    break;
+                case BalloonKeyCode.RIGHT:
+                case BalloonKeyCode.D:
+                    targetSpriteFrame = this.rightArrowSprite;
+                    break;
+                default:
+                    cc.warn(`[Balloon] No sprite for key code: ${this.requiredKeyCode}`);
+                    break;
             }
+            this.keyIconSprite.spriteFrame = targetSpriteFrame;
         }
     }
 
     getCalculatedScore(): number {
-        let score = this.points;
+        if (this.isPopped) return 0;
+
+        let calculatedScore = this.points;
         switch (this.operation) {
             case BalloonOperation.ADD:
-                score += this.operationValue;
+                calculatedScore += this.operationValue;
                 break;
             case BalloonOperation.SUBTRACT:
-                score -= this.operationValue;
+                calculatedScore -= this.operationValue;
                 break;
             case BalloonOperation.MULTIPLY:
-                score *= this.operationValue;
+                calculatedScore *= this.operationValue;
                 break;
             case BalloonOperation.DIVIDE:
-                // Ensure division by zero doesn't occur, though operationValue is >= 2
-                score = Math.floor(score / (this.operationValue || 1)); 
+                if (this.operationValue !== 0) {
+                    calculatedScore = Math.floor(calculatedScore / this.operationValue);
+                } else {
+                    cc.warn("[Balloon] Division by zero in getCalculatedScore. Returning original points.");
+                }
                 break;
         }
-        return Math.max(0, score); // Score cannot be negative from operations, and ensure it's an integer for display
+        return Math.max(0, calculatedScore); 
     }
 
-    update(dt: number) {
-        this.node.y += this.speed * dt;
-        // Destroy balloon if it goes off screen (top)
-        if (this.node.y > cc.view.getVisibleSize().height + this.node.height / 2) {
-            // Notify game manager that this balloon was missed (optional)
-            if (this.gameManager && typeof this.gameManager.balloonMissed === 'function') {
-                this.gameManager.balloonMissed(this.balloonId);
-            }
-            this.node.destroy();
-        }
-    }
-
-    // Called by PlayerController when a correct key is pressed while hovering
-    pop(popPlayerActorNr: number) {
-        // cc.log(`Balloon ${this.balloonId} popped by player ${popPlayerActorNr}, Value: ${this.getCalculatedScore()}`);
-        // Play animation/sound if any
-        // e.g., const anim = this.getComponent(cc.Animation);
-        // if (anim) anim.play('pop_animation');
-        // this.scheduleOnce(() => this.node.destroy(), 0.5); // Destroy after animation
+    pop(popperActorNr: number) {
+        if (this.isPopped) return;
+        this.isPopped = true;
         
-        // For now, just destroy immediately
-        this.node.destroy();
+        cc.log(`[Balloon] Balloon ${this.balloonId} popped by ${popperActorNr}.`);
+        // TODO: Add visual pop effect (e.g., particle system, animation)
+        // TODO: Add sound effect
+        
+        // Destroy is now handled by GameManager after this call or after remotePop
+        // to ensure it's removed from activeBalloons map first.
+        // For master client, it will call this, then remove from map, then destroy.
+        // For other clients, clientHandleBalloonPopped will call remotePop, then remove from map, then destroy.
+        // this.node.destroy(); 
     }
-
-    // Helper to check if a point (mouse cursor) is over this balloon
-    isPointInside(point: cc.Vec2): boolean {
-        const rect = this.node.getBoundingBoxToWorld();
-        return rect.contains(point);
-    }
-
-    // Optional: Call this if a balloon is popped by another player via network event
+    
     remotePop() {
-        // cc.log(`Balloon ${this.balloonId} remotely popped.`);
-        // Play animation/sound
-        this.node.destroy();
+        if (this.isPopped) return;
+        this.isPopped = true;
+
+        cc.log(`[Balloon] Balloon ${this.balloonId} remotePopped.`);
+        // TODO: Add visual pop effect (e.g., particle system, animation)
+        // TODO: Add sound effect
+        // this.node.destroy(); 
+    }
+
+    despawn() {
+        if (this.isPopped) return; 
+        if (this.gameManager) {
+            this.gameManager.reportBalloonDespawned(this.balloonId);
+        }
+        // Actual node destruction is handled by reportBalloonDespawned or directly by GameManager
+        // this.node.destroy();
+    }
+
+    isPointInside(worldPoint: cc.Vec2): boolean {
+        if (!this.node || !this.node.active || this.isPopped) return false;
+        let boundingBox = this.node.getBoundingBoxToWorld();
+        return boundingBox.contains(worldPoint);
     }
 }

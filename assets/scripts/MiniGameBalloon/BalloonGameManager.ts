@@ -1,14 +1,14 @@
-// filepath: c:\\Monopoly Game\\Monopoly\\assets\\scripts\\MiniGameBalloon\\BalloonGameManager.ts
+// filepath: c:\Monopoly Game\Monopoly\assets\scripts\MiniGameBalloon\BalloonGameManager.ts
 const {ccclass, property} = cc._decorator;
-import Balloon from "./Balloon";
-import BalloonPlayerController from "./BalloonPlayerController";
+import Balloon, { BalloonKeyCode, BalloonOperation } from "./Balloon";
 import NetworkManager from "../NetworkManager";
 import { PhotonEventCodes } from "../types/PhotonEventCodes";
+import BalloonPlayerController from "./BalloonPlayerController"; // Import for type hinting
 
 interface PlayerScore {
     actorNr: number;
     score: number;
-    name: string; // Optional: player name for display
+    name: string;
 }
 
 @ccclass
@@ -18,16 +18,19 @@ export default class BalloonGameManager extends cc.Component {
     balloonPrefab: cc.Prefab = null;
 
     @property(cc.Node)
-    balloonLayer: cc.Node = null; // Parent node for balloons
+    balloonLayer: cc.Node = null;
 
     @property(cc.Label)
     timerLabel: cc.Label = null;
 
-    @property(cc.Label)
-    scoreLabel: cc.Label = null; // For local player's score or general score display
+    @property([cc.Label])
+    scoreLabels: cc.Label[] = [];
 
-    @property(cc.Node) // Assign the local player's controller node here
-    localPlayerNode: cc.Node = null;
+    @property([cc.Node]) // Assign one cursor node for each potential player (e.g., 4 cursors)
+    playerCursors: cc.Node[] = [];
+
+    @property(cc.Node) // Assign the node that has the BalloonPlayerController for the local player
+    localPlayerControllerNode: cc.Node = null;
 
     @property
     gameTime: number = 60; // seconds
@@ -39,64 +42,149 @@ export default class BalloonGameManager extends cc.Component {
     private myActorNr: number = -1;
 
     private playerScores: PlayerScore[] = [];
-    private activeBalloons: Map<string, Balloon> = new Map(); // Keep track of active balloons by ID
+    private activeBalloons: Map<string, Balloon> = new Map();
+    private remoteCursors: Map<number, cc.Node> = new Map(); // actorNr -> cursorNode
 
-    private balloonSpawnInterval: number = 0.5; // seconds
+    private balloonSpawnInterval: number = 0.75; // seconds
     private timeSinceLastSpawn: number = 0;
-    private nextBalloonId: number = 0;
+    private nextBalloonIdSuffix: number = 0; // Used to create unique balloon IDs
+
+    // Player names can be predefined or fetched if your system supports it
+    private playerNames: string[] = [null, "P1", "P2", "P3", "P4"]; // 1-indexed, adjust as needed
 
     private messageHandler: (eventCode: number, content: any, actorNr: number) => void;
 
-
     onLoad () {
         this.networkManager = NetworkManager.getInstance();
-        if (!this.networkManager) {
-            cc.error("[BalloonGameManager] NetworkManager not found!");
+        const photonClient = this.networkManager?.getPhotonClient();
+
+        if (!this.networkManager || !photonClient) {
+            cc.error("[BalloonGameManager] NetworkManager or PhotonClient not available! Game cannot start.");
             this.isGameOver = true;
+            this.node.active = false; // Disable component if network is not up
             return;
         }
 
         this.myActorNr = this.networkManager.getMyActorNumber();
-        this.isMasterClient = this.networkManager.isMasterClient();
+        this.isMasterClient = photonClient.isJoinedToRoom() ? (this.myActorNr === photonClient.myRoom().masterClientId) : false;
+        
+        if (!photonClient.isJoinedToRoom()) {
+            cc.warn("[BalloonGameManager] Not joined to a room. isMasterClient defaults to false. Game might not function correctly for multiplayer.");
+        }
+        
         this.timer = this.gameTime;
+        this.playerScores = [];
 
-        if (this.localPlayerNode) {
-            const controller = this.localPlayerNode.getComponent(BalloonPlayerController);
-            if (controller) {
-                controller.init(this); // Pass reference of this manager to player controller
-            } else {
-                cc.error("[BalloonGameManager] BalloonPlayerController component not found on localPlayerNode.");
+        if (photonClient.isJoinedToRoom()) {
+            const actorsInRoom = photonClient.myRoomActors();
+            for (const actorNrStr in actorsInRoom) {
+                const actor = actorsInRoom[actorNrStr];
+                const actorNumber = parseInt(actorNrStr, 10);
+                if (actor && actorNumber > 0) {
+                    let playerName = (actorNumber < this.playerNames.length && this.playerNames[actorNumber])
+                                       ? this.playerNames[actorNumber]
+                                       : (actor.name || `Player ${actorNumber}`);
+                    
+                    // Ensure unique name if somehow playerNames has duplicates or actor.name is generic
+                    let existingPlayerWithName = this.playerScores.find(p => p.name === playerName);
+                    if (existingPlayerWithName && existingPlayerWithName.actorNr !== actorNumber) {
+                        playerName = `${playerName}_${actorNumber}`;
+                    }
+
+                    this.playerScores.push({ actorNr: actorNumber, score: 0, name: playerName });
+                }
             }
         } else {
-            cc.error("[BalloonGameManager] LocalPlayerNode not assigned in editor.");
+             cc.warn("[BalloonGameManager] Not in a room. Player scores will be initialized minimally.");
         }
+        
+        // Ensure local player is in the list
+        if (this.myActorNr > 0 && !this.playerScores.find(p => p.actorNr === this.myActorNr)) {
+            const myName = (this.myActorNr < this.playerNames.length && this.playerNames[this.myActorNr])
+                            ? this.playerNames[this.myActorNr]
+                            : `Player ${this.myActorNr}`;
+            this.playerScores.push({ actorNr: this.myActorNr, score: 0, name: myName });
+            cc.log(`[BalloonGameManager] Added local player (actorNr: ${this.myActorNr}, name: ${myName}) to scores.`);
+        }
+        
+        this.playerScores.sort((a, b) => a.actorNr - b.actorNr); // Consistent order
 
-        // Initialize scores for all players in the room
-        const players = this.networkManager.getActorList(); // Or a similar method
-        if (players) {
-            players.forEach(playerInfo => { // Adjust playerInfo structure as per your NetworkManager
-                this.playerScores.push({ 
-                    actorNr: playerInfo.actorNr, 
-                    score: 0, 
-                    name: playerInfo.name || `Player ${playerInfo.actorNr}` 
-                });
-            });
-        }
         this.internalUpdateScoreDisplay();
+        this.initializeCursors();
 
         this.messageHandler = this.handlePhotonEvent.bind(this);
         this.networkManager.registerMessageHandler(this.messageHandler);
 
-        if (!this.balloonPrefab) cc.error("Balloon prefab not assigned!");
-        if (!this.balloonLayer) cc.error("Balloon layer not assigned!");
-        if (!this.timerLabel) cc.error("Timer label not assigned!");
-        if (!this.scoreLabel) cc.error("Score label not assigned!");
+        if (!this.balloonPrefab) cc.error("[BalloonGameManager] Balloon prefab not assigned!");
+        if (!this.balloonLayer) cc.error("[BalloonGameManager] Balloon layer not assigned!");
+        if (!this.timerLabel) cc.error("[BalloonGameManager] Timer label not assigned!");
+        if (this.scoreLabels.length === 0) cc.warn("[BalloonGameManager] Score labels array is empty!");
+        if (this.playerCursors.length === 0) cc.warn("[BalloonGameManager] Player cursors array is empty!");
+        if (!this.localPlayerControllerNode) cc.warn("[BalloonGameManager] LocalPlayerControllerNode not assigned!");
+    }
+
+    initializeCursors() {
+        if (!this.localPlayerControllerNode) {
+            cc.warn("[BalloonGameManager] LocalPlayerControllerNode not set.");
+        }
+        
+        const localPlayerControllerScript = this.localPlayerControllerNode?.getComponent(BalloonPlayerController);
+
+        this.playerCursors.forEach(cursorNode => { if (cursorNode) cursorNode.active = false; });
+        
+        this.playerScores.forEach(player => {
+            // Player actorNr is 1-indexed. Cursors array is 0-indexed.
+            // We need a mapping strategy. If playerCursors are meant to correspond to actorNr 1, 2, 3, 4
+            // then playerCursors[0] is for actorNr 1, playerCursors[1] for actorNr 2 etc.
+            const cursorIndex = player.actorNr - 1; 
+
+            if (cursorIndex >= 0 && cursorIndex < this.playerCursors.length && this.playerCursors[cursorIndex]) {
+                const targetCursorNode = this.playerCursors[cursorIndex];
+                if (player.actorNr === this.myActorNr) {
+                    if (localPlayerControllerScript) {
+                        localPlayerControllerScript.setCursorNode(targetCursorNode); // Assign specific cursor to local controller
+                        targetCursorNode.active = true;
+                        cc.log(`[BalloonGameManager] Assigned and activated cursor for local player ${this.myActorNr} (index ${cursorIndex})`);
+                    } else {
+                         cc.warn(`[BalloonGameManager] Local player controller script not found for actorNr ${this.myActorNr}. Cannot assign its cursor.`);
+                         targetCursorNode.active = true; // Activate directly as a fallback
+                    }
+                } else {
+                    this.remoteCursors.set(player.actorNr, targetCursorNode);
+                    // Remote cursors are initially hidden, activated on first CURSOR_MOVE event.
+                    targetCursorNode.active = false; 
+                    cc.log(`[BalloonGameManager] Mapped remote cursor for player ${player.actorNr} (index ${cursorIndex})`);
+                }
+            } else {
+                cc.warn(`[BalloonGameManager] No cursor node in playerCursors for actorNr ${player.actorNr} (expected index ${cursorIndex}). Total cursors: ${this.playerCursors.length}`);
+            }
+        });
+    }
+    
+    internalUpdateScoreDisplay() {
+        this.playerScores.forEach((player, displayIndex) => {
+            // Assuming scoreLabels are ordered to match sorted playerScores (by actorNr)
+            if (displayIndex < this.scoreLabels.length && this.scoreLabels[displayIndex]) {
+                this.scoreLabels[displayIndex].string = `${player.name}: ${player.score}`;
+            } else if (this.scoreLabels.length > 0) {
+                // cc.warn(`[BalloonGameManager] Not enough score labels for player ${player.name}. Index ${displayIndex}, Labels ${this.scoreLabels.length}`);
+            }
+        });
+        for (let i = this.playerScores.length; i < this.scoreLabels.length; i++) {
+            if (this.scoreLabels[i]) this.scoreLabels[i].string = ""; // Clear unused labels
+        }
     }
 
     onDestroy() {
         if (this.networkManager && this.messageHandler) {
             this.networkManager.unregisterMessageHandler(this.messageHandler);
         }
+        this.activeBalloons.forEach(balloon => {
+            if (balloon && balloon.node && cc.isValid(balloon.node)) {
+                balloon.node.destroy();
+            }
+        });
+        this.activeBalloons.clear();
     }
 
     update (dt: number) {
@@ -115,8 +203,7 @@ export default class BalloonGameManager extends cc.Component {
             this.timeSinceLastSpawn += dt;
             if (this.timeSinceLastSpawn >= this.balloonSpawnInterval) {
                 this.timeSinceLastSpawn = 0;
-                // Adjust spawn chance for variety
-                if (Math.random() < 0.7) { // 70% chance to spawn a balloon this interval
+                if (Math.random() < 0.8) { // Chance to spawn
                     this.internalSpawnBalloonRandomly();
                 }
             }
@@ -124,244 +211,245 @@ export default class BalloonGameManager extends cc.Component {
     }
 
     internalSpawnBalloonRandomly() {
-        if (!this.balloonPrefab || !this.balloonLayer || !this.isMasterClient) return;
+        if (!this.isMasterClient || !this.balloonPrefab || !this.balloonLayer) return;
 
         const balloonNode = cc.instantiate(this.balloonPrefab);
+        if (!balloonNode) { cc.error("Failed to instantiate balloon prefab."); return; }
+        
         const balloonScript = balloonNode.getComponent(Balloon);
         if (!balloonScript) {
-            cc.error("Balloon script not found on prefab!");
-            balloonNode.destroy();
-            return;
+            cc.error("Balloon script not found on prefab instance!");
+            balloonNode.destroy(); return;
         }
 
         const gameWidth = this.balloonLayer.width;
-        const gameHeight = this.balloonLayer.height; // Or cc.view.getVisibleSize().height
+        const gameHeight = this.balloonLayer.height;
+        const balloonWidth = balloonNode.width * balloonNode.scaleX;
+        const balloonHeight = balloonNode.height * balloonNode.scaleY;
+        
+        const x = Math.random() * (gameWidth - balloonWidth) - (gameWidth / 2) + (balloonWidth / 2);
+        const y = -gameHeight / 2 - balloonHeight; // Start below screen
 
-        // Spawn at bottom, random X
-        const x = Math.random() * (gameWidth - balloonNode.width) - (gameWidth / 2) + (balloonNode.width / 2);
-        const y = -gameHeight / 2 - balloonNode.height / 2; // Start just below the screen
+        const pointsValues = [10, 15, 20, 25, 30, -5, -10]; // Added negative point balloons
+        const points = pointsValues[Math.floor(Math.random() * pointsValues.length)];
 
-        const balloonId = `b${this.myActorNr}_${this.nextBalloonId++}`;
-        balloonScript.init(balloonId, cc.v2(x, y), gameWidth, gameHeight, this);
+        const operations = [BalloonOperation.NONE, BalloonOperation.ADD, BalloonOperation.SUBTRACT, BalloonOperation.MULTIPLY];
+        let operation = operations[Math.floor(Math.random() * operations.length)];
+        
+        let operationValue = 0;
+        if (operation !== BalloonOperation.NONE) {
+            if (operation === BalloonOperation.ADD || operation === BalloonOperation.SUBTRACT) {
+                operationValue = (Math.floor(Math.random() * 6) + 1) * 5; // 5, 10, 15, 20, 25, 30
+            } else if (operation === BalloonOperation.MULTIPLY) {
+                operationValue = Math.random() < 0.7 ? 2 : 1; // Mostly x2, sometimes x1 (effectively no change)
+            }
+        }
+        // Ensure multiply isn't used with negative base points to avoid large negative swings easily
+        if (points < 0 && operation === BalloonOperation.MULTIPLY) {
+            operation = BalloonOperation.NONE; 
+        }
+
+
+        const keyCodes = [BalloonKeyCode.UP, BalloonKeyCode.DOWN, BalloonKeyCode.LEFT, BalloonKeyCode.RIGHT];
+        const requiredKeyCode = keyCodes[Math.floor(Math.random() * keyCodes.length)];
+        
+        const speed = 60 + Math.random() * 90; // Random speed 60-150
+
+        const balloonId = `b${this.myActorNr}_${this.nextBalloonIdSuffix++}`;
+
+        balloonScript.init(balloonId, cc.v2(x, y), gameWidth, gameHeight, this, points, operation, operationValue, requiredKeyCode, speed);
         
         this.balloonLayer.addChild(balloonNode);
         this.activeBalloons.set(balloonId, balloonScript);
 
-        // Use a specific event code for balloon spawn if defined, otherwise use SEND_MESSAGE with a type
-        const eventCodeToUse = PhotonEventCodes.MINIGAME_BALLOON_SPAWN || PhotonEventCodes.SEND_MESSAGE;
-        this.networkManager.sendGameAction(eventCodeToUse, {
-            type: eventCodeToUse === PhotonEventCodes.SEND_MESSAGE ? 'balloon_spawn' : undefined, // Add type if using generic SEND_MESSAGE
-            id: balloonId,
-            posX: x,
-            posY: y,
-            points: balloonScript.points,
-            operation: balloonScript.operation,
-            operationValue: balloonScript.operationValue,
-            requiredKeyCode: balloonScript.requiredKeyCode,
-            speed: balloonScript.speed
+        this.networkManager.sendGameAction(PhotonEventCodes.MINIGAME_BALLOON_SPAWN, {
+            id: balloonId, posX: x, posY: y,
+            points: points, operation: operation, operationValue: operationValue,
+            requiredKeyCode: requiredKeyCode, speed: speed
         });
     }
 
     handlePhotonEvent(eventCode: number, content: any, actorNr: number) {
-        let messageType = content ? content.type : null;
-
-        // If not using SEND_MESSAGE, the eventCode itself identifies the action
-        if (eventCode === PhotonEventCodes.MINIGAME_BALLOON_SPAWN) messageType = 'balloon_spawn';
-        else if (eventCode === PhotonEventCodes.MINIGAME_BALLOON_POP_ATTEMPT) messageType = 'balloon_pop_attempt';
-        else if (eventCode === PhotonEventCodes.MINIGAME_BALLOON_POPPED_CONFIRMED) messageType = 'balloon_popped_confirmed';
-        else if (eventCode === PhotonEventCodes.MINIGAME_BALLOON_GAME_OVER) messageType = 'game_over_sync';
-        else if (eventCode === PhotonEventCodes.MINIGAME_BALLOON_SCORE_UPDATE) messageType = 'player_score_update';
-
-
-        if (messageType) {
-            switch (messageType) {
-                case 'balloon_spawn':
-                    if (!this.isMasterClient) {
-                        this.internalSpawnBalloonFromNetwork(content);
+        switch (eventCode) {
+            case PhotonEventCodes.MINIGAME_BALLOON_SPAWN:
+                if (!this.isMasterClient) {
+                    this.internalSpawnBalloonFromNetwork(content);
+                }
+                break;
+            case PhotonEventCodes.MINIGAME_BALLOON_POP_ATTEMPT:
+                if (this.isMasterClient) {
+                    this.masterHandleBalloonPop(content.balloonId, content.playerId, content.keyCodeAttempted);
+                }
+                break;
+            case PhotonEventCodes.MINIGAME_BALLOON_POPPED_CONFIRMED:
+                this.clientHandleBalloonPopped(content.balloonId, content.playerId, content.scoreAwarded, content.newScoreTotal, content.balloonDestroyed);
+                break;
+            case PhotonEventCodes.MINIGAME_BALLOON_GAME_OVER:
+                 if (!this.isMasterClient) {
+                    this.isGameOver = true; this.timer = 0; 
+                    if(this.timerLabel) this.timerLabel.string = "Time: 0";
+                    cc.log("[BalloonGameManager] Client received game over.");
+                    if (content.finalScores) {
+                        this.playerScores = content.finalScores;
+                        this.internalUpdateScoreDisplay();
+                        this.internalShowFinalResults();
                     }
-                    break;
-                case 'balloon_pop_attempt':
-                    if (this.isMasterClient) {
-                        this.masterHandleBalloonPop(content.balloonId, content.playerId);
-                    }
-                    break;
-                case 'balloon_popped_confirmed':
-                    this.clientHandleBalloonPopped(content.balloonId, content.playerId, content.scoreAwarded, content.updatedScores);
-                    break;
-                case 'game_over_sync':
-                     if (!this.isMasterClient) {
-                        this.isGameOver = true;
-                        this.timer = 0; 
-                        if(this.timerLabel) this.timerLabel.string = "Time: 0";
-                        cc.log("[BalloonGameManager] Client received game over signal.");
-                        if (content.finalScores) {
-                            this.playerScores = content.finalScores;
-                            this.internalShowFinalResults(); // Show results on client too
-                        }
-                    }
-                    break;
-                case 'player_score_update': // Could be used for periodic score sync if needed
-                    if (!this.isMasterClient) {
-                        const scoreData = content.scores as PlayerScore[];
-                        if (scoreData) {
-                            this.playerScores = scoreData;
-                            this.internalUpdateScoreDisplay();
-                        }
-                    }
-                    break;
-            }
+                }
+                break;
+            // MINIGAME_BALLOON_SCORE_UPDATE might be redundant if POPPED_CONFIRMED handles it.
+            // Could be used for periodic sync if needed.
+            case PhotonEventCodes.MINIGAME_BALLOON_CURSOR_MOVE:
+                if (actorNr !== this.myActorNr) {
+                    this.updateRemoteCursor(actorNr, content.position);
+                }
+                break;
+        }
+    }
+    
+    updateRemoteCursor(actorNr: number, position: {x: number, y: number}) {
+        const cursorNode = this.remoteCursors.get(actorNr);
+        if (cursorNode) {
+            if (!cursorNode.activeInHierarchy) cursorNode.active = true;
+            // Assuming position is in the same world coordinate system.
+            // If BalloonPlayerController sends local position to parent, convert it here if necessary.
+            // For now, assume it's correct for direct application.
+            cursorNode.setPosition(position.x, position.y);
         }
     }
 
     internalSpawnBalloonFromNetwork(data: any) {
-        if (!this.balloonPrefab || !this.balloonLayer || this.activeBalloons.has(data.id)) return;
+        if (this.activeBalloons.has(data.id) || !this.balloonPrefab || !this.balloonLayer) return;
 
         const balloonNode = cc.instantiate(this.balloonPrefab);
+        if (!balloonNode) { cc.error("Client: Failed to instantiate balloon prefab from network."); return; }
         const balloonScript = balloonNode.getComponent(Balloon);
         if (!balloonScript) {
-            cc.error("Balloon script not found on prefab (network)!");
-            balloonNode.destroy();
-            return;
+            cc.error("Client: Balloon script not found on prefab (network)!");
+            balloonNode.destroy(); return;
         }
         
-        const gameWidth = this.balloonLayer.width;
-        const gameHeight = this.balloonLayer.height;
-
-        balloonScript.init(data.id, cc.v2(data.posX, data.posY), gameWidth, gameHeight, this);
-        // Override random properties with synced ones
-        balloonScript.points = data.points;
-        balloonScript.operation = data.operation;
-        balloonScript.operationValue = data.operationValue;
-        balloonScript.requiredKeyCode = data.requiredKeyCode;
-        balloonScript.speed = data.speed;
-        balloonScript.updateDisplay(); // Crucial to show correct key icon and value
-
+        balloonScript.init(data.id, cc.v2(data.posX, data.posY), 
+                           this.balloonLayer.width, this.balloonLayer.height, this,
+                           data.points, data.operation, data.operationValue, 
+                           data.requiredKeyCode, data.speed);
+        
         this.balloonLayer.addChild(balloonNode);
         this.activeBalloons.set(data.id, balloonScript);
     }
 
-    masterHandleBalloonPop(balloonId: string, playerId: number) {
+    masterHandleBalloonPop(balloonId: string, playerId: number, keyCodeAttempted: BalloonKeyCode) {
         if (!this.isMasterClient || this.isGameOver) return;
 
         const balloon = this.activeBalloons.get(balloonId);
-        if (balloon && balloon.isValid) { // Check if balloon still exists and is valid
-            const scoreAwarded = balloon.getCalculatedScore();
-            
-            // Update score for the player
-            const player = this.playerScores.find(p => p.actorNr === playerId);
-            if (player) {
-                player.score += scoreAwarded;
-                cc.log(`[BalloonGameManager] Master: Player ${playerId} popped ${balloonId}, score +${scoreAwarded}, new total: ${player.score}`);
+        if (balloon && balloon.isValid && !balloon.isPopped) { 
+            if (balloon.requiredKeyCode === keyCodeAttempted) {
+                const scoreAwarded = balloon.getCalculatedScore();
+                const player = this.playerScores.find(p => p.actorNr === playerId);
+                
+                if (player) {
+                    player.score += scoreAwarded;
+                    player.score = Math.max(0, player.score); // Ensure score doesn't drop below 0
+
+                    cc.log(`[BalloonGameManager] Master: Player ${playerId} popped ${balloonId}. Score: +${scoreAwarded}, NewTotal: ${player.score}`);
+
+                    this.networkManager.sendGameAction(PhotonEventCodes.MINIGAME_BALLOON_POPPED_CONFIRMED, {
+                        balloonId: balloonId,
+                        playerId: playerId,
+                        scoreAwarded: scoreAwarded,
+                        newScoreTotal: player.score,
+                        balloonDestroyed: true 
+                    });
+
+                    balloon.pop(playerId); // Mark as popped, play master-side effects if any
+                    this.activeBalloons.delete(balloonId);
+                    if (balloon.node && cc.isValid(balloon.node)) balloon.node.destroy(); // Master destroys the authoritative object
+                    
+                    this.internalUpdateScoreDisplay();
+                }
+            } else {
+                 // cc.log(`[BalloonGameManager] Master: Player ${playerId} wrong key for ${balloonId}.`);
+                 // Optionally send a "failed attempt" feedback if desired
             }
-
-            // Remove balloon
-            balloon.pop(playerId); // Let balloon handle its own destruction animation etc.
-            this.activeBalloons.delete(balloonId);
-
-            // Broadcast that the balloon was popped and scores updated
-            const eventCodeToUse = PhotonEventCodes.MINIGAME_BALLOON_POPPED_CONFIRMED || PhotonEventCodes.SEND_MESSAGE;
-            this.networkManager.sendGameAction(eventCodeToUse, {
-                type: eventCodeToUse === PhotonEventCodes.SEND_MESSAGE ? 'balloon_popped_confirmed' : undefined,
-                balloonId: balloonId,
-                playerId: playerId,
-                scoreAwarded: scoreAwarded, // Send score for local display if needed
-                updatedScores: this.playerScores // Send all scores for sync
-            });
-            
-            this.internalUpdateScoreDisplay();
         }
     }
 
-    clientHandleBalloonPopped(balloonId: string, playerId: number, scoreAwarded: number, updatedScores: PlayerScore[]) {
+    clientHandleBalloonPopped(balloonId: string, playerId: number, scoreAwarded: number, newPlayerScoreTotal: number, balloonDestroyed: boolean) {
         const balloon = this.activeBalloons.get(balloonId);
-        if (balloon && balloon.isValid) {
-            balloon.remotePop(); // Or balloon.pop(playerId) if it handles remote vs local differently
+        if (balloon && balloon.isValid && !balloon.isPopped && balloonDestroyed) {
+            // cc.log(`[BalloonGameManager] Client: Balloon ${balloonId} popped by ${playerId}.`);
+            balloon.remotePop(); // Play effects, mark as popped
             this.activeBalloons.delete(balloonId);
+            if (balloon.node && cc.isValid(balloon.node)) balloon.node.destroy();
         }
 
-        if (updatedScores) {
-             this.playerScores = updatedScores;
-        } else { // Fallback if full scores not sent, update individually (less ideal)
-            if (!this.isMasterClient) {
-                const player = this.playerScores.find(p => p.actorNr === playerId);
-                if (player) {
-                    player.score += scoreAwarded; // This might be redundant if full scores are synced
-                }
-            }
+        const player = this.playerScores.find(p => p.actorNr === playerId);
+        if (player) {
+            player.score = newPlayerScoreTotal;
+        } else {
+            // Potentially a new player joined and master sent an update for them
+            // Or a slight de-sync. For now, log it.
+            // cc.warn(`[BalloonGameManager] Client: Score update for unknown player ${playerId}.`);
         }
         this.internalUpdateScoreDisplay();
     }
     
-    public balloonMissed(balloonId: string) { // Make public if called from Balloon.ts
-        if (this.activeBalloons.has(balloonId)) {
+    public reportBalloonDespawned(balloonId: string) {
+        const balloon = this.activeBalloons.get(balloonId);
+        if (balloon) {
             this.activeBalloons.delete(balloonId);
-            // cc.log(`[BalloonGameManager] Balloon ${balloonId} was missed.`);
+            if (balloon.node && cc.isValid(balloon.node)) {
+                 // cc.log(`[BalloonGameManager] Balloon ${balloonId} despawned, destroying node.`);
+                balloon.node.destroy();
+            }
         }
-    }
-
-    internalUpdateScoreDisplay() {
-        // Display score for the local player
-        const localPlayerScore = this.playerScores.find(p => p.actorNr === this.myActorNr);
-        if (this.scoreLabel && localPlayerScore) {
-            this.scoreLabel.string = `Score: ${localPlayerScore.score}`;
-        } else if (this.scoreLabel) {
-             this.scoreLabel.string = "Score: 0"; // Default if local player not found yet
-        }
-        // For debugging or a multi-score display:
-        // console.log("Current Scores:", this.playerScores.map(p => `P${p.actorNr} (${p.name}): ${p.score}`).join(", "));
     }
 
     internalEndGame() {
         if (this.isGameOver) return;
         this.isGameOver = true;
+        this.timer = 0;
+        if(this.timerLabel) this.timerLabel.string = "Time: 0";
         cc.log("[BalloonGameManager] Game Over!");
-        
-        this.activeBalloons.forEach(balloon => { if (balloon.isValid) balloon.node.destroy(); });
+
+        this.activeBalloons.forEach(b => { if(b.node && cc.isValid(b.node)) b.node.destroy(); });
         this.activeBalloons.clear();
 
         if (this.isMasterClient) {
-            const eventCodeToUse = PhotonEventCodes.MINIGAME_BALLOON_GAME_OVER || PhotonEventCodes.SEND_MESSAGE;
-            this.networkManager.sendGameAction(eventCodeToUse, {
-                type: eventCodeToUse === PhotonEventCodes.SEND_MESSAGE ? 'game_over_sync' : undefined,
-                finalScores: this.playerScores
+            this.networkManager.sendGameAction(PhotonEventCodes.MINIGAME_BALLOON_GAME_OVER, {
+                finalScores: this.playerScores 
             });
             this.internalShowFinalResults();
-        } else {
-             if (this.timerLabel) this.timerLabel.string = "GAME OVER";
         }
+        // Disable local player input
+        const localController = this.localPlayerControllerNode?.getComponent(BalloonPlayerController);
+        if (localController) {
+            localController.disableInput();
+        }
+    }
+
+    internalShowFinalResults() {
+        this.playerScores.sort((a, b) => b.score - a.score); 
+        let resultsText = "Final Scores:\n";
+        this.playerScores.forEach(p => { resultsText += `${p.name}: ${p.score}\n`; });
+        cc.log(resultsText);
+        // Display this on a UI panel
     }
     
-    internalShowFinalResults() {
-        let resultText = "Final Scores:\n";
-        // Sort by score descending before displaying
-        const sortedScores = [...this.playerScores].sort((a, b) => b.score - a.score);
-        sortedScores.forEach(p => {
-            resultText += `${p.name || 'Player ' + p.actorNr}: ${p.score}\n`;
+    public getBalloonByNode(node: cc.Node): Balloon | null {
+        let foundBalloon: Balloon = null;
+        this.activeBalloons.forEach(balloon => {
+            if (balloon.node === node) {
+                foundBalloon = balloon;
+            }
         });
-        cc.log(resultText); // Log for debugging
-
-        if (this.scoreLabel) { 
-            this.scoreLabel.string = resultText.replace(/\n/g, '\n'); 
-        }
-        if (this.timerLabel) this.timerLabel.string = "GAME OVER";
-
-        // Example: Load a result scene after a delay
-        // this.scheduleOnce(() => {
-        // cc.director.loadScene('ResultScene'); // Pass scores to ResultScene if needed
-        // }, 3);
+        return foundBalloon;
+    }
+    
+    public getActiveBalloons(): Map<string, Balloon> { // Used by PlayerController to find hovered balloon
+        return this.activeBalloons;
     }
 
-    public getIsGameOver(): boolean { // Make public for PlayerController
-        return this.isGameOver;
-    }
+    public getMyActorNumber(): number { return this.myActorNr; }
+    public getIsGameOver(): boolean { return this.isGameOver; }
+    public getBalloonLayer(): cc.Node { return this.balloonLayer; }
 }
-
-// Ensure PhotonEventCodes includes a general purpose code like SEND_MESSAGE
-// and that your NetworkManager is set up to handle these custom message types.
-// Example in PhotonEventCodes.ts:
-// export enum PhotonEventCodes {
-//     // ... other codes
-//     SEND_MESSAGE = 200, // Or any unused number
-//     CUSTOM_EVENT_CODE_201 = 201, // For Balloon Pop Attempt if SEND_MESSAGE is too generic
-//     // ... other codes
-// }

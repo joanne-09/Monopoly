@@ -15,4 +15,5 @@ export enum PhotonEventCodes {
     MINIGAME_BALLOON_POPPED_CONFIRMED = 13,
     MINIGAME_BALLOON_GAME_OVER = 14,
     MINIGAME_BALLOON_SCORE_UPDATE = 15,
+    MINIGAME_BALLOON_CURSOR_MOVE = 16, // Added for cursor synchronization
 }
