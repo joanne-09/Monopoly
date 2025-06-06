@@ -110,8 +110,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 80,
-      "height": 189
+      "width": 90,
+      "height": 188
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -129,8 +129,8 @@
         0,
         0,
         1,
-        1,
-        1,
+        0.5,
+        0.5,
         1
       ]
     },
@@ -163,7 +163,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "98c53967-0e03-4ac4-845b-f24e8af1a711"
+      "__uuid__": "564a4fab-c895-4de8-82cb-e711f0aa2bb3"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -210,14 +210,14 @@
     "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
+      "r": 0,
+      "g": 0,
+      "b": 0,
       "a": 255
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 97.87,
+      "width": 73.4,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -230,7 +230,7 @@
       "ctor": "Float64Array",
       "array": [
         0,
-        61,
+        29,
         0,
         0,
         0,
@@ -271,7 +271,7 @@
     "_dstBlendFactor": 771,
     "_string": "Label",
     "_N$string": "Label",
-    "_fontSize": 40,
+    "_fontSize": 30,
     "_lineHeight": 40,
     "_enableWrapText": true,
     "_N$file": null,
@@ -339,17 +339,9 @@
     "valueLabel": {
       "__id__": 6
     },
-    "iconSprite": {
-      "__id__": 3
+    "popFXPrefab": {
+      "__uuid__": "f81dffaf-0fcd-4d04-8074-8861c467897c"
     },
-    "keyWIcon": null,
-    "keyAIcon": null,
-    "keySIcon": null,
-    "keyDIcon": null,
-    "keyUpIcon": null,
-    "keyLeftIcon": null,
-    "keyDownIcon": null,
-    "keyRightIcon": null,
     "_id": ""
   },
   {

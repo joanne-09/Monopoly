@@ -49,7 +49,7 @@ export default class MapManager extends cc.Component {
     }
 
     private loadGameScene() {
-      cc.director.loadScene("MiniGameSnowball");
+      cc.director.loadScene("MiniGameBalloon");
     }
     protected getSpaceNodeItemByIndex(index: number) {
       if (!this.spacesNode) {

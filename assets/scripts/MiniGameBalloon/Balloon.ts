@@ -2,17 +2,6 @@
 const {ccclass, property} = cc._decorator;
 import BalloonGameManager from "./BalloonGameManager";
 
-export enum BalloonKeyCode {
-    UP = cc.macro.KEY.up,
-    DOWN = cc.macro.KEY.down,
-    LEFT = cc.macro.KEY.left,
-    RIGHT = cc.macro.KEY.right,
-    W = cc.macro.KEY.w,
-    A = cc.macro.KEY.a,
-    S = cc.macro.KEY.s,
-    D = cc.macro.KEY.d
-}
-
 export enum BalloonOperation {
     NONE,
     ADD,
@@ -27,23 +16,13 @@ export default class Balloon extends cc.Component {
     @property(cc.Label)
     valueLabel: cc.Label = null;
 
-    @property(cc.Sprite)
-    keyIconSprite: cc.Sprite = null;
-
-    @property(cc.SpriteFrame)
-    upArrowSprite: cc.SpriteFrame = null;
-    @property(cc.SpriteFrame)
-    downArrowSprite: cc.SpriteFrame = null;
-    @property(cc.SpriteFrame)
-    leftArrowSprite: cc.SpriteFrame = null;
-    @property(cc.SpriteFrame)
-    rightArrowSprite: cc.SpriteFrame = null;
+    @property(cc.Prefab)
+    popFXPrefab: cc.Prefab = null;
 
     public balloonId: string = "";
     public points: number = 0;
     public operation: BalloonOperation = BalloonOperation.NONE;
     public operationValue: number = 0;
-    public requiredKeyCode: BalloonKeyCode = null;
     public speed: number = 100; 
     public isPopped: boolean = false;
 
@@ -61,7 +40,6 @@ export default class Balloon extends cc.Component {
         points: number,
         operation: BalloonOperation,
         operationValue: number,
-        keyCode: BalloonKeyCode,
         speed: number
     ) {
         this.balloonId = id;
@@ -73,11 +51,27 @@ export default class Balloon extends cc.Component {
         this.points = points;
         this.operation = operation;
         this.operationValue = operationValue;
-        this.requiredKeyCode = keyCode;
         this.speed = speed;
         this.isPopped = false;
 
         this.updateDisplay();
+    }
+
+    isPointInside(worldPoint: cc.Vec2): boolean {
+        if (!this.node || !this.node.parent || !this.node.activeInHierarchy) { // Added activeInHierarchy check
+            // cc.warn(`[Balloon ${this.balloonId}] isPointInside check skipped: Node invalid or inactive.`);
+            return false;
+        }
+        const boundingBox = this.node.getBoundingBoxToWorld();
+        const contained = boundingBox.contains(worldPoint);
+        
+        if (contained) {
+            cc.log(`[Balloon ${this.balloonId}] isPointInside: YES for worldPoint (${worldPoint.x.toFixed(1)}, ${worldPoint.y.toFixed(1)}). Balloon worldBox: x=${boundingBox.x.toFixed(1)}, y=${boundingBox.y.toFixed(1)}, w=${boundingBox.width.toFixed(1)}, h=${boundingBox.height.toFixed(1)}`);
+        } else {
+            // Optional: Log if not contained, can be noisy
+            // cc.log(`[Balloon ${this.balloonId}] isPointInside: NO for worldPoint (${worldPoint.x.toFixed(1)}, ${worldPoint.y.toFixed(1)}). Balloon worldBox: x=${boundingBox.x.toFixed(1)}, y=${boundingBox.y.toFixed(1)}, w=${boundingBox.width.toFixed(1)}, h=${boundingBox.height.toFixed(1)}`);
+        }
+        return contained;
     }
 
     update(dt: number) {
@@ -87,7 +81,7 @@ export default class Balloon extends cc.Component {
 
         const balloonTopEdge = this.node.y + (this.node.height * this.node.scaleY / 2);
         if (balloonTopEdge > this.gameHeightValue / 2) {
-            this.despawn();
+            this.despawn(); // 移除 debug log
         }
     }
 
@@ -105,32 +99,6 @@ export default class Balloon extends cc.Component {
             } else {
                 this.valueLabel.string = this.points.toString();
             }
-        }
-
-        if (this.keyIconSprite) {
-            let targetSpriteFrame: cc.SpriteFrame = null;
-            switch (this.requiredKeyCode) {
-                case BalloonKeyCode.UP:
-                case BalloonKeyCode.W:
-                    targetSpriteFrame = this.upArrowSprite;
-                    break;
-                case BalloonKeyCode.DOWN:
-                case BalloonKeyCode.S:
-                    targetSpriteFrame = this.downArrowSprite;
-                    break;
-                case BalloonKeyCode.LEFT:
-                case BalloonKeyCode.A:
-                    targetSpriteFrame = this.leftArrowSprite;
-                    break;
-                case BalloonKeyCode.RIGHT:
-                case BalloonKeyCode.D:
-                    targetSpriteFrame = this.rightArrowSprite;
-                    break;
-                default:
-                    cc.warn(`[Balloon] No sprite for key code: ${this.requiredKeyCode}`);
-                    break;
-            }
-            this.keyIconSprite.spriteFrame = targetSpriteFrame;
         }
     }
 
@@ -162,8 +130,17 @@ export default class Balloon extends cc.Component {
     pop(popperActorNr: number) {
         if (this.isPopped) return;
         this.isPopped = true;
-        
         cc.log(`[Balloon] Balloon ${this.balloonId} popped by ${popperActorNr}.`);
+        // Instantiate popFX at balloon position
+        if (this.popFXPrefab) {
+            const fx = cc.instantiate(this.popFXPrefab);
+            fx.setPosition(this.node.getPosition());
+            if (this.node.parent) {
+                this.node.parent.addChild(fx);
+            }
+            // Optionally destroy the FX after 1s
+            fx.runAction(cc.sequence(cc.delayTime(1), cc.callFunc(() => fx.destroy())));
+        }
         // TODO: Add visual pop effect (e.g., particle system, animation)
         // TODO: Add sound effect
         
@@ -177,8 +154,16 @@ export default class Balloon extends cc.Component {
     remotePop() {
         if (this.isPopped) return;
         this.isPopped = true;
-
         cc.log(`[Balloon] Balloon ${this.balloonId} remotePopped.`);
+        // Instantiate popFX at balloon position
+        if (this.popFXPrefab) {
+            const fx = cc.instantiate(this.popFXPrefab);
+            fx.setPosition(this.node.getPosition());
+            if (this.node.parent) {
+                this.node.parent.addChild(fx);
+            }
+            fx.runAction(cc.sequence(cc.delayTime(1), cc.callFunc(() => fx.destroy())));
+        }
         // TODO: Add visual pop effect (e.g., particle system, animation)
         // TODO: Add sound effect
         // this.node.destroy(); 
@@ -186,16 +171,11 @@ export default class Balloon extends cc.Component {
 
     despawn() {
         if (this.isPopped) return; 
+        cc.log(`[Balloon] Balloon ${this.balloonId} despawn() called.`);
         if (this.gameManager) {
             this.gameManager.reportBalloonDespawned(this.balloonId);
         }
         // Actual node destruction is handled by reportBalloonDespawned or directly by GameManager
         // this.node.destroy();
-    }
-
-    isPointInside(worldPoint: cc.Vec2): boolean {
-        if (!this.node || !this.node.active || this.isPopped) return false;
-        let boundingBox = this.node.getBoundingBoxToWorld();
-        return boundingBox.contains(worldPoint);
     }
 }
