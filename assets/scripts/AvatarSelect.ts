@@ -1,7 +1,6 @@
-import AccessUser, {UserData} from "./firebase/AccessUser";
 import GameManager from "./GameManager";
 import NetworkManager from "./NetworkManager";
-import { PlayerAvatar } from "./types/DataTypes";
+import { PlayerData, PlayerAvatar } from "./types/DataTypes";
 import { PhotonEventCodes } from "./types/PhotonEventCodes";
 const {ccclass, property} = cc._decorator;
 
@@ -30,6 +29,8 @@ export default class AvatarSelect extends cc.Component {
 
     private playerName: string = '';
     private networkManager: NetworkManager = NetworkManager.getInstance();
+    private gameManager: GameManager = GameManager.getInstance();
+
     private playCharacterAnimation(characterNumber: number) {
         if (!this.playerNode) {
             console.warn("PlayerNode not assigned for character animation play.");
@@ -96,9 +97,9 @@ export default class AvatarSelect extends cc.Component {
         }
 
         //Will set player name and avatar in GameManager
-        GameManager.getInstance().setPlayerNameandAvatar(this.playerName, activeAvatarEnum);
-        console.log("WHO AM I: ", GameManager.getInstance().whoAmI());
-        this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_JOINED, GameManager.getInstance().whoAmI());
+        this.gameManager.setPlayerNameandAvatar(this.playerName, activeAvatarEnum);
+        console.log("WHO AM I: ", this.gameManager.whoAmI());
+        this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_JOINED, this.gameManager.whoAmI());
         cc.director.loadScene("MatchMaking");
     }
 
@@ -131,25 +132,20 @@ export default class AvatarSelect extends cc.Component {
             this.onCharacterSelect(1);
         }
 
-        // Load player name from user data
-        const currentUser = firebase.auth().currentUser.uid;
-        AccessUser.getUser(currentUser).then((userData: UserData | null) => {
-            if (userData) {
-                this.playerName = userData.username || "Player";
-                this.playerLabel.string = this.playerName;
-                console.log(`Player name loaded: ${this.playerName}`);
-            } else {
-                console.warn("No user data found, using default player name.");
-                this.playerName = "Player";
-            }
-        });
-
         // Go to the next scene
         if(this.createButton) {
             this.createButton.node.on("click", () => {
                 this.onCreateRoom();
             }, this);
         }
+    }
+
+    start() {
+        // Get User Name from GameManager
+        console.log("Get Player Name from GameManager");
+        const player: PlayerData = this.gameManager.whoAmI();
+        this.playerName = player ? player.name : "Player";
+        this.playerLabel.string = this.playerName;
     }
 
     update(dt: number) {

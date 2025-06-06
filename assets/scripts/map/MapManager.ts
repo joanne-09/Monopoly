@@ -1,28 +1,53 @@
 import SpaceNodeCtrl from "./SpaceNodeCtrl";
 import SpaceNodeItem from "./SpaceNodeItem";
 import { MapNodeEvents } from "../types/GameEvents";
-
+import GameManager from "../GameManager";
+import { PlayerData } from "../types/DataTypes";
 const {ccclass, property} = cc._decorator;
 
 @ccclass
 export default class MapManager extends cc.Component {
+    private static instance: MapManager = null;
 
     @property(cc.Node)
     spacesNode: cc.Node = null;
-
+    
+    @property(cc.Label)
+    moneyLabel: cc.Label = null;
     private spaceNum: number = 60;
     private spaceNodeCtrl = new SpaceNodeCtrl();
+    private gameManager: GameManager;
+    private localPlayerData: PlayerData;
+    private lastMoney: number = null;
 
+    @property(cc.Button)
+    gameButton: cc.Button = null;
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
-      
+        if (MapManager.instance) {
+            this.node.destroy();
+            return;
+        }
+        MapManager.instance = this;
+        this.gameManager = GameManager.getInstance();
+        this.gameButton.node.on('click', this.loadGameScene, this);
+    }
+
+    public static getInstance(): MapManager {
+        return MapManager.instance;
     }
 
     start() {
-
+      this.gameManager.startGame();
+      this.schedule(() => {
+        this.localPlayerData = this.gameManager.getLocalPlayerData();
+      }, 0.5);
     }
 
+    private loadGameScene() {
+      cc.director.loadScene("MiniGameSnowball");
+    }
     protected getSpaceNodeItemByIndex(index: number) {
       if (!this.spacesNode) {
         cc.error(`Spaces node ${index} is not set!`);
@@ -57,5 +82,15 @@ export default class MapManager extends cc.Component {
       return spaceNodeItem.getMapNodeEvent();
     }
 
-    // update (dt) {}
+    
+    update (dt) {
+        if (this.localPlayerData && this.moneyLabel) {
+            if (this.localPlayerData.money !== this.lastMoney) {
+                this.moneyLabel.string = `Money: ${this.localPlayerData.money}`;
+                this.lastMoney = this.localPlayerData.money;
+            }
+        } else {
+            cc.warn("Local player data or money label is not set.");
+        }
+    }
 }

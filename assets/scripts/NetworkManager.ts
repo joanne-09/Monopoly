@@ -12,9 +12,10 @@ export default class NetworkManager extends cc.Component {
 
     private APP_ID = "e67b38a8-62a3-4f6b-bb72-f735e94a0016"; // Replace with your AppId
     private APP_VERSION = "1.0";
-    private client: Photon.LoadBalancing.LoadBalancingClient; // Use 'any' or a specific Photon type if you have .d.ts
+    private client: Photon.LoadBalancing.LoadBalancingClient;
 
     private messageHandlers: Array<(eventCode: number, content: any, actorNr: number) => void> = [];
+    private playerReadyCallbacks: Array<(actorNr: number) => void> = [];
 
     onLoad() {
         // Prevent duplicate instances
@@ -56,7 +57,7 @@ export default class NetworkManager extends cc.Component {
         if (this.client) {
             // Essential: log only when actually attempting to connect
             console.log("NetworkManager: Attempting to connect to Photon...");
-            this.client.connectToRegionMaster("asia"); // e.g., "us", "eu", "asia"
+            this.client.connectToRegionMaster("hk"); // e.g., "us", "eu", "asia"
         } else {
             console.error("NetworkManager: Photon client not initialized, cannot connect.");
         }
@@ -69,24 +70,32 @@ export default class NetworkManager extends cc.Component {
         }
         
         this.client.onStateChange = (state: number) => {
-            // Essential: log state changes
             console.log("Photon State Change: " + state);
-            // Handle different states (ConnectedToMaster, JoinedLobby, Joined, etc.)
             if (state === Photon.LoadBalancing.LoadBalancingClient.State.ConnectedToMaster) {
-                // Essential: log successful connection to master
                 console.log("Successfully connected to Master Server. Client will automatically join lobby...");
-                // Client automatically joins lobby when autoJoinLobby is true (default)
-                // No additional action needed here
             } else if (state === Photon.LoadBalancing.LoadBalancingClient.State.JoinedLobby) {
-                // Essential: log lobby join
                 console.log("Successfully joined Lobby. Ready to join or create rooms.");
                 this.joinOrCreateMonopolyRoom();
             }
         };
 
         this.client.onJoinRoom = (createdByMe: boolean) => {
-            // Essential: log room join
             console.log(`NetworkManager: Room joined. Was created by me: ${createdByMe}`);
+            const actor = this.client.myActor && typeof this.client.myActor === 'function' ? this.client.myActor() : null;
+            if (actor && actor.actorNr !== undefined) {
+                const myActorNr = actor.actorNr;
+                console.log(`NetworkManager: My actor number ${myActorNr} is now available.`);
+                this.playerReadyCallbacks.forEach(cb => {
+                    try {
+                        cb(myActorNr);
+                    } catch (error) {
+                        console.error("NetworkManager: Error in playerReadyCallback:", error);
+                    }
+                });
+                this.playerReadyCallbacks = []; // Clear callbacks after firing
+            } else {
+                console.warn("NetworkManager: Joined room but myActor or actorNr is not yet available. Player ready callbacks deferred.");
+            }
         };
 
         this.client.onEvent = (code: number, content: any, actorNr: number) => {
@@ -145,6 +154,10 @@ export default class NetworkManager extends cc.Component {
         }
     }
 
+    public isMasterClient(): boolean {
+        return this.getMyActorNumber() === 1;
+    }
+
     public registerMessageHandler(handler: (eventCode: number, content: any, actorNr: number) => void) {
         if (!this.messageHandlers.includes(handler)) {
             this.messageHandlers.push(handler);
@@ -171,21 +184,27 @@ export default class NetworkManager extends cc.Component {
         });
     }
 
-    // public getMyActorName(): string {
-    //     if (this.client && this.client.myActor) {
-    //         return this.client.myActor.name
-    //     }
-    //     return "UNDEFINED"; // Default if not connected
-    // }
-
-    //used to get actor number of the current player
-    public getMyActorNumber(): number {
-        if (this.client && typeof this.client.myActor === 'function') {
-            const actor = this.client.myActor();
-            // console.log("NetworkManager: My actor number is: " + actor.actorNr);
-            return actor ? actor.actorNr : -1;
+    public registerPlayerReadyCallback(callback: (actorNr: number) => void) {
+        const actor = this.client && typeof this.client.myActor === 'function' ? this.client.myActor() : null;
+        if (this.client && this.client.isJoinedToRoom() && actor && actor.actorNr !== undefined) {
+            try {
+                console.log(`NetworkManager: Player already ready, invoking callback immediately with actorNr: ${actor.actorNr}`);
+                callback(actor.actorNr);
+            } catch (error) {
+                console.error("NetworkManager: Error in immediate playerReadyCallback:", error);
+            }
+        } else {
+            console.log("NetworkManager: Player not ready yet, queuing callback.");
+            this.playerReadyCallbacks.push(callback);
         }
-        return -1; // Default if not connected
+    }
+
+    public getMyActorNumber(): number {
+        const actor = this.client && typeof this.client.myActor === 'function' ? this.client.myActor() : null;
+        if (actor && actor.actorNr !== undefined) {
+            return actor.actorNr;
+        }
+        return -1; 
     }
     
     public static getInstance(): NetworkManager {
@@ -197,9 +216,11 @@ export default class NetworkManager extends cc.Component {
     }
 
     public getPhotonID(): string {
-        if (this.client && this.client.myActor) {
-            return this.client.myActor().userId || "UNDEFINED";
+        const actor = this.client && typeof this.client.myActor === 'function' ? this.client.myActor() : null;
+        if (actor && actor.userId) {
+            return actor.userId;
         }
+        return "UNDEFINED";
     }
     onDestroy() {
         if (NetworkManager.instance === this) {

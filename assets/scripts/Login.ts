@@ -1,3 +1,6 @@
+import AccessUser, {UserData} from "./firebase/AccessUser";
+import GameManager from "./GameManager";
+import { PlayerAvatar } from "./types/DataTypes";
 const {ccclass, property} = cc._decorator;
 
 @ccclass
@@ -8,6 +11,24 @@ export default class Login extends cc.Component {
     emailInput: cc.EditBox = null;
     @property(cc.EditBox)
     passwordInput: cc.EditBox = null;
+
+    async loadFirebase() {
+        // Load player name from user data
+        const currentUser = firebase.auth().currentUser.uid;
+        let playerName = "";
+
+        const userData = await AccessUser.getUser(currentUser);
+        if (userData) {
+            playerName = userData.username || "Player";
+            console.log(`Player name loaded: ${playerName}`);
+        } else {
+            console.warn("No user data found, using default player name.");
+            playerName = "Player";
+        }
+
+        GameManager.getInstance().setPlayerNameandAvatar(playerName, PlayerAvatar.NULL);
+        console.log("WHO AM I: ", GameManager.getInstance().whoAmI());
+    }
 
     onEnter() {
         console.log("Enter button clicked");
@@ -39,7 +60,12 @@ export default class Login extends cc.Component {
                 // Signed in
                 const user = userCredential.user;
                 cc.log("User signed in: ", user);
-                cc.director.loadScene('AvatarSelect');
+
+                cc.log("Load User Data");
+                this.loadFirebase()
+                    .then(() => {
+                        cc.director.loadScene('AvatarSelect');
+                    });
             })
             .catch((error) => {
                 const errorCode = error.code;

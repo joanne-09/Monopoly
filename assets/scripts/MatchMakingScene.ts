@@ -1,5 +1,6 @@
 import GameManager from "./GameManager";
 import NetworkManager from "./NetworkManager";
+import { PhotonEventCodes } from "./types/PhotonEventCodes";
 const {ccclass, property} = cc._decorator;
 
 // Start scene (player data) localStorage?
@@ -36,6 +37,10 @@ export default class MatchMakingScene extends cc.Component {
     playerSprite3: cc.Sprite = null;
     @property(cc.Sprite)
     playerSprite4: cc.Sprite = null;
+
+    // Button to transition to the game scene
+    @property(cc.Button)
+    startGameButton: cc.Button = null;
 
     @property(cc.Node)
     leaveButton: cc.Node = null;
@@ -99,6 +104,9 @@ export default class MatchMakingScene extends cc.Component {
                     this.leaveButton.on("click", this.onLeave, this);
                 }
 
+                if(this.startGameButton) {
+                    this.startGameButton.node.on("click", this.onStartGame, this);
+                }
                 this.scheduleOnce(() => {
                     this.refreshPlayerList();
                 }, 0.2);
@@ -121,6 +129,9 @@ export default class MatchMakingScene extends cc.Component {
         // where whoAmI returns the playerdata object, provided in DataTypes.ts
         // console.log("Photon event received:", eventCode, content, actorNr);
         // console.log(GameManager.getInstance().getPlayerList());
+        if(eventCode === PhotonEventCodes.START_GAME) {
+            cc.director.loadScene("MapScene");
+        }
         this.refreshPlayerList();
     }
 
@@ -182,7 +193,7 @@ export default class MatchMakingScene extends cc.Component {
         if (this.playerList.length === 4 && !this.sceneLoadScheduled) {
             this.sceneLoadScheduled = true
             this.scheduleOnce(() => {
-                cc.director.loadScene("TestMultiplayer");
+                cc.director.loadScene("MapScene");
             }, 3.0);
         }
     }
@@ -191,6 +202,13 @@ export default class MatchMakingScene extends cc.Component {
         // Optionally: leave the Photon room here
         cc.log("leave button clicked");
         cc.director.loadScene("Start");
+    }
+
+    onStartGame() {
+        cc.log("start game button clicked");
+        this.networkManager.sendGameAction(PhotonEventCodes.START_GAME, null);
+    
+        cc.director.loadScene("MapScene");
     }
 
     onDestroy() {
