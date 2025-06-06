@@ -273,6 +273,13 @@ export class PlayerControl extends cc.Component {
                 const distance = this.moveSpeed * dt;
                 const remainingDistance = nextMove.sub(currentPosition).mag();
 
+                // Adjust the scale based on the direction
+                if(direction.x > 0){
+                    this.node.scaleX = Math.abs(this.node.scaleX);
+                }else if(direction.x < 0){
+                    this.node.scaleX = -Math.abs(this.node.scaleX);
+                }
+
                 if(distance >= remainingDistance) {
                     // if the distance to the next position is less than or equal to the move speed
                     this.setPlayerPosition(nextMove);
