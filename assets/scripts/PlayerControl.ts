@@ -6,6 +6,7 @@ import NetworkManager from "./NetworkManager";
 import GameManager from "./GameManager";
 import DiceManager from "./DiceManager";
 import OtherPlayers from "./OtherPlayers";
+import CameraFollow from "./CameraFollow";
 
 @ccclass('PlayerControl')
 export class PlayerControl extends cc.Component {
@@ -182,6 +183,7 @@ export class PlayerControl extends cc.Component {
 
         // Find the player camera
         this.playerCamera = this.node.getChildByName('PlayerCamera');
+        this.playerCamera.getComponent(CameraFollow).initPlayers(this.gameManager.getPlayerList(), this.playerId);
 
         // Bind the rollDiceButton click event
         if (this.rollDiceButton) {
