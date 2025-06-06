@@ -31,6 +31,9 @@ export default class MapManager extends cc.Component {
         }
         MapManager.instance = this;
         this.gameManager = GameManager.getInstance();
+
+        this.gameManager.startGame(); // Start the game while load
+
         this.gameButton.node.on('click', this.loadGameScene, this);
     }
 
@@ -39,7 +42,6 @@ export default class MapManager extends cc.Component {
     }
 
     start() {
-      this.gameManager.startGame();
       this.schedule(() => {
         this.localPlayerData = this.gameManager.getLocalPlayerData();
       }, 0.5);

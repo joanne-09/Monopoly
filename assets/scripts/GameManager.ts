@@ -100,6 +100,13 @@ export default class GameManager extends cc.Component {
             } else {
                 console.warn("GameManager: Received PLAYER_TRIGGERED_MAP_EVENT, but this client is not the master client. Ignoring event.");
             }
+        }else if(eventCode == PhotonEventCodes.PLAYER_MAP_JOINED) {
+            console.log("GameManager: Received new player joined for existing player event from network manager handler.");
+            // Potentially update this.playerList if game is active and master client
+            if (this.isGameActive) {
+                this.playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
+                console.log("GameManager: playerList updated due to PLAYER_MAP_JOINED event on master.", this.playerList);
+            }
         }
     }
 
@@ -169,6 +176,14 @@ export default class GameManager extends cc.Component {
         console.log("Player movement broadcasted to Photon: ", playerMovement);
     }
 
+    private broadcastPlayerMapJoined() {
+        if (!this.isGameActive) {
+            console.warn("GameManager: Cannot broadcast player map joined, game is not active.");
+            return;
+        }
+        this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_MAP_JOINED, Array.from(this.playerMap.values()));
+        console.log("GameManager: A new Player is Joined, broadcasting player map joined to all clients.");
+    }
 
     public static getInstance(): GameManager {
         return GameManager.instance;
@@ -276,13 +291,16 @@ export default class GameManager extends cc.Component {
             if(playerData.actorNumber === this.networkManager.getMyActorNumber()) {
                 playerData.islocal = true; // Set local player flag
                 playerData.isready = true; // Set local player as ready
+                playerData.positionIndex = 1;  // Initialize Player Index
+                playerData.position = this.mapManager.getCoordByIndex(1);
                 this.broadcastPlayerData();
+
+                console.log("GameManager: A new Player is Joined");
+                this.broadcastPlayerMapJoined();
             }
         })
         if (this.networkManager.isMasterClient()) {
             this.playerMap.forEach((playerData: PlayerData) => {
-                playerData.positionIndex = 1; 
-                playerData.position = this.mapManager.getCoordByIndex(1);
                 playerData.money = 1500;
             });
             this.broadcastPlayerData(); // Broadcast once after all players are initialized
