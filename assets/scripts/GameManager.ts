@@ -161,7 +161,7 @@ export default class GameManager extends cc.Component {
     private broadcastNextRound() {
         this.networkManager.sendGameAction(PhotonEventCodes.START_NEXT_ROUND, this.currentTurnIndex); // PLAYER_MOVE_COMPLETED is used to broadcast the next round
     }
-    private broadcastTurn() {
+    public broadcastTurn() {
         if (!this.isGameActive) {
             console.warn("GameManager: Cannot broadcast turn, game is not active.");
             return;
