@@ -131,24 +131,24 @@ export default class GameManager extends cc.Component {
             }
         } else if(eventCode == PhotonEventCodes.SHOW_MAP_EVENT_CARD) {
             console.log("GameManager: Received SHOW_MAP_EVENT_CARD event from actorNr:", actorNr, "content:", content);
-            switch(content) {
+            switch(content.mapEvent) {
                 case MapNodeEvents.NORMAL:
-                    EventCard.getInstance().showCard(MapNodeEvents.NORMAL, `${this.playerMap.get(actorNr).name} found nothing`, "Nothing happened");
+                    EventCard.getInstance().showCard(MapNodeEvents.NORMAL, `${content.actorName} found nothing`, "Nothing happened");
                     break;
                 case MapNodeEvents.DESTINY:
-                    EventCard.getInstance().showCard(MapNodeEvents.DESTINY, `${this.playerMap.get(actorNr).name} found a destiny!`, "You found a destiny!"); 
+                    EventCard.getInstance().showCard(MapNodeEvents.DESTINY, `${content.actorName} found a destiny!`, "You found a destiny!"); 
                     break;
                 case MapNodeEvents.CHANCE:
-                    EventCard.getInstance().showCard(MapNodeEvents.CHANCE, `${this.playerMap.get(actorNr).name} found a chance!`, "You found a chance!");
+                    EventCard.getInstance().showCard(MapNodeEvents.CHANCE, `${content.actorName} found a chance!`, "You found a chance!");
                     break;
                 case MapNodeEvents.GAME:
-                    EventCard.getInstance().showCard(MapNodeEvents.GAME, `${this.playerMap.get(actorNr).name} found a game!`, "You found a game!");
+                    EventCard.getInstance().showCard(MapNodeEvents.GAME, `${content.actorName} found a game!`, "You found a game!");
                     break;
                 case MapNodeEvents.ADDMONEY:
-                    EventCard.getInstance().showCard(MapNodeEvents.ADDMONEY, `${this.playerMap.get(actorNr).name} found $100!`, "You found $100!");
+                    EventCard.getInstance().showCard(MapNodeEvents.ADDMONEY, `${content.actorName} found $100!`, "You found $100!");
                     break;
                 case MapNodeEvents.DEDUCTMONEY:
-                    EventCard.getInstance().showCard(MapNodeEvents.DEDUCTMONEY, `${this.playerMap.get(actorNr).name} lost $100!`, "You lost $100!");
+                    EventCard.getInstance().showCard(MapNodeEvents.DEDUCTMONEY, `${content.actorName} lost $100!`, "You lost $100!");
             }
         }
     }
@@ -218,7 +218,7 @@ export default class GameManager extends cc.Component {
 
     public broadcastMapEventandShowCard(mapEvent: MapNodeEvents) {
         console.log("GameManager: Broadcasting SHOW_MAP_EVENT_CARD event to all clients.");
-        this.networkManager.sendGameAction(PhotonEventCodes.SHOW_MAP_EVENT_CARD, mapEvent);
+        this.networkManager.sendGameAction(PhotonEventCodes.SHOW_MAP_EVENT_CARD, {mapEvent, actorName: this.currentTurnPlayer.name});
     }
     private broadcastNextRound() {
         this.networkManager.sendGameAction(PhotonEventCodes.START_NEXT_ROUND, this.currentTurnIndex); // PLAYER_MOVE_COMPLETED is used to broadcast the next round

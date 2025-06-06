@@ -1,7 +1,7 @@
 {
   "title": "Monopoly",
   "packageName": "org.cocos2d.demo",
-  "startScene": "c76704d4-7864-4f58-b328-175aed6b39e1",
+  "startScene": "98424626-172e-4729-b5a8-7bde2737a5f8",
   "excludeScenes": [],
   "orientation": {
     "landscapeRight": true,

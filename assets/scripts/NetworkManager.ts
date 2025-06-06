@@ -46,7 +46,7 @@ export default class NetworkManager extends cc.Component {
         // console.log("NetworkManager: Photon SDK found.");
 
         // Initialize Photon client only once
-        this.client = new Photon.LoadBalancing.LoadBalancingClient(Photon.ConnectionProtocol.Ws, this.APP_ID, this.APP_VERSION);
+        this.client = new Photon.LoadBalancing.LoadBalancingClient(Photon.ConnectionProtocol.Wss, this.APP_ID, this.APP_VERSION);
         // console.log("NetworkManager: Photon client initialized.");
         console.log(this.client);
         this.client.setLogLevel(Photon.LogLevel.WARN); // Options: ERROR, WARN, INFO, DEBUG
