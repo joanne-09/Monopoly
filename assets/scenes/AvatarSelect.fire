@@ -1837,7 +1837,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 300,
+      "width": 250,
       "height": 60
     },
     "_anchorPoint": {
@@ -1906,7 +1906,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 300,
+      "width": 250,
       "height": 60
     },
     "_anchorPoint": {
@@ -2020,8 +2020,8 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "CREATE ROOM",
-    "_N$string": "CREATE ROOM",
+    "_string": "JOIN ROOM",
+    "_N$string": "JOIN ROOM",
     "_fontSize": 30,
     "_lineHeight": 40,
     "_enableWrapText": false,
@@ -2316,6 +2316,12 @@
     },
     "createButton": {
       "__id__": 41
+    },
+    "buttonClickSfx": {
+      "__uuid__": "c8bba6ab-849c-4d8f-b893-b6a4636f96c2"
+    },
+    "buttonHoverSfx": {
+      "__uuid__": "9050e650-86bc-40a7-9f20-81cfa8b0abcb"
     },
     "_id": "98nvznLh5NgqmOmTnjIljE"
   },

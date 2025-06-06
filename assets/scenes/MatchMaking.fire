@@ -317,7 +317,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "9a0b3ad2-f62e-43d6-a545-69a1d5653b4c"
+      "__uuid__": "9f070488-17d8-4fe2-bdf2-02f03020719e"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -2411,6 +2411,12 @@
         "__uuid__": "6435c66c-c770-4b5a-b11b-222c180eae06"
       }
     ],
+    "buttonClickSfx": {
+      "__uuid__": "c8bba6ab-849c-4d8f-b893-b6a4636f96c2"
+    },
+    "buttonHoverSfx": {
+      "__uuid__": "9050e650-86bc-40a7-9f20-81cfa8b0abcb"
+    },
     "_id": "78gfXkHMZPM6OlIDlw66mZ"
   }
 ]

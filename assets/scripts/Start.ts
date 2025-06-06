@@ -23,6 +23,15 @@ export default class Start extends cc.Component {
     @property(cc.Node)
     background2: cc.Node = null;
 
+    @property({type:cc.AudioClip})
+    bgm: cc.AudioClip = null;
+
+    @property({type: cc.AudioClip})
+    buttonClickSfx: cc.AudioClip = null;
+
+    @property({type: cc.AudioClip})
+    buttonHoverSfx: cc.AudioClip = null;
+
     private networkManager: any = null;
 
     private backgroundSpeed: number = 200;
@@ -51,12 +60,14 @@ export default class Start extends cc.Component {
 
     onLogin() {
         cc.log("Login button clicked");
+        cc.audioEngine.playEffect(this.buttonClickSfx, false);
         this.saveBackgroundState();
         cc.director.loadScene("Login");
     }
 
     onSignup() {
         cc.log("Signup button clicked");
+        cc.audioEngine.playEffect(this.buttonClickSfx, false);
         this.saveBackgroundState();
         cc.director.loadScene("Signup");
     }
@@ -101,6 +112,15 @@ export default class Start extends cc.Component {
 
         // Determine the screen's left edge for wrapping logic (assuming camera is at x=0)
         this.screenLeftEdgeX = -cc.winSize.width / 2;
+
+        // play bgm
+        cc.audioEngine.playMusic(this.bgm, true);
+        this.loginButton.node.on("mouseenter", () => {
+            if (this.buttonHoverSfx) cc.audioEngine.playEffect(this.buttonHoverSfx, false);
+        });
+        this.signupButton.node.on("mouseenter", () => {
+            if (this.buttonHoverSfx) cc.audioEngine.playEffect(this.buttonHoverSfx, false);
+        });
     }
 
     start() {
