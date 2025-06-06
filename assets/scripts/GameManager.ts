@@ -6,6 +6,7 @@ import { PhotonEventCodes } from "./types/PhotonEventCodes"; // Make sure this i
 import MapManager from "./map/MapManager";
 import { MapNodeEvents } from "./types/GameEvents";
 import EventCard from "./EventCard";
+import { getRandomEvent } from "./types/EventsSets";
 
 enum GameState {
     INIT = "initialized",
@@ -34,6 +35,7 @@ export default class GameManager extends cc.Component {
     private currentTurnPlayer: PlayerData = null; // The player whose turn it is currently
     private isGameActive = false; // Flag to check if the game is active
     private state: GameState = null;
+    private inMiniGame: boolean = false;
     
     onLoad() {
         // Prevent duplicate instances
@@ -70,6 +72,7 @@ export default class GameManager extends cc.Component {
             this.statusLabel.string = "Game Manager Initialized";
         }
         this.state = GameState.INIT;
+    
     }
 
     // Network broadcast and listening
@@ -82,6 +85,12 @@ export default class GameManager extends cc.Component {
         } else if(eventCode == PhotonEventCodes.PLAYER_DATA) {
             //console.log("GameManager: Received player data from network manager handler.");
             this.playerMap = new Map(content.map((player: PlayerData) => [player.actorNumber, player]));
+
+            this.playerMap.forEach((playerData: PlayerData) => {
+                if(playerData.money == null || playerData.money === undefined) {
+                    playerData.money = 1500; // Default money for new players
+                }
+            })
             // Potentially update this.playerList if game is active and master client
             if (this.isGameActive) {
                 this.playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
@@ -162,6 +171,11 @@ export default class GameManager extends cc.Component {
             case MapNodeEvents.GAME:
                 console.log("GameManager: Handling GAME map event.");
                 this.broadcastMapEventandShowCard(MapNodeEvents.GAME);
+                this.inMiniGame = true;
+                this.scheduleOnce(() => {
+                    //cc.director.loadScene("MiniGameBalloon");
+                    Math.random() < 0.5 ? cc.director.loadScene("MiniGameBalloon") : cc.director.loadScene("MiniGameSnowball");
+                }, 5);
                 break;
             case MapNodeEvents.ADDMONEY:
                 console.log("GameManager: Handling ADDMONEY map event.");
@@ -197,7 +211,9 @@ export default class GameManager extends cc.Component {
                 //EventCard.getInstance().showCard(MapNodeEvents.STAR, "You found a star!", "You found a star!");
                 break;
         }
-        this.broadcastNextRound();
+        if(!this.inMiniGame){
+                this.broadcastNextRound();
+        }
     }
 
     public broadcastMapEventandShowCard(mapEvent: MapNodeEvents) {
@@ -519,7 +535,12 @@ export default class GameManager extends cc.Component {
         });
         this.broadcastPlayerData(); // Broadcast updated player data after adding gadget
     }
-
+    public exitMiniGame() {
+        this.inMiniGame = false;
+        console.log("GameManager: Exiting mini-game, returning to main game state.");
+        // Optionally, you can reset any mini-game specific state here
+        this.broadcastNextRound(); // Proceed to the next round after exiting the mini-game
+    }
 }
 
 // TODO 

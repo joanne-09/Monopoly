@@ -14,24 +14,50 @@ export default class EventCard extends cc.Component {
     @property(cc.Label)
     effectLabel: cc.Label = null;
     
-    // Variable to control which sprite to show
     private currentSpriteIndex: number = 0;
     private static instance: EventCard = null;
+
     onLoad() {
-        if (EventCard.instance) {
-            cc.warn("EventCard: Instance already exists, destroying duplicate.");
+        cc.log(`EventCard onLoad: Node ${this.node.name}. Current static instance before assignment: ${EventCard.instance ? EventCard.instance.node.name : "null"}, is current instance's node valid: ${EventCard.instance && EventCard.instance.node ? EventCard.instance.node.isValid : "N/A"}`);
+        
+        // If there's an existing instance, and its node is NO LONGER VALID,
+        // then it's a stale instance from a previous scene. Clear it so this new one can take over.
+        if (EventCard.instance && (!EventCard.instance.node || !EventCard.instance.node.isValid)) {
+            cc.warn(`EventCard: Stale instance found (node ${EventCard.instance.node ? EventCard.instance.node.name : "N/A"} was invalid). Clearing old instance.`);
+            EventCard.instance = null;
+        }
+
+        // Now, if an instance still exists at this point, it must be a valid one (e.g., if EventCard was made persistent).
+        // In that case, this new one (from the reloaded scene) is a duplicate and should be destroyed.
+        if (EventCard.instance && EventCard.instance !== this) {
+            cc.warn(`EventCard: A valid instance on node ${EventCard.instance.node.name} already exists. Destroying this duplicate on ${this.node.name}.`);
             this.node.destroy();
             return;
         }
+        
+        // This component becomes the canonical instance.
         EventCard.instance = this;
+        cc.log(`EventCard: Static instance set to this component on node ${this.node.name}`);
     }
 
     start() {
-        this.node.active = false; // Hide the card initially
+        // It's generally better to set the initial active state in the editor (prefab/scene).
+        // If this node is part of the scene, it will be active by default unless set otherwise.
+        // This ensures it's hidden if it wasn't already.
+        if (this.node.parent) { // Check if it's actually in a scene
+            this.node.active = false; 
+        }
         this.updateSprite();
     }
 
     public static getInstance(): EventCard {
+        if (!EventCard.instance) {
+            cc.error("EventCard.getInstance() called but instance is null. The EventCard node might not be in the current scene or not yet loaded.");
+        } else if (!EventCard.instance.node || !EventCard.instance.node.isValid) {
+            cc.error("EventCard.getInstance() is returning an instance whose node is invalid. This indicates a problem with singleton management during scene transitions.");
+            // EventCard.instance = null; // Optionally clear it to force re-evaluation, though onLoad should handle this.
+            return null; // Return null to prevent further errors on an invalid instance
+        }
         return EventCard.instance;
     }
 
@@ -44,6 +70,11 @@ export default class EventCard extends cc.Component {
     }
 
     public showCard(nodeEvent: MapNodeEvents, description: string, effect: string) {
+        if (!this.node || !this.node.isValid) {
+            cc.error("EventCard.showCard() called, but this EventCard's node is invalid. Aborting showCard. This might be due to a scene transition issue.");
+            return;
+        }
+
         // Set the description and effect labels
         if (this.descriptionLabel) {
             this.descriptionLabel.string = description;
@@ -70,10 +101,12 @@ export default class EventCard extends cc.Component {
                 this.setSpriteByType("deductmoney");
                 break;
             case MapNodeEvents.STAR:
-                this.setSpriteByType("star");
+                this.setSpriteByType("star"); // Ensure "star" is in your spriteMap or handle default
                 break;
             default:
                 cc.warn(`Unknown node event type: ${nodeEvent}`);
+                // Optionally set to a default sprite
+                // this.setSpriteByType("normal"); 
                 break;
         }
         cc.log(`Showing card for event: ${nodeEvent}, description: ${description}, effect: ${effect}`);
@@ -102,7 +135,8 @@ export default class EventCard extends cc.Component {
             "destiny": 1,
             "chance": 2,
             "addmoney": 3,
-            "deductmoney": 4
+            "deductmoney": 4,
+            "star": 5 // Added "star", ensure you have a 6th spriteFrame (index 5) or adjust index
         };
         
         if (spriteMap.hasOwnProperty(type)) {
@@ -123,6 +157,18 @@ export default class EventCard extends cc.Component {
     }
 
     public hideCard() {
+        if (!this.node || !this.node.isValid) {
+            cc.warn("EventCard.hideCard() called, but this EventCard's node is invalid.");
+            return;
+        }
         this.node.active = false; // Hide the card
+    }
+
+    onDestroy() {
+        cc.log(`EventCard onDestroy: Node ${this.node.name}. Static instance was ${EventCard.instance ? EventCard.instance.node.name : "null"}`);
+        if (EventCard.instance === this) {
+            EventCard.instance = null;
+            cc.log("EventCard: Static instance cleared because this component (on " + this.node.name + ") was destroyed.");
+        }
     }
 }

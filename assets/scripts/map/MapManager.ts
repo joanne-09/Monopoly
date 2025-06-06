@@ -39,12 +39,15 @@ export default class MapManager extends cc.Component {
       // Don't call startGame if the game is already active
         this.gameButton.node.on('click', this.loadGameScene, this);
 
+
         if(!this.gameManager.getIsGameActive()) {
           this.gameManager.startGame();
         }else{
+              this.gameManager.exitMiniGame();
           this.gameManager.resetMapManager();
         }
         this.gameManager.broadcastTurn();
+
          // Start the game while load)
         cc.audioEngine.playMusic(this.gameBgm, true);
     }
