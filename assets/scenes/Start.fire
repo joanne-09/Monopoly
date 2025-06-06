@@ -1570,6 +1570,15 @@
     "background2": {
       "__id__": 7
     },
+    "bgm": {
+      "__uuid__": "6a3cc1b8-b6df-4ab9-a1ca-6fb967a1b9de"
+    },
+    "buttonClickSfx": {
+      "__uuid__": "c8bba6ab-849c-4d8f-b893-b6a4636f96c2"
+    },
+    "buttonHoverSfx": {
+      "__uuid__": "9050e650-86bc-40a7-9f20-81cfa8b0abcb"
+    },
     "_id": "07g0GAnqpD7rXN7MePIk5V"
   }
 ]
