@@ -44,7 +44,7 @@ export class PlayerControl extends cc.Component {
     private networkManagerHandler(eventCode: number, content: any, actorNr: number) {
         //Will listen to all events on photon
         switch(eventCode) {
-            case PhotonEventCodes.PLAYER_TURN:
+            case PhotonEventCodes.CURRNET_TURN_PLAYER:
                 this.setPlayerTurn(content.actorNumber);
                 break;
             case PhotonEventCodes.PLAYER_MOVEMENT:

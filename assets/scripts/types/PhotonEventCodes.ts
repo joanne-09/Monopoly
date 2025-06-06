@@ -4,9 +4,9 @@ export enum PhotonEventCodes {
     PLAYER_JOINED = 3,
     PLAYER_THROW_ACTION = 4, // Added
     PLAYER_HIT_ACTION = 5,   // Added
-    PLAYER_TURN = 6,      // Added
+    CURRNET_TURN_PLAYER = 6,      // Added
     PLAYER_DATA = 7,
     START_GAME = 8,
-    PLAYER_MOVE_COMPLETED = 9, // Added
+    START_NEXT_ROUND = 9, // Added
     PLAYER_TRIGGERED_MAP_EVENT = 10, // Added
 }
