@@ -31696,7 +31696,7 @@
         "__id__": 1040
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 752
@@ -35151,9 +35151,9 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
+        -405.507,
+        -237.868,
         0,
-        0,
-        -554.25626,
         0,
         0,
         0,
@@ -35568,7 +35568,7 @@
       "ctor": "Float64Array",
       "array": [
         -407.196,
-        -189.834,
+        -141.612,
         0,
         0,
         0,
@@ -42243,7 +42243,7 @@
         "__id__": 1021
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 1028
