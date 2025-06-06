@@ -5,115 +5,106 @@ const {ccclass, property} = cc._decorator;
 @ccclass
 export default class EventCard extends cc.Component {
 
-    @property(cc.Node)
-    iconSprite: cc.Node = null;
     @property([cc.SpriteFrame])
     spriteFrames: cc.SpriteFrame[] = [];
-    @property(cc.Label)
-    descriptionLabel: cc.Label = null;
-    @property(cc.Label)
-    effectLabel: cc.Label = null;
+    @property(cc.Prefab)
+    eventCardPrefab: cc.Prefab = null;
     
-    // Variable to control which sprite to show
-    private currentSpriteIndex: number = 0;
+    // These will be assigned from the prefab instance
+    private iconSprite: cc.Node = null;
+    private descriptionLabel: cc.Label = null;
+    private effectLabel: cc.Label = null;
 
-    onload() {
-
+    onLoad() {
+        // Initialize the card as hidden
+        // this.node.active = false; // This will be handled by the prefab's initial state or showCard
     }
 
     start() {
-        cc.log("EventCard start - Node info:");
-        cc.log("Position:", this.node.position);
-        cc.log("Scale:", this.node.scale);
-        cc.log("Opacity:", this.node.opacity);
-        cc.log("Parent active:", this.node.parent ? this.node.parent.active : "No parent");
-        
-        //this.node.active = false; // Hide the card initially
-        this.updateSprite();
+        // updateSprite might be called before iconSprite is set if not careful
+        // It's better to call updateSprite after iconSprite is assigned in showCard
+    }
+
+    // Static method to create and show event card
+    public showEventCard(nodeEvent: MapNodeEvents, description: string, effect: string) {
+        if (!this.eventCardPrefab) {
+            cc.warn("EventCard: eventCardPrefab is not assigned!");
+            return;
+        }
+        // initiate the prefab
+        const eventCardNode = cc.instantiate(this.eventCardPrefab);
+        if (!eventCardNode) {
+            cc.warn("EventCard: Failed to instantiate eventCardPrefab!");
+            return;
+        }
+        eventCardNode.setParent(this.node);
+        eventCardNode.active = true; // Ensure the card is visible
+        eventCardNode.setPosition(cc.v2(0, 0)); // Set position to center of the parent node
+        if (!eventCardNode) {
+            cc.warn("EventCard: Failed to instantiate eventCardPrefab!");
+            return;
+        }
+        cc.log("EventCard: Prefab instance created successfully.");
+/*
+        // get the needed nodes from the prefab instance
+        this.iconSprite = eventCardNode.getChildByName("icon")?.getChildByName("icon_sprite");
+        const descriptionNode = eventCardNode.getChildByName("description")?.getChildByName("Label");
+        this.descriptionLabel = descriptionNode?.getComponent(cc.Label);
+        const effectNode = eventCardNode.getChildByName("effect")?.getChildByName("Label");
+        this.effectLabel = effectNode?.getComponent(cc.Label);
+
+        // Verify that all parts were found
+        if (!this.iconSprite) {
+            cc.warn("EventCard: 'icon/icon_sprite' node not found in prefab instance.");
+        }
+        if (!this.descriptionLabel) {
+            cc.warn("EventCard: 'description/Label' node or its Label component not found in prefab instance.");
+        }
+        if (!this.effectLabel) {
+            cc.warn("EventCard: 'effect/Label' node or its Label component not found in prefab instance.");
+        }
+
+        this.setEventSprite(nodeEvent);
+        this.descriptionLabel.string = description || "No description provided.";
+        this.effectLabel.string = effect || "No effect specified.";
+        */
+    }
+
+    // Static method to hide current event card
+    public static hideEventCard() {
+
     }
 
     public test() {
-      cc.log("EventCard test method called");
-      this.showCard(MapNodeEvents.DEDUCTMONEY, "This is a test description", "This is a test effect");
-      this.scheduleOnce(() => {
-        this.hideCard();
-      }, 5); // Hide the card after 3 seconds
-    }
-
-    public showCard(nodeEvent: MapNodeEvents, description: string, effect: string) {
-        // Set the description and effect labels
-        if (this.descriptionLabel) {
-            this.descriptionLabel.string = description;
-        }
-        if (this.effectLabel) {
-            this.effectLabel.string = effect;
-        }
-
-        // Set the sprite based on the node event type
-        switch (nodeEvent) {
-            case MapNodeEvents.NORMAL:
-                this.setSpriteByType("normal");
-                break;
-            case MapNodeEvents.DESTINY:
-                this.setSpriteByType("destiny");
-                break;
-            case MapNodeEvents.CHANCE:
-                this.setSpriteByType("chance");
-                break;
-            case MapNodeEvents.ADDMONEY:
-                this.setSpriteByType("addmoney");
-                break;
-            case MapNodeEvents.DEDUCTMONEY:
-                this.setSpriteByType("deductmoney");
-                break;
-            default:
-                cc.warn(`Unknown node event type: ${nodeEvent}`);
-                break;
-        }
-        cc.log(`Showing card for event: ${nodeEvent}, description: ${description}, effect: ${effect}`);
-        // Set the card visibility to true
-        this.node.active = true;
+        // a testcase of showEventCard
+        const testEvent = MapNodeEvents.DEDUCTMONEY;
+        const testDescription = "This is a test event description.";
+        const testEffect = "This is a test effect.";
+        this.showEventCard(testEvent, testDescription, testEffect);
+        cc.log("EventCard: Test event card shown with description and effect.");
     }
 
     // Method to switch sprite based on index
-    public setSpriteByIndex(index: number) {
-        if (index >= 0 && index < this.spriteFrames.length) {
-            this.currentSpriteIndex = index;
-            this.updateSprite();
-        } else {
-            cc.warn(`Invalid sprite index: ${index}. Available indices: 0-${this.spriteFrames.length - 1}`);
+    public setEventSprite(event: MapNodeEvents) {
+        switch (event) {
+        case MapNodeEvents.NORMAL:
+            this.iconSprite.getComponent(cc.Sprite).spriteFrame = this.spriteFrames[0];
+            break;
+        case MapNodeEvents.DESTINY:
+            this.iconSprite.getComponent(cc.Sprite).spriteFrame = this.spriteFrames[1];
+            break;
+        case MapNodeEvents.CHANCE:
+            this.iconSprite.getComponent(cc.Sprite).spriteFrame = this.spriteFrames[2];
+            break;
+        case MapNodeEvents.ADDMONEY:
+            this.iconSprite.getComponent(cc.Sprite).spriteFrame = this.spriteFrames[3];
+            break;
+        case MapNodeEvents.DEDUCTMONEY:
+            this.iconSprite.getComponent(cc.Sprite).spriteFrame = this.spriteFrames[4];
+            break;
+        default:
+            cc.warn(`EventCard: No sprite frame found for event type ${event}`);
+            break;
         }
-    }
-
-    // Method to switch sprite based on a string identifier
-    public setSpriteByType(type: string) {
-        const spriteMap = {
-            "normal": 0,
-            "destiny": 1,
-            "chance": 2,
-            "addmoney": 3,
-            "deductmoney": 4
-        };
-        
-        if (spriteMap.hasOwnProperty(type)) {
-            this.setSpriteByIndex(spriteMap[type]);
-        } else {
-            cc.warn(`Unknown sprite type: ${type}`);
-        }
-    }
-
-    // Private method to actually update the sprite
-    private updateSprite() {
-        if (this.iconSprite && this.spriteFrames.length > 0 && this.currentSpriteIndex < this.spriteFrames.length) {
-            const spriteComponent = this.iconSprite.getComponent(cc.Sprite);
-            if (spriteComponent) {
-                spriteComponent.spriteFrame = this.spriteFrames[this.currentSpriteIndex];
-            }
-        }
-    }
-
-    public hideCard() {
-      cc.log("Hiding event card");
-        this.node.active = false; // Hide the card
     }
 }
