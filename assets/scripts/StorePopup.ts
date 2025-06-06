@@ -1,3 +1,5 @@
+import GameManager from "./GameManager";
+
 const {ccclass, property} = cc._decorator;
 
 @ccclass
@@ -65,15 +67,23 @@ export default class StorePopup extends cc.Component {
             return;
         }
         this.playerMoney -= total;
+        GameManager.getInstance().addGadgetToLocalPlayer(this.selectedAmounts);
+        GameManager.getInstance().deductMoneyFromLocalPlayer(total);
         for (let i = 0; i < 4; i++) {
             this.playerInventory[i] += this.selectedAmounts[i];
+
             this.selectedAmounts[i] = 0;
         }
+
         this.updateUI();
         if(total != 0) alert("Purchase successful!");
     }
 
     onLeave() {
         this.node.active = false; // Hide the popup
+    }
+
+    public isActive(): boolean {
+        return this.node.active;
     }
 }

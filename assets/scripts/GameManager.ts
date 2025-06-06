@@ -148,9 +148,6 @@ export default class GameManager extends cc.Component {
             case MapNodeEvents.DEDUCTMONEY:
                 console.log("GameManager: Handling DEDUCTMONEY map event.");
                 break;
-            case MapNodeEvents.SHOP:
-                console.log("GameManager: Handling SHOP map event.");
-                break;
             case MapNodeEvents.STAR:
                 console.log("GameManager: Handling STAR map event.");
                 break;
@@ -442,6 +439,32 @@ export default class GameManager extends cc.Component {
         }
         return this.mapManager.getMapNodeEventByIndex(currentPlayerData.positionIndex);
     }
+
+    // SHOP EVENTS
+    public deductMoneyFromLocalPlayer(amount: number) {
+        this.playerMap.forEach(playerData => {
+            if(playerData.actorNumber === this.networkManager.getMyActorNumber()) {
+                playerData.money -= amount;
+                console.log(`GameManager: Deducted ${amount} from local player ${playerData.name}. New balance: ${playerData.money}`);
+            }
+        });
+        this.broadcastPlayerData(); // Broadcast updated player data after deduction
+    }
+
+    public addGadgetToLocalPlayer(gadget: number[]) {
+        console.log(`GameManager: Adding gadget ${gadget} to local player.`);
+        this.playerMap.forEach(playerData => {
+            if(playerData.actorNumber === this.networkManager.getMyActorNumber()) {
+                if (!playerData.gadgets) {
+                    playerData.gadgets = gadget;
+                }
+                playerData.gadgets.push();
+                console.log(`GameManager: Added gadget ${gadget} to local player ${playerData.name}. Gadgets: ${playerData.gadgets}`);
+            }
+        });
+        this.broadcastPlayerData(); // Broadcast updated player data after adding gadget
+    }
+
 }
 
 // TODO 
