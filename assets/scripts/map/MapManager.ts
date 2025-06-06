@@ -87,7 +87,7 @@ export default class MapManager extends cc.Component {
     }
 
     private loadGameScene() {
-      cc.director.loadScene("MiniGameBalloon");
+      cc.director.loadScene("MiniGameSnowball");
     }
     protected getSpaceNodeItemByIndex(index: number) {
       if (!this.spacesNode) {

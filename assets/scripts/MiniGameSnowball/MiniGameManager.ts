@@ -175,6 +175,28 @@ export default class GameManager extends cc.Component {
         }, 1);
     }
 
+    // 新增：每次擊中對手都+50分，並檢查隊伍是否全滅
+    handlePlayerHit(attackerId: number, victimId: number) {
+        // 找到攻擊者與受害者的 PlayerController
+        const attacker = this.players.find(p => p.actorNumber === attackerId);
+        const victim = this.players.find(p => p.actorNumber === victimId);
+        if (!attacker || !victim) return;
+        // 加分：攻擊者隊伍+50分
+        if (attacker.team === 'A') {
+            this.addScore('A', 50);
+        } else if (attacker.team === 'B') {
+            this.addScore('B', 50);
+        }
+        // 標記受害者陣亡
+        victim.isDead = true;
+        // 檢查隊伍是否全滅
+        const teamAAlive = this.players.some(p => p.team === 'A' && !p.isDead);
+        const teamBAlive = this.players.some(p => p.team === 'B' && !p.isDead);
+        if (!teamAAlive || !teamBAlive) {
+            this.endGame();
+        }
+    }
+
     handlePhotonEvent(eventCode: number, content: any, actorNr: number) {
         cc.log(`[GameManager] handlePhotonEvent received: eventCode=${eventCode}, actorNr=${actorNr}, content=`, content);
 
@@ -269,6 +291,11 @@ export default class GameManager extends cc.Component {
                 }
                 break;
             
+            case PhotonEventCodes.PLAYER_HIT_ACTION:
+                // content: { attackerId, victimId }
+                this.handlePlayerHit(content.attackerId, content.victimId);
+                break;
+
             default:
                 cc.log(`[GameManager] Received unhandled eventCode: ${eventCode} for player ${targetPlayerId}`);
                 break;
@@ -282,6 +309,35 @@ export default class GameManager extends cc.Component {
 
     endGame() {
         this.isGameOver = true;
-        // TODO: 判斷勝負、加分、顯示結果
+        // --- 計算每人獎勵金額 ---
+        // 1. 所有玩家根據自己分數獲得等值金錢
+        // 2. 勝利隊伍每人再多200元
+        // 3. 等待0.5秒後回到MapScene
+        const gameManager = (window as any).GameManager?.getInstance?.() || cc.director.getScene().getChildByName("GameManager")?.getComponent("GameManager");
+        // 假設 this.players 是所有玩家的 PlayerController 或 PlayerData 陣列
+        // 並且每個 player 有 actorNumber, team, score 屬性
+        // 這裡用 teamAScore/teamBScore 判斷勝利隊伍
+        let winningTeam: 'A' | 'B' = this.teamAScore > this.teamBScore ? 'A' : (this.teamBScore > this.teamAScore ? 'B' : null);
+        // 取得所有玩家資料（假設 this.players 有正確資料）
+        this.players.forEach(player => {
+            // 1. 分數等值金錢
+            if (gameManager && typeof gameManager.deductMoneyFromLocalPlayer === 'function' && player.getIsLocalPlayer && player.getIsLocalPlayer()) {
+                if (player.score > 0) {
+                    gameManager.deductMoneyFromLocalPlayer(-player.score); // 加錢
+                }
+            }
+        });
+        // 2. 勝利隊伍每人多200
+        this.players.forEach(player => {
+            if (gameManager && typeof gameManager.deductMoneyFromLocalPlayer === 'function' && player.getIsLocalPlayer && player.getIsLocalPlayer()) {
+                if (winningTeam && player.team === winningTeam) {
+                    gameManager.deductMoneyFromLocalPlayer(-200);
+                }
+            }
+        });
+        // 3. 0.5秒後回到地圖
+        this.scheduleOnce(() => {
+            cc.director.loadScene('MapScene');
+        }, 0.5);
     }
 }
