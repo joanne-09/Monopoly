@@ -35,6 +35,9 @@ export default class BalloonGameManager extends cc.Component {
     @property
     gameTime: number = 60; // seconds
 
+    @property({type:cc.AudioClip})
+    balloonBGM: cc.AudioClip;
+
     private timer: number = 0;
     private isGameOver: boolean = false;
     private networkManager: NetworkManager = null;
@@ -55,6 +58,7 @@ export default class BalloonGameManager extends cc.Component {
     private messageHandler: (eventCode: number, content: any, actorNr: number) => void;
 
     onLoad () {
+        cc.audioEngine.playMusic(this.balloonBGM, true);
         this.networkManager = NetworkManager.getInstance();
         const photonClient = this.networkManager?.getPhotonClient();
 
@@ -289,6 +293,7 @@ export default class BalloonGameManager extends cc.Component {
             }
             this.internalShowFinalResults();
             // --- Return to MapScene ---
+            cc.audioEngine.stopAll();
             cc.director.loadScene("MapScene");
         }, 0.5);
         if (this.isMasterClient) {
