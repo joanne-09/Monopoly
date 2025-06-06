@@ -1,6 +1,7 @@
 const {ccclass, property} = cc._decorator;
 import { PlayerData, PlayerAvatar } from "./types/DataTypes";
 import { PlayerControl } from "./PlayerControl";
+import OtherPlayers from "./OtherPlayers";
 
 enum CameraState {
     FOLLOW_PLAYER,
@@ -25,12 +26,14 @@ export default class CameraFollow extends cc.Component {
 
     @property(cc.Button)
     backButton: cc.Button = null;
+    @property(cc.Label)
+    moneyLabel: cc.Label = null;
 
     private parentPlayer: PlayerControl = null;
     private playerIndex: Map<number, number> = new Map();
 
     private currentCameraState: CameraState = CameraState.FOLLOW_PLAYER;
-    private targetPosition: cc.Vec2 = cc.v2(0, 0);
+    private targetPlayerId: number = 0;
 
     private mapMinX: number = -Infinity;
     private mapMaxX: number = Infinity;
@@ -58,9 +61,20 @@ export default class CameraFollow extends cc.Component {
             return;
         }
 
+        this.targetPlayerId = this.playerIndex.get(index);
         this.currentCameraState = CameraState.FOLLOW_OTHER;
-        const parentPosition = this.parentPlayer.node.getPosition();
-        this.targetPosition = this.parentPlayer.getPlayerPosition(this.playerIndex.get(index)).sub(parentPosition);
+        console.log(`Switched camera to follow player with ID: ${this.targetPlayerId}`);
+    }
+
+    getTargetPosition(): cc.Vec2 {
+        if (this.targetPlayerId === 0) {
+            console.error("Target player ID is not set.");
+            return cc.v2(0, 0);
+        }
+
+        const parentPosition = this.parentPlayer.getPlayerPosition(this.parentPlayer.playerId);
+        const targetPosition = this.parentPlayer.getPlayerPosition(this.targetPlayerId).sub(parentPosition);
+        return targetPosition;
     }
 
     onLoad() {
@@ -100,8 +114,9 @@ export default class CameraFollow extends cc.Component {
             
             // Apply position to camera
             this.node.setPosition(currentX, currentY);
-        }else{
-            this.node.setPosition(this.targetPosition);
+        }else if(this.currentCameraState === CameraState.FOLLOW_OTHER) {
+            const targetPosition = this.getTargetPosition();
+            this.node.setPosition(targetPosition);
         }
     }
 

@@ -31,7 +31,7 @@ export class PlayerControl extends cc.Component {
 
     private moveBuffer: cc.Vec2[] = [];
     private movementIndex: number = 0;
-    private moveSpeed: number = 100;
+    private moveSpeed: number = 150;
 
     private networkManager: NetworkManager = null;
     private gameManager: GameManager = GameManager.getInstance();
@@ -82,11 +82,14 @@ export class PlayerControl extends cc.Component {
     */
     public getPlayerPosition(playerId: number): cc.Vec2 {
         if (playerId === this.playerId) {
+            console.log(`Player ${this.playerId} position:`, this.position);
             return this.position;
         } else {
             const otherPlayerNode = this.otherPlayerMap.get(playerId);
             if (otherPlayerNode) {
-                return otherPlayerNode.getPosition();
+                const target = otherPlayerNode.getPosition();
+                console.log(`Other Player ${playerId} position:`, target);
+                return target;
             }
         }
         return cc.v2(0, 0);
