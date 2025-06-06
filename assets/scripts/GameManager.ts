@@ -5,6 +5,8 @@ import { config } from "./firebase/firebase-service";
 import { PhotonEventCodes } from "./types/PhotonEventCodes"; // Make sure this is correctly imported
 import MapManager from "./map/MapManager";
 import { MapNodeEvents } from "./types/GameEvents";
+import EventCard from "./EventCard";
+import { getRandomEvent } from "./types/EventsSets";
 
 enum GameState {
     INIT = "initialized",
@@ -33,6 +35,7 @@ export default class GameManager extends cc.Component {
     private currentTurnPlayer: PlayerData = null; // The player whose turn it is currently
     private isGameActive = false; // Flag to check if the game is active
     private state: GameState = null;
+    private inMiniGame: boolean = false;
     
     onLoad() {
         // Prevent duplicate instances
@@ -69,6 +72,7 @@ export default class GameManager extends cc.Component {
             this.statusLabel.string = "Game Manager Initialized";
         }
         this.state = GameState.INIT;
+    
     }
 
     // Network broadcast and listening
@@ -81,11 +85,18 @@ export default class GameManager extends cc.Component {
         } else if(eventCode == PhotonEventCodes.PLAYER_DATA) {
             //console.log("GameManager: Received player data from network manager handler.");
             this.playerMap = new Map(content.map((player: PlayerData) => [player.actorNumber, player]));
+
+            this.playerMap.forEach((playerData: PlayerData) => {
+                if(playerData.money == null || playerData.money === undefined) {
+                    playerData.money = 1500; // Default money for new players
+                }
+            })
             // Potentially update this.playerList if game is active and master client
             if (this.isGameActive) {
                 this.playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
                 console.log("GameManager: playerList updated due to PLAYER_DATA event on master.", this.playerList);
             }
+
         } else if(eventCode == PhotonEventCodes.PLAYER_MOVEMENT) { 
             //console.log("GameManager: Received player movement from network manager handler.");
             this.state = GameState.MOVE_PLAYER;
@@ -118,6 +129,27 @@ export default class GameManager extends cc.Component {
                 this.playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
                 console.log("GameManager: playerList updated due to PLAYER_MAP_JOINED event on master.", this.playerList);
             }
+        } else if(eventCode == PhotonEventCodes.SHOW_MAP_EVENT_CARD) {
+            console.log("GameManager: Received SHOW_MAP_EVENT_CARD event from actorNr:", actorNr, "content:", content);
+            switch(content) {
+                case MapNodeEvents.NORMAL:
+                    EventCard.getInstance().showCard(MapNodeEvents.NORMAL, `${this.playerMap.get(actorNr).name} found nothing`, "Nothing happened");
+                    break;
+                case MapNodeEvents.DESTINY:
+                    EventCard.getInstance().showCard(MapNodeEvents.DESTINY, `${this.playerMap.get(actorNr).name} found a destiny!`, "You found a destiny!"); 
+                    break;
+                case MapNodeEvents.CHANCE:
+                    EventCard.getInstance().showCard(MapNodeEvents.CHANCE, `${this.playerMap.get(actorNr).name} found a chance!`, "You found a chance!");
+                    break;
+                case MapNodeEvents.GAME:
+                    EventCard.getInstance().showCard(MapNodeEvents.GAME, `${this.playerMap.get(actorNr).name} found a game!`, "You found a game!");
+                    break;
+                case MapNodeEvents.ADDMONEY:
+                    EventCard.getInstance().showCard(MapNodeEvents.ADDMONEY, `${this.playerMap.get(actorNr).name} found $100!`, "You found $100!");
+                    break;
+                case MapNodeEvents.DEDUCTMONEY:
+                    EventCard.getInstance().showCard(MapNodeEvents.DEDUCTMONEY, `${this.playerMap.get(actorNr).name} lost $100!`, "You lost $100!");
+            }
         }
     }
 
@@ -125,16 +157,25 @@ export default class GameManager extends cc.Component {
         switch(mapEvent) {
             case MapNodeEvents.NORMAL:
                 console.log("GameManager: Handling NORMAL map event.");
-
+                //EventCard.getInstance().showCard(MapNodeEvents.NORMAL, "Nothing happened", "Nothing happened");
+                this.broadcastMapEventandShowCard(MapNodeEvents.NORMAL);
                 break;
             case MapNodeEvents.DESTINY:
                 console.log("GameManager: Handling DESTINY map event.");
+                this.broadcastMapEventandShowCard(MapNodeEvents.DESTINY);
                 break;
             case MapNodeEvents.CHANCE:
                 console.log("GameManager: Handling CHANCE map event.");
+                this.broadcastMapEventandShowCard(MapNodeEvents.CHANCE);
                 break;
             case MapNodeEvents.GAME:
                 console.log("GameManager: Handling GAME map event.");
+                this.broadcastMapEventandShowCard(MapNodeEvents.GAME);
+                this.inMiniGame = true;
+                this.scheduleOnce(() => {
+                    //cc.director.loadScene("MiniGameBalloon");
+                    Math.random() < 0.5 ? cc.director.loadScene("MiniGameBalloon") : cc.director.loadScene("MiniGameSnowball");
+                }, 5);
                 break;
             case MapNodeEvents.ADDMONEY:
                 console.log("GameManager: Handling ADDMONEY map event.");
@@ -143,6 +184,8 @@ export default class GameManager extends cc.Component {
                         playerData.money += 100;
                     }
                 });
+                this.broadcastMapEventandShowCard(MapNodeEvents.ADDMONEY);
+                //EventCard.getInstance().showCard(MapNodeEvents.ADDMONEY, "You found $100!", "You found $100!");
                 this.broadcastPlayerData();
                 break;
             case MapNodeEvents.DEDUCTMONEY:
@@ -154,6 +197,8 @@ export default class GameManager extends cc.Component {
                 }
                 );
                 this.broadcastPlayerData();
+                this.broadcastMapEventandShowCard(MapNodeEvents.DEDUCTMONEY);
+                //EventCard.getInstance().showCard(MapNodeEvents.DEDUCTMONEY, "You lost $100!", "You lost $100!");
                 break;
             case MapNodeEvents.STAR:
                 console.log("GameManager: Handling STAR map event.");
@@ -162,11 +207,19 @@ export default class GameManager extends cc.Component {
                         playerData.stars += 1;
                     }
                 });
+                this.broadcastMapEventandShowCard(MapNodeEvents.STAR);
+                //EventCard.getInstance().showCard(MapNodeEvents.STAR, "You found a star!", "You found a star!");
                 break;
         }
-        this.broadcastNextRound();
+        if(!this.inMiniGame){
+                this.broadcastNextRound();
+        }
     }
 
+    public broadcastMapEventandShowCard(mapEvent: MapNodeEvents) {
+        console.log("GameManager: Broadcasting SHOW_MAP_EVENT_CARD event to all clients.");
+        this.networkManager.sendGameAction(PhotonEventCodes.SHOW_MAP_EVENT_CARD, mapEvent);
+    }
     private broadcastNextRound() {
         this.networkManager.sendGameAction(PhotonEventCodes.START_NEXT_ROUND, this.currentTurnIndex); // PLAYER_MOVE_COMPLETED is used to broadcast the next round
     }
@@ -328,7 +381,7 @@ export default class GameManager extends cc.Component {
 
         // Initialize playerData for ALL players on the Master Client
         this.playerMap.forEach((playerData: PlayerData) => {
-            if(playerData.actorNumber === this.networkManager.getMyActorNumber()) {
+            if(true) {
                 playerData.islocal = true; // Set local player flag
                 playerData.isready = true; // Set local player as ready
                 playerData.positionIndex = 1;  // Initialize Player Index
@@ -386,7 +439,6 @@ export default class GameManager extends cc.Component {
         // This will be the logical, potentially ever-increasing, position index.
         // MapManager.getCoordByIndex is expected to handle wrapping this to a board coordinate.
         let newLogicalPositionIndex = playerToMove.positionIndex; 
-
         for (let i = 0; i < diceValue; i++) {
             newLogicalPositionIndex++; // Increment the logical position index for the next step
             newLogicalPositionIndex = ((newLogicalPositionIndex-1) % 60) + 1;
@@ -420,7 +472,7 @@ export default class GameManager extends cc.Component {
             playerToMove.position = finalPositionVec.clone();
         }
 
-
+        this.currentTurnPlayer.positionIndex = playerToMove.positionIndex; // Update currentTurnPlayer's positionIndex)
         this.broadcastPlayerData(); // playerMap now contains the updated playerToMove
         this.broadcastPlayerMovement(playerMovement);
     }
@@ -439,6 +491,7 @@ export default class GameManager extends cc.Component {
             // Handle map events
             const currentPlayerMapEvent: MapNodeEvents = this.getMapEventofCurrentPlayer();
             if(currentPlayerMapEvent !== null) {
+                console.log("Current player map event:", currentPlayerMapEvent);
                 this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_TRIGGERED_MAP_EVENT, currentPlayerMapEvent);
             }  
             //this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_MOVE_COMPLETED, { /* actorWhoMoved: myActorNumber */ }); // Content is optional
@@ -454,6 +507,7 @@ export default class GameManager extends cc.Component {
             console.error("GameManager: No current player data found for getting map event.");
             return null;
         }
+        console.log(`GameManager: Getting map event for current player ${currentPlayerData.name} (Actor: ${currentPlayerData.actorNumber}) at position index ${currentPlayerData.positionIndex}.`);
         return this.mapManager.getMapNodeEventByIndex(currentPlayerData.positionIndex);
     }
 
@@ -481,7 +535,12 @@ export default class GameManager extends cc.Component {
         });
         this.broadcastPlayerData(); // Broadcast updated player data after adding gadget
     }
-
+    public exitMiniGame() {
+        this.inMiniGame = false;
+        console.log("GameManager: Exiting mini-game, returning to main game state.");
+        // Optionally, you can reset any mini-game specific state here
+        this.broadcastNextRound(); // Proceed to the next round after exiting the mini-game
+    }
 }
 
 // TODO 

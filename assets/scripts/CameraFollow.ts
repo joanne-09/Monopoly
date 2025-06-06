@@ -75,8 +75,14 @@ export default class CameraFollow extends cc.Component {
                 this.selfDisplay.getChildByName("SelfName").getComponent(cc.Label).string = playerData.name;
                 const targetAvatar: cc.SpriteFrame = this[playerData.avatar + "_Avatar"];
                 this.selfDisplay.getChildByName("SelfAva").getComponent(cc.Sprite).spriteFrame = targetAvatar;
+                // initialize player money
+                this.updateMoney(playerData.money || 0);
             }
         });
+    }
+
+    public updateMoney(money: number) {
+        this.moneyLabel.string = `${money}`;
     }
 
     switchToOtherPlayer(index: number) {
