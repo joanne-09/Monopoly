@@ -1,7 +1,7 @@
 // filepath: c:\Monopoly Game\Monopoly\assets\scripts\MiniGameBalloon\Balloon.ts
 const {ccclass, property} = cc._decorator;
 import BalloonGameManager from "./BalloonGameManager";
-
+import GameManager from "../GameManager";
 export enum BalloonOperation {
     NONE,
     ADD,
@@ -55,6 +55,7 @@ export default class Balloon extends cc.Component {
         this.isPopped = false;
 
         this.updateDisplay();
+        this.updateScale(); // Add this line
     }
 
     isPointInside(worldPoint: cc.Vec2): boolean {
@@ -87,44 +88,111 @@ export default class Balloon extends cc.Component {
 
     updateDisplay() {
         if (this.valueLabel) {
-            let opSymbol = "";
-            if (this.operation !== BalloonOperation.NONE && this.operationValue !== 0) {
-                switch (this.operation) {
-                    case BalloonOperation.ADD: opSymbol = "+"; break;
-                    case BalloonOperation.SUBTRACT: opSymbol = "-"; break;
-                    case BalloonOperation.MULTIPLY: opSymbol = "x"; break;
-                    case BalloonOperation.DIVIDE: opSymbol = "/"; break;
-                }
-                this.valueLabel.string = `${this.points}\n${opSymbol}${this.operationValue}`;
-            } else {
-                this.valueLabel.string = this.points.toString();
+            let textToShow = "";
+            switch (this.operation) {
+                case BalloonOperation.ADD:
+                    textToShow = `+${this.operationValue}`;
+                    break;
+                case BalloonOperation.SUBTRACT:
+                    textToShow = `-${this.operationValue}`; // Assumes operationValue is positive magnitude
+                    break;
+                case BalloonOperation.MULTIPLY:
+                    textToShow = `×${this.operationValue}`; // Shows the multiplier
+                    break;
+                case BalloonOperation.DIVIDE:
+                    textToShow = `÷${this.operationValue}`; // Shows the divisor
+                    break;
+                case BalloonOperation.NONE:
+                    textToShow = this.points > 0 ? this.points.toString() : "0"; // Fallback, though points is usually 0
+                    break;
+                default:
+                    textToShow = "ERR";
+                    break;
             }
+            this.valueLabel.string = textToShow;
+        }
+        
+    }
+
+    updateScale() {
+        const minScale = 0.7;
+        const maxScale = 1.8;
+        let valueForScaling = 0; // This will be mapped to a common impact range e.g. 0-100
+
+        // Define a common impact range for normalization [minOverallImpact, maxOverallImpact]
+        // Let's use 10 as min (e.g. for /5 or +10) and 100 as max (e.g. for *5 or +100)
+        const minOverallImpact = 10;
+        const maxOverallImpact = 100;
+
+        switch (this.operation) {
+            case BalloonOperation.ADD:
+            case BalloonOperation.SUBTRACT:
+                // operationValue for ADD/SUB is expected to be in range like 10-100
+                valueForScaling = Math.abs(this.operationValue);
+                break;
+
+            case BalloonOperation.MULTIPLY:
+                // Factors: *2, *5. Map to an impact value.
+                if (this.operationValue === 5) valueForScaling = maxOverallImpact; // *5 is high impact
+                else if (this.operationValue === 2) valueForScaling = 70; // *2 is medium-high impact
+                else valueForScaling = 70; // Default for other multipliers
+                break;
+
+            case BalloonOperation.DIVIDE:
+                // Divisors: 2, 5. (Factors 0.5, 0.2) Map to an impact value.
+                if (this.operationValue === 5) valueForScaling = minOverallImpact + 10; // /5 is lower impact (e.g., 20 on 10-100 scale)
+                else if (this.operationValue === 2) valueForScaling = 40; // /2 is medium-low impact (e.g., 40 on 10-100 scale)
+                else valueForScaling = 30; // Default for other divisors
+                break;
+            
+            default:
+                this.node.scale = 1.0;
+                // Ensure it's set if we return early
+                if (isNaN(this.node.scaleX) || this.node.scaleX < minScale) {
+                    this.node.scale = minScale;
+                }
+                return; // Exit if no specific operation for scaling
+        }
+
+        // Normalize valueForScaling (which is now in a conceptual 10-100 range) to a 0-1 factor
+        let normalizedImpact = (valueForScaling - minOverallImpact) / (maxOverallImpact - minOverallImpact);
+        normalizedImpact = Math.max(0, Math.min(1, normalizedImpact)); // Clamp to 0-1
+
+        let targetScale = minScale + normalizedImpact * (maxScale - minScale);
+        
+        this.node.scale = Math.max(minScale, Math.min(maxScale, targetScale));
+
+        if (isNaN(this.node.scaleX)) {
+            this.node.scale = minScale; // Fallback if any calculation error
         }
     }
 
     getCalculatedScore(): number {
         if (this.isPopped) return 0;
-
-        let calculatedScore = this.points;
+        // this.points is expected to be 0 from BalloonGameManager for all types.
+        // Score calculation for ADD/SUB is based on operationValue.
+        // Score calculation for MULTIPLY/DIVIDE will be handled by BalloonGameManager,
+        // as it needs the player's current score. This function will return 0 for M/D types.
+        let calculatedScore = 0; 
         switch (this.operation) {
             case BalloonOperation.ADD:
-                calculatedScore += this.operationValue;
+                calculatedScore = this.operationValue; // operationValue is the direct score to add
                 break;
             case BalloonOperation.SUBTRACT:
-                calculatedScore -= this.operationValue;
+                calculatedScore = -this.operationValue; // operationValue is the positive magnitude to subtract
                 break;
             case BalloonOperation.MULTIPLY:
-                calculatedScore *= this.operationValue;
-                break;
             case BalloonOperation.DIVIDE:
-                if (this.operationValue !== 0) {
-                    calculatedScore = Math.floor(calculatedScore / this.operationValue);
-                } else {
-                    cc.warn("[Balloon] Division by zero in getCalculatedScore. Returning original points.");
-                }
+                // These types are handled by BalloonGameManager by applying the factor.
+                // This function returns 0 for them as they don't award a fixed score directly.
+                calculatedScore = 0; 
+                break;
+            default:
+                calculatedScore = this.points; // Fallback, should be 0
                 break;
         }
-        return Math.max(0, calculatedScore); 
+        // Removed Math.max(0, calculatedScore) to allow negative scores (e.g., -20)
+        return calculatedScore; 
     }
 
     pop(popperActorNr: number) {
@@ -138,8 +206,14 @@ export default class Balloon extends cc.Component {
             if (this.node.parent) {
                 this.node.parent.addChild(fx);
             }
-            // Optionally destroy the FX after 1s
-            fx.runAction(cc.sequence(cc.delayTime(1), cc.callFunc(() => fx.destroy())));
+            // Destroy FX after animation ends, or fallback to timer
+            const anim = fx.getComponent(cc.Animation);
+            if (anim) {
+                anim.on(cc.Animation.EventType.FINISHED, () => fx.destroy(), fx);
+                anim.play();
+            } else {
+                fx.runAction(cc.sequence(cc.delayTime(1), cc.callFunc(() => fx.destroy())));
+            }
         }
         // TODO: Add visual pop effect (e.g., particle system, animation)
         // TODO: Add sound effect
@@ -162,7 +236,13 @@ export default class Balloon extends cc.Component {
             if (this.node.parent) {
                 this.node.parent.addChild(fx);
             }
-            fx.runAction(cc.sequence(cc.delayTime(1), cc.callFunc(() => fx.destroy())));
+            const anim = fx.getComponent(cc.Animation);
+            if (anim) {
+                anim.on(cc.Animation.EventType.FINISHED, () => fx.destroy(), fx);
+                anim.play();
+            } else {
+                fx.runAction(cc.sequence(cc.delayTime(1), cc.callFunc(() => fx.destroy())));
+            }
         }
         // TODO: Add visual pop effect (e.g., particle system, animation)
         // TODO: Add sound effect
@@ -177,5 +257,18 @@ export default class Balloon extends cc.Component {
         }
         // Actual node destruction is handled by reportBalloonDespawned or directly by GameManager
         // this.node.destroy();
+    }
+
+    // Utility: Map player avatar type to slot index (0-3) for cursor/label assignment
+    // Avatar types: 'electric', 'grass', 'ice', 'fire' (order: 0,1,2,3)
+    // Returns slot index for a given avatar type string
+    static getAvatarSlotIndex(avatarType: string): number {
+        switch (avatarType) {
+            case 'electric': return 0;
+            case 'grass': return 1;
+            case 'ice': return 2;
+            case 'fire': return 3;
+            default: return 0; // fallback to electric if unknown
+        }
     }
 }
