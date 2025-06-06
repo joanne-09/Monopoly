@@ -53,9 +53,9 @@ export default class MatchMakingScene extends cc.Component {
     private networkManager: NetworkManager = null;
     private playerList: PlayerInfo[] = [];
     private handler: (eventCode: number, content: any, actorNr: number) => void;
+    private sceneLoadScheduled: boolean = false;
 
     onLoad() {
-
         this.networkManager = NetworkManager.getInstance();
         if (!this.networkManager) {
             cc.error("NetworkManager not found!");
@@ -69,10 +69,11 @@ export default class MatchMakingScene extends cc.Component {
 
         this.handler = this.onPhotonEvent.bind(this);
         this.networkManager.registerMessageHandler(this.handler);
-            // Wait for connection and room join, then set custom properties
+        // Wait for connection and room join, then set custom properties
         // console.log(GameManager.getInstance().getPlayerData(this.networkManager.getMyActorNumber()))
-        // console.log("hello! ",GameManager.getInstance().getPlayerList());
+        // console.log(GameManager.getInstance().getPlayerList());
         const list = GameManager.getInstance().getPlayerList();
+        console.log(list);
         const myActorNr = this.networkManager.getMyActorNumber();
         const setPropertiesWhenReady = () => {
             if (
@@ -116,6 +117,8 @@ export default class MatchMakingScene extends cc.Component {
         };
 
         setPropertiesWhenReady();
+
+        this.sceneLoadScheduled = false;
     }
 
     onPhotonEvent(eventCode: number, content: any, actorNr: number) {
@@ -159,7 +162,6 @@ export default class MatchMakingScene extends cc.Component {
                         playerLabels[i].string = this.playerList[i].username;
                     if (playerSprites[i] && this.playerList[i].sprite) {
                         playerSprites[i].node.active = true;
-                        // console.log("playerList[i].sprite:", this.playerList[i].sprite);
                         switch(this.playerList[i].sprite) {
                             case "ELECTRIC":
                                 playerSprites[i].spriteFrame = this.avatarSpriteFrames[0];
@@ -186,9 +188,10 @@ export default class MatchMakingScene extends cc.Component {
             }
         }
         if (this.leaveButton) {
-            //this.leaveButton.interactable = this.playerList.length < 4;
+            this.leaveButton.getComponent(cc.Button).enabled = this.playerList.length < 4;
         }
-        if (this.playerList.length === 4) {
+        if (this.playerList.length === 4 && !this.sceneLoadScheduled) {
+            this.sceneLoadScheduled = true
             this.scheduleOnce(() => {
                 cc.director.loadScene("MapScene");
             }, 3.0);
@@ -198,7 +201,7 @@ export default class MatchMakingScene extends cc.Component {
     onLeave() {
         // Optionally: leave the Photon room here
         cc.log("leave button clicked");
-        cc.director.loadScene("Start");
+        //cc.director.loadScene("Start");
     }
 
     onStartGame() {
@@ -215,10 +218,5 @@ export default class MatchMakingScene extends cc.Component {
         if (this.leaveButton) {
             this.leaveButton.off("click", this.onLeave, this);
         }
-    }
-
-    private getAvatarSpriteFrame(spriteName: string): cc.SpriteFrame | null {
-        const idx = this.avatarNames.indexOf(spriteName);
-        return idx !== -1 ? this.avatarSpriteFrames[idx] : null;
     }
 }

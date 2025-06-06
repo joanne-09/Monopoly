@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "spaceFrame_chance",
+    "_name": "spaceFrame_star",
     "_objFlags": 0,
     "_parent": null,
     "_children": [
@@ -187,7 +187,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "697IFCWXVLOImOcWnu/2cu",
+    "fileId": "42/Y+AxrpCa7aKodM01kTs",
     "sync": false
   },
   {
@@ -294,12 +294,12 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "1bUnmkVRpMto4tHIPC2bqg",
+    "fileId": "5dxY+zcYdPf6VPaLQHe9Hh",
     "sync": false
   },
   {
     "__type__": "cc.Node",
-    "_name": "Icon_ItemIcon_Clover",
+    "_name": "star_ic_2",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -377,7 +377,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "165d6c66-57af-47f7-a2fb-2de6d6fb689c"
+      "__uuid__": "bb44c9ff-2fee-47fc-9176-ea1ab5d0e74d"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -401,7 +401,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "51w0diiOtHrYfhGtxCt6Wi",
+    "fileId": "54ZeztsPlFwbV/X1ysscNR",
     "sync": false
   },
   {
