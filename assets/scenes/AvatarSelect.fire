@@ -1927,7 +1927,7 @@
         1,
         1,
         1,
-        1
+        0
       ]
     },
     "_eulerAngles": {
@@ -2112,8 +2112,8 @@
     "clickEvents": [],
     "_N$interactable": true,
     "_N$enableAutoGrayEffect": false,
-    "_N$transition": 2,
-    "transition": 2,
+    "_N$transition": 3,
+    "transition": 3,
     "_N$normalColor": {
       "__type__": "cc.Color",
       "r": 230,
@@ -2389,14 +2389,9 @@
       "__id__": 46
     },
     "_enabled": true,
-    "playerName": "",
-    "playerId": 1,
-    "playerAvatar": 0,
-    "position": {
-      "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
-    },
+    "otherPlayerPrefab": null,
+    "diceManager": null,
+    "rollDiceButton": null,
     "_id": "a3AKD3UqNPVb7kGGmX2HOm"
   }
 ]
