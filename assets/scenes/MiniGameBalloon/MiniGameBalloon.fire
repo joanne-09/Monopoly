@@ -2538,6 +2538,9 @@
       "__id__": 2
     },
     "gameTime": 60,
+    "balloonBGM": {
+      "__uuid__": "1b045361-2a8f-422a-8344-d5963aa5edd7"
+    },
     "_id": "e30vfg0qFCyYM7/WM4Mle3"
   }
 ]
