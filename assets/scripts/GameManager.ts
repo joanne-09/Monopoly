@@ -389,7 +389,8 @@ export default class GameManager extends cc.Component {
 
         for (let i = 0; i < diceValue; i++) {
             newLogicalPositionIndex++; // Increment the logical position index for the next step
-            const stepPosition = this.mapManager.getCoordByIndex(newLogicalPositionIndex);
+            newLogicalPositionIndex = (newLogicalPositionIndex % 60) + 1;
+            let stepPosition = this.mapManager.getCoordByIndex(newLogicalPositionIndex);
 
             if (!stepPosition) {
                 console.error(`GameManager: mapManager.getCoordByIndex(${newLogicalPositionIndex}) returned undefined for step ${i + 1}! Player: ${playerToMove.name}`);

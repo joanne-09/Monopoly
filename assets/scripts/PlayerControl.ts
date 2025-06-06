@@ -12,6 +12,8 @@ import CameraFollow from "./CameraFollow";
 export class PlayerControl extends cc.Component {
     @property(cc.Prefab)
     otherPlayerPrefab: cc.Prefab = null;
+    @property(cc.Node)
+    otherPlayers: cc.Node = null;
     @property(DiceManager)
     diceManager: DiceManager = null;
     @property(cc.Button)
@@ -130,7 +132,7 @@ export class PlayerControl extends cc.Component {
                 const playerControl = otherPlayerNode.getComponent(OtherPlayers);
                 playerControl.initPlayer(player);
                 this.otherPlayerMap.set(player.actorNumber, otherPlayerNode);
-                this.node.parent.addChild(otherPlayerNode);
+                this.otherPlayers.addChild(otherPlayerNode);
             }else{
                 this.playerName = player.name;
                 this.playerAvatar = player.avatar;
@@ -270,6 +272,13 @@ export class PlayerControl extends cc.Component {
                 const direction = nextMove.sub(currentPosition).normalize();
                 const distance = this.moveSpeed * dt;
                 const remainingDistance = nextMove.sub(currentPosition).mag();
+
+                // Adjust the scale based on the direction
+                if(direction.x > 0){
+                    this.node.scaleX = Math.abs(this.node.scaleX);
+                }else if(direction.x < 0){
+                    this.node.scaleX = -Math.abs(this.node.scaleX);
+                }
 
                 if(distance >= remainingDistance) {
                     // if the distance to the next position is less than or equal to the move speed
