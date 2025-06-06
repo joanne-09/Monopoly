@@ -4,13 +4,11 @@ const {ccclass, property} = cc._decorator;
 @ccclass("Store")
 export default class Store extends cc.Component {
     @property(cc.Label)
-    gadgetLabels: cc.Label[] = [];
-    @property(cc.Label)
     amountLabels: cc.Label[] = [];
     @property(cc.Button)
-    plusButtons: cc.Button[] = [];
-    @property(cc.Button)
     minusButtons: cc.Button[] = [];
+    @property(cc.Button)
+    plusButtons: cc.Button[] = [];
 
     @property(cc.Button)
     buyButton: cc.Button = null;
@@ -19,7 +17,6 @@ export default class Store extends cc.Component {
     @property(cc.Label)
     moneyLabel: cc.Label = null;
 
-    private gadgetNames = ["Gadget A", "Gadget B", "Gadget C", "Gadget D"];
     private gadgetPrices = [100, 200, 300, 400];
     private selectedAmounts = [0, 0, 0, 0];
     private playerMoney = 1000;
@@ -50,15 +47,12 @@ export default class Store extends cc.Component {
 
     updateUI() {
         for (let i = 0; i < 4; i++) {
-            if (this.gadgetLabels[i]) {
-                this.gadgetLabels[i].string = `${this.gadgetNames[i]} ($${this.gadgetPrices[i]})`;
-            }
             if (this.amountLabels[i]) {
                 this.amountLabels[i].string = `${this.selectedAmounts[i]}`;
             }
         }
         if (this.moneyLabel) {
-            this.moneyLabel.string = `Money: $${this.playerMoney}`;
+            this.moneyLabel.string = `${this.playerMoney}`;
         }
     }
 
@@ -77,7 +71,7 @@ export default class Store extends cc.Component {
             this.selectedAmounts[i] = 0;
         }
         this.updateUI();
-        alert("Purchase successful!");
+        if(total != 0) alert("Purchase successful!");
     }
 
     onLeave() {
