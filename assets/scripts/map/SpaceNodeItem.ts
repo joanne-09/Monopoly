@@ -8,13 +8,13 @@ export default class SpaceNodeItem extends cc.Component {
     mapNodeEvents: MapNodeEvents = MapNodeEvents.NORMAL;
     @property({type: cc.Enum(NodeOwnership)})
     Owner: NodeOwnership = NodeOwnership.NONE;
+    private coord: cc.Vec2 = cc.v2(0, 0);
 
     // LIFE-CYCLE CALLBACKS:
 
     // onLoad () {}
 
     start () {
-
     }
 
     isOwned(): boolean {
@@ -23,6 +23,11 @@ export default class SpaceNodeItem extends cc.Component {
 
     getOwner(): NodeOwnership {
         return this.Owner;
+    }
+
+    getCoord(): cc.Vec2 {
+      cc.log("getCoord called on SpaceNodeItem");
+        return this.node.getPosition();
     }
 
     public getMapNodeEvent(): MapNodeEvents {
