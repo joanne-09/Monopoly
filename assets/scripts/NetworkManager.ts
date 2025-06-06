@@ -174,7 +174,7 @@ export default class NetworkManager extends cc.Component {
     }
     
     private broadcastToHandlers(eventCode: number, content: any, actorNr: number) {
-        console.log(`NetworkManager: Broadcasting event ${eventCode} to ${this.messageHandlers.length} handlers`);
+        //console.log(`NetworkManager: Broadcasting event ${eventCode} to ${this.messageHandlers.length} handlers`);
         this.messageHandlers.forEach(handler => {
             try {
                 handler(eventCode, content, actorNr);
