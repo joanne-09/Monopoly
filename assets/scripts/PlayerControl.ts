@@ -208,6 +208,7 @@ export class PlayerControl extends cc.Component {
 
     start(){
         this.initPlayersPosition(this.gameManager.getPlayerList());
+        
     }
 
     update(dt: number){

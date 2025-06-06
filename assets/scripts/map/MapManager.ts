@@ -37,8 +37,14 @@ export default class MapManager extends cc.Component {
 
         this.gameManager = GameManager.getInstance();
 
-        this.gameManager.startGame(); // Start the game while load)
+      // Don't call startGame if the game is already active
         this.gameButton.node.on('click', this.loadGameScene, this);
+
+        if(!this.gameManager.getIsGameActive()) {
+          this.gameManager.startGame();
+        }
+        this.gameManager.broadcastTurn();
+         // Start the game while load)
 
     }
 
@@ -167,5 +173,6 @@ export default class MapManager extends cc.Component {
         if (MapManager.instance === this) {
             MapManager.instance = null;
         }
+        
     }
 }
