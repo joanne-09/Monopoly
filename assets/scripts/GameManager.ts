@@ -36,6 +36,7 @@ export default class GameManager extends cc.Component {
     private isGameActive = false; // Flag to check if the game is active
     private state: GameState = null;
     private inMiniGame: boolean = false;
+    private totalRounds: number = 1;
     
     onLoad() {
         // Prevent duplicate instances
@@ -111,6 +112,12 @@ export default class GameManager extends cc.Component {
                 this.currentTurnIndex = (content + 1) % this.playerList.length;
                 this.currentTurnPlayer = this.playerList[this.currentTurnIndex];
                 this.round++;
+                if(this.round > this.totalRounds) {
+                    this.scheduleOnce(() => {
+                        cc.director.loadScene("ResultScene");
+                    }, 2); // Delay to allow any final actions
+                    
+                }
                 this.broadcastPlayerData(); // Broadcast any state changes
                 this.broadcastTurn();     // Broadcast the new turn
             }
@@ -156,6 +163,12 @@ export default class GameManager extends cc.Component {
                     //cc.director.loadScene("MiniGameBalloon");
                     Math.random() < 0.5 ? cc.director.loadScene("MiniGameBalloon") : cc.director.loadScene("MiniGameSnowball");
                 }, 5);
+        } else if(eventCode == PhotonEventCodes.MINIGAME_BALLOON_GAME_OVER){
+            this.scheduleOnce(() => {
+                console.log("GameManager: Mini-game over, returning to main game state.");
+                cc.director.loadScene("MapScene");
+                this.exitMiniGame();
+            }, 5); // Delay to allow mini-game to finish
         }
     }
 
