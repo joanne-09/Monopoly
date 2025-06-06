@@ -389,7 +389,7 @@ export default class GameManager extends cc.Component {
 
         for (let i = 0; i < diceValue; i++) {
             newLogicalPositionIndex++; // Increment the logical position index for the next step
-            newLogicalPositionIndex = (newLogicalPositionIndex % 60) + 1;
+            newLogicalPositionIndex = ((newLogicalPositionIndex-1) % 60) + 1;
             let stepPosition = this.mapManager.getCoordByIndex(newLogicalPositionIndex);
 
             if (!stepPosition) {
