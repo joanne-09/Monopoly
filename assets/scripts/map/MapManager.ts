@@ -20,6 +20,9 @@ export default class MapManager extends cc.Component {
 
     @property(cc.Button)
     gameButton: cc.Button = null;
+
+    @property({type:cc.AudioClip})
+    gameBgm: cc.AudioClip = null;
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
@@ -43,7 +46,7 @@ export default class MapManager extends cc.Component {
         }
         this.gameManager.broadcastTurn();
          // Start the game while load)
-
+        cc.audioEngine.playMusic(this.gameBgm, true);
     }
 
     public static getInstance(): MapManager {
@@ -85,7 +88,9 @@ export default class MapManager extends cc.Component {
     }
 
     private loadGameScene() {
-      cc.director.loadScene("MiniGameSnowball");
+      cc.audioEngine.stopAll();
+      cc.director.loadScene("MiniGameBalloon");
+      //cc.director.loadScene("MiniGameSnowball");
     }
     protected getSpaceNodeItemByIndex(index: number) {
       if (!this.spacesNode) {

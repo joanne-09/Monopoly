@@ -1704,6 +1704,12 @@
       "__uuid__": "6f7fcab8-082c-4ff7-89ac-2161af3d6c39"
     },
     "team": "A",
+    "playerDieSfx": {
+      "__uuid__": "394e9712-b37a-42c1-9ba1-fc66a75c5a69"
+    },
+    "snowballMakeSfx": {
+      "__uuid__": "e90fd748-48df-4568-89a1-48f9845b2b2f"
+    },
     "_id": "96jXsaUU9ATrGRwErAU34W"
   },
   {
@@ -2984,6 +2990,12 @@
       "__uuid__": "6f7fcab8-082c-4ff7-89ac-2161af3d6c39"
     },
     "team": "B",
+    "playerDieSfx": {
+      "__uuid__": "394e9712-b37a-42c1-9ba1-fc66a75c5a69"
+    },
+    "snowballMakeSfx": {
+      "__uuid__": "e90fd748-48df-4568-89a1-48f9845b2b2f"
+    },
     "_id": "c8lgH4kBJA4IKV1nEOyWmH"
   },
   {
@@ -3865,6 +3877,12 @@
       "__uuid__": "6f7fcab8-082c-4ff7-89ac-2161af3d6c39"
     },
     "team": "A",
+    "playerDieSfx": {
+      "__uuid__": "394e9712-b37a-42c1-9ba1-fc66a75c5a69"
+    },
+    "snowballMakeSfx": {
+      "__uuid__": "e90fd748-48df-4568-89a1-48f9845b2b2f"
+    },
     "_id": "82OACdKD5NW5lDPbrrCqiY"
   },
   {
@@ -4746,6 +4764,12 @@
       "__uuid__": "6f7fcab8-082c-4ff7-89ac-2161af3d6c39"
     },
     "team": "B",
+    "playerDieSfx": {
+      "__uuid__": "394e9712-b37a-42c1-9ba1-fc66a75c5a69"
+    },
+    "snowballMakeSfx": {
+      "__uuid__": "e90fd748-48df-4568-89a1-48f9845b2b2f"
+    },
     "_id": "18x7HOj/VHvZ2RCTEryInn"
   },
   {
@@ -4926,6 +4950,9 @@
     "speed": 800,
     "hitFXPrefab": {
       "__uuid__": "99affb74-466a-427d-b47b-8c7af06501a6"
+    },
+    "snowballHitSfx": {
+      "__uuid__": "13b05bcb-47fb-4404-967e-4021a86dec13"
     },
     "_id": "b6juCT/9RMiI3JtgAgM9bS"
   },
@@ -6397,6 +6424,9 @@
     },
     "backToMapButton": {
       "__id__": 165
+    },
+    "snowballBGM": {
+      "__uuid__": "c06ab43d-ef3e-41ef-9349-528cb3fefb10"
     },
     "_id": "d34viMggxHE61RcqrokFMG"
   }

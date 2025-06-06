@@ -19,6 +19,9 @@ export default class Balloon extends cc.Component {
     @property(cc.Prefab)
     popFXPrefab: cc.Prefab = null;
 
+    @property({type:cc.AudioClip})
+    balloonPopSfx: cc.AudioClip = null;
+
     public balloonId: string = "";
     public points: number = 0;
     public operation: BalloonOperation = BalloonOperation.NONE;
@@ -173,6 +176,7 @@ export default class Balloon extends cc.Component {
     }
 
     pop(popperActorNr: number) {
+        cc.audioEngine.playEffect(this.balloonPopSfx, false);
         if (this.isPopped) return;
         this.isPopped = true;
         cc.log(`[Balloon] Balloon ${this.balloonId} popped by ${popperActorNr}.`);

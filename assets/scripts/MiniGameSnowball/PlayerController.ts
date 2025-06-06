@@ -38,6 +38,12 @@ export default class PlayerController extends cc.Component {
     @property
     team: string = 'A'; // Player's team, can be set in the editor
 
+    @property({type:cc.AudioClip})
+    playerDieSfx: cc.AudioClip;
+
+    @property({type:cc.AudioClip})
+    snowballMakeSfx: cc.AudioClip;
+
     private state: PlayerState = PlayerState.Idle;
     private keys: { [key: string]: boolean } = {};
     private moveSpeed: number = 200;
@@ -69,6 +75,8 @@ export default class PlayerController extends cc.Component {
     public static REMOTE_MOVE_ACTION_TAG = 1001;
     private inputListenersAttached: boolean = false; // Flag to track if listeners are on
     private isDead: boolean = false; // 死亡旗標
+
+    private snowballMakeEffectId: number = -1;
 
     // Public getter for isLocalPlayer
     public getIsLocalPlayer(): boolean {
@@ -242,6 +250,7 @@ export default class PlayerController extends cc.Component {
             case cc.macro.KEY.space:
                 if (!this.hasSnowball && this.state !== PlayerState.MakingSnowball) {
                     this.state = PlayerState.MakingSnowball;
+                    this.snowballMakeEffectId = cc.audioEngine.playEffect(this.snowballMakeSfx, false);
                     this.snowballTimer = 0;
                     if (this.anim) this.anim.play(this.makeAnimName);
                 }
@@ -270,6 +279,10 @@ export default class PlayerController extends cc.Component {
             case cc.macro.KEY.space:
                 if (this.state === PlayerState.MakingSnowball) {
                     this.state = PlayerState.Idle;
+                    if (this.snowballMakeEffectId !== -1) {
+                        cc.audioEngine.stopEffect(this.snowballMakeEffectId);
+                        this.snowballMakeEffectId = -1;
+                    }
                     this.snowballTimer = 0;
                     if (this.anim) this.anim.play(this.idleAnimName); 
                 } else if (this.state === PlayerState.HoldingSnowball) {
@@ -297,6 +310,7 @@ export default class PlayerController extends cc.Component {
 
     // 玩家死亡流程
     private handleDeath() {
+        cc.audioEngine.playEffect(this.playerDieSfx, false);
         this.isDead = true;
         // 停止操控
         this.state = PlayerState.Frozen;
@@ -376,6 +390,10 @@ export default class PlayerController extends cc.Component {
             if (this.snowballTimer >= this.snowballMakingTime) {
                 this.hasSnowball = true;
                 this.state = PlayerState.HoldingSnowball;
+                if (this.snowballMakeEffectId !== -1) {
+                    cc.audioEngine.stopEffect(this.snowballMakeEffectId);
+                    this.snowballMakeEffectId = -1;
+                }
                 if (this.snowballBar) this.snowballBar.node.active = false;
             }
             if (this.anim && !this.anim.getAnimationState(this.makeAnimName).isPlaying) {

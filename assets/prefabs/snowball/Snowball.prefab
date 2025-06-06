@@ -126,6 +126,9 @@
     "hitFXPrefab": {
       "__uuid__": "99affb74-466a-427d-b47b-8c7af06501a6"
     },
+    "snowballHitSfx": {
+      "__uuid__": "13b05bcb-47fb-4404-967e-4021a86dec13"
+    },
     "_id": ""
   },
   {
