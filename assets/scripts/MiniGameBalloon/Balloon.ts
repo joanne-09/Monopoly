@@ -115,55 +115,32 @@ export default class Balloon extends cc.Component {
     }
 
     updateScale() {
-        const minScale = 0.7;
-        const maxScale = 1.8;
-        let valueForScaling = 0; // This will be mapped to a common impact range e.g. 0-100
-
-        // Define a common impact range for normalization [minOverallImpact, maxOverallImpact]
-        // Let's use 10 as min (e.g. for /5 or +10) and 100 as max (e.g. for *5 or +100)
+        const minScale = 0.85; // was 0.7
+        const maxScale = 1.25; // was 1.8
+        let valueForScaling = 0;
         const minOverallImpact = 10;
-        const maxOverallImpact = 100;
-
+        const maxOverallImpact = 50; // was 100, now matches max allowed value
         switch (this.operation) {
             case BalloonOperation.ADD:
             case BalloonOperation.SUBTRACT:
-                // operationValue for ADD/SUB is expected to be in range like 10-100
                 valueForScaling = Math.abs(this.operationValue);
                 break;
-
             case BalloonOperation.MULTIPLY:
-                // Factors: *2, *5. Map to an impact value.
-                if (this.operationValue === 5) valueForScaling = maxOverallImpact; // *5 is high impact
-                else if (this.operationValue === 2) valueForScaling = 70; // *2 is medium-high impact
-                else valueForScaling = 70; // Default for other multipliers
+                valueForScaling = 50; // Only *2 allowed, treat as max impact
                 break;
-
-            case BalloonOperation.DIVIDE:
-                // Divisors: 2, 5. (Factors 0.5, 0.2) Map to an impact value.
-                if (this.operationValue === 5) valueForScaling = minOverallImpact + 10; // /5 is lower impact (e.g., 20 on 10-100 scale)
-                else if (this.operationValue === 2) valueForScaling = 40; // /2 is medium-low impact (e.g., 40 on 10-100 scale)
-                else valueForScaling = 30; // Default for other divisors
-                break;
-            
             default:
                 this.node.scale = 1.0;
-                // Ensure it's set if we return early
                 if (isNaN(this.node.scaleX) || this.node.scaleX < minScale) {
                     this.node.scale = minScale;
                 }
-                return; // Exit if no specific operation for scaling
+                return;
         }
-
-        // Normalize valueForScaling (which is now in a conceptual 10-100 range) to a 0-1 factor
         let normalizedImpact = (valueForScaling - minOverallImpact) / (maxOverallImpact - minOverallImpact);
-        normalizedImpact = Math.max(0, Math.min(1, normalizedImpact)); // Clamp to 0-1
-
+        normalizedImpact = Math.max(0, Math.min(1, normalizedImpact));
         let targetScale = minScale + normalizedImpact * (maxScale - minScale);
-        
         this.node.scale = Math.max(minScale, Math.min(maxScale, targetScale));
-
         if (isNaN(this.node.scaleX)) {
-            this.node.scale = minScale; // Fallback if any calculation error
+            this.node.scale = minScale;
         }
     }
 
