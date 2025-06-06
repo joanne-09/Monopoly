@@ -29,6 +29,15 @@ export default class CameraFollow extends cc.Component {
     @property(cc.Label)
     moneyLabel: cc.Label = null;
 
+    @property(cc.SpriteFrame)
+    ELECTRIC_Avatar: cc.SpriteFrame = null;
+    @property(cc.SpriteFrame)
+    FIRE_Avatar: cc.SpriteFrame = null;
+    @property(cc.SpriteFrame)
+    GRASS_Avatar: cc.SpriteFrame = null;
+    @property(cc.SpriteFrame)
+    ICE_Avatar: cc.SpriteFrame = null;
+
     private parentPlayer: PlayerControl = null;
     private playerIndex: Map<number, number> = new Map();
 
@@ -52,7 +61,19 @@ export default class CameraFollow extends cc.Component {
         players.forEach((playerData) => {
             if(playerData.actorNumber !== parentIndex) {
                 this.playerIndex.set(index, playerData.actorNumber);
+
+                // set name and avatar
+                const targetNode = this[`otherPlayer${index}`];
+                targetNode.getChildByName("SelfName").getComponent(cc.Label).string = playerData.name;
+                const targetAvatar: cc.SpriteFrame = this[playerData.avatar + "_Avatar"];
+                targetNode.getChildByName("SelfAva").getComponent(cc.Sprite).spriteFrame = targetAvatar;
+
                 index++;
+            }else{
+                // set parent name and avatar
+                this.selfDisplay.getChildByName("SelfName").getComponent(cc.Label).string = playerData.name;
+                const targetAvatar: cc.SpriteFrame = this[playerData.avatar + "_Avatar"];
+                this.selfDisplay.getChildByName("SelfAva").getComponent(cc.Sprite).spriteFrame = targetAvatar;
             }
         });
     }

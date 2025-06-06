@@ -3476,6 +3476,18 @@
     "moneyLabel": {
       "__id__": 83
     },
+    "ELECTRIC_Avatar": {
+      "__uuid__": "00ba008c-93ec-4e3b-89ad-4106bb1f639b"
+    },
+    "FIRE_Avatar": {
+      "__uuid__": "f25c93c8-1b68-4d39-b8da-d22f2b652545"
+    },
+    "GRASS_Avatar": {
+      "__uuid__": "b79e4e7f-e042-45f8-a5d8-a037ae32ce35"
+    },
+    "ICE_Avatar": {
+      "__uuid__": "6435c66c-c770-4b5a-b11b-222c180eae06"
+    },
     "_id": ""
   },
   {
