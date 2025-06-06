@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "afe59a9d-1495-4e8c-a210-1c4be1ac75c2",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 393,
+  "height": 360,
+  "platformSettings": {},
+  "subMetas": {
+    "Balloon Blue": {
+      "ver": "1.0.6",
+      "uuid": "98c53967-0e03-4ac4-845b-f24e8af1a711",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "afe59a9d-1495-4e8c-a210-1c4be1ac75c2",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 50.5,
+      "offsetY": 28.5,
+      "trimX": 207,
+      "trimY": 57,
+      "width": 80,
+      "height": 189,
+      "rawWidth": 393,
+      "rawHeight": 360,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
