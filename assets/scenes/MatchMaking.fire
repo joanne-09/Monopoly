@@ -345,7 +345,7 @@
         "__id__": 8
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 13
@@ -545,8 +545,8 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "Leave",
-    "_N$string": "Leave",
+    "_string": "Start",
+    "_N$string": "Start",
     "_fontSize": 20,
     "_lineHeight": 40,
     "_enableWrapText": false,
@@ -2393,10 +2393,10 @@
     "playerSprite4": {
       "__id__": 41
     },
-    "startGameButton": null,
-    "leaveButton": {
-      "__id__": 7
+    "startGameButton": {
+      "__id__": 13
     },
+    "leaveButton": null,
     "avatarSpriteFrames": [
       {
         "__uuid__": "00ba008c-93ec-4e3b-89ad-4106bb1f639b"

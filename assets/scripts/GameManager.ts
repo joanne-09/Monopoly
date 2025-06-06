@@ -236,6 +236,14 @@ export default class GameManager extends cc.Component {
 
         return localPlayerData;
     }
+
+    public getCurrentTurnPlayerData(): PlayerData | null {
+        if (!this.currentTurnPlayer) {
+            console.error("GameManager: No current turn player data available.");
+            return null;
+        }
+        return this.currentTurnPlayer;
+    }
     // Returns the player data for a specific actor number
     public getPlayerData(actorNumber: number): PlayerData | null {
         return this.playerMap.get(actorNumber) || null;
@@ -273,23 +281,12 @@ export default class GameManager extends cc.Component {
         })
         if (this.networkManager.isMasterClient()) {
             this.playerMap.forEach((playerData: PlayerData) => {
-                // Set islocal flag based on the current client's perspective,
-                // but this part of the loop is for master client's initialization of shared state.
-                // The actual 'islocal' for each client will be determined by them based on their actorNumber.
-                // However, the master client needs to prepare the full initial state.
                 playerData.positionIndex = 1; 
                 playerData.position = this.mapManager.getCoordByIndex(1);
                 playerData.money = 1500;
-                // 'islocal' will be correctly determined by each client upon receiving the data
-                // or can be set here if we are careful, but the primary goal is to ensure
-                // position and money are set for everyone by the master.
             });
             this.broadcastPlayerData(); // Broadcast once after all players are initialized
         }
-        
-        // Each client will set its own 'islocal' property correctly when processing received player data
-        // or when their PlayerControl initializes.
-        // For the local player on this client instance:
 
         this.broadcastTurn(); // Master client should typically manage turns
     }
