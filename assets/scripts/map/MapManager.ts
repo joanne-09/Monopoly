@@ -90,7 +90,7 @@ export default class MapManager extends cc.Component {
     private loadGameScene() {
       cc.audioEngine.stopAll();
       cc.director.loadScene("MiniGameBalloon");
-      cc.director.loadScene("MiniGameSnowball");
+      //cc.director.loadScene("MiniGameSnowball");
     }
     protected getSpaceNodeItemByIndex(index: number) {
       if (!this.spacesNode) {
