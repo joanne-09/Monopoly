@@ -95,7 +95,7 @@ export default class GameManager extends cc.Component {
             this.currentTurnPlayer = content;
         } else if (eventCode == PhotonEventCodes.START_NEXT_ROUND) {
             this.state = GameState.PLAYER_TURN;
-            //console.log(`GameManager: Received STARTNEXTROUND event from actorNr: ${actorNr}. Content:`, content);
+            console.log(`GameManager: Received STARTNEXTROUND event from actorNr: ${actorNr}. Content:`, content);
             if (this.networkManager.isMasterClient()) {
                 this.currentTurnIndex = (content + 1) % this.playerList.length;
                 this.currentTurnPlayer = this.playerList[this.currentTurnIndex];
