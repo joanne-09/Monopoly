@@ -201,7 +201,7 @@ export default class MatchMakingScene extends cc.Component {
     onLeave() {
         // Optionally: leave the Photon room here
         cc.log("leave button clicked");
-        cc.director.loadScene("Start");
+        //cc.director.loadScene("Start");
     }
 
     onStartGame() {
