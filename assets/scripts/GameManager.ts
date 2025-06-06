@@ -75,8 +75,7 @@ export default class GameManager extends cc.Component {
     //content is playerData type
     private networkManagerHandler(eventCode: number, content: any, actorNr: number) {
         if(eventCode == PhotonEventCodes.PLAYER_JOINED) {
-            let clients = this.networkManager["client"];
-            //console.log("GameManager: Network manager handler called with event code:", eventCode, "content:", content, "actorNr:", actorNr);
+            console.log("GameManager: Network manager handler called with event code:", eventCode, "content:", content, "actorNr:", actorNr);
             //console.log("GameManager: Current clients:", clients);
             this.playerMap.set(actorNr, content);
         } else if(eventCode == PhotonEventCodes.PLAYER_DATA) {
@@ -96,7 +95,7 @@ export default class GameManager extends cc.Component {
             this.currentTurnPlayer = content;
         } else if (eventCode == PhotonEventCodes.START_NEXT_ROUND) {
             this.state = GameState.PLAYER_TURN;
-            //console.log(`GameManager: Received STARTNEXTROUND event from actorNr: ${actorNr}. Content:`, content);
+            console.log(`GameManager: Received STARTNEXTROUND event from actorNr: ${actorNr}. Content:`, content);
             if (this.networkManager.isMasterClient()) {
                 this.currentTurnIndex = (content + 1) % this.playerList.length;
                 this.currentTurnPlayer = this.playerList[this.currentTurnIndex];
@@ -148,9 +147,6 @@ export default class GameManager extends cc.Component {
             case MapNodeEvents.DEDUCTMONEY:
                 console.log("GameManager: Handling DEDUCTMONEY map event.");
                 break;
-            case MapNodeEvents.SHOP:
-                console.log("GameManager: Handling SHOP map event.");
-                break;
             case MapNodeEvents.STAR:
                 console.log("GameManager: Handling STAR map event.");
                 break;
@@ -161,7 +157,7 @@ export default class GameManager extends cc.Component {
     private broadcastNextRound() {
         this.networkManager.sendGameAction(PhotonEventCodes.START_NEXT_ROUND, this.currentTurnIndex); // PLAYER_MOVE_COMPLETED is used to broadcast the next round
     }
-    private broadcastTurn() {
+    public broadcastTurn() {
         if (!this.isGameActive) {
             console.warn("GameManager: Cannot broadcast turn, game is not active.");
             return;
@@ -442,6 +438,32 @@ export default class GameManager extends cc.Component {
         }
         return this.mapManager.getMapNodeEventByIndex(currentPlayerData.positionIndex);
     }
+
+    // SHOP EVENTS
+    public deductMoneyFromLocalPlayer(amount: number) {
+        this.playerMap.forEach(playerData => {
+            if(playerData.actorNumber === this.networkManager.getMyActorNumber()) {
+                playerData.money -= amount;
+                console.log(`GameManager: Deducted ${amount} from local player ${playerData.name}. New balance: ${playerData.money}`);
+            }
+        });
+        this.broadcastPlayerData(); // Broadcast updated player data after deduction
+    }
+
+    public addGadgetToLocalPlayer(gadget: number[]) {
+        console.log(`GameManager: Adding gadget ${gadget} to local player.`);
+        this.playerMap.forEach(playerData => {
+            if(playerData.actorNumber === this.networkManager.getMyActorNumber()) {
+                if (!playerData.gadgets) {
+                    playerData.gadgets = gadget;
+                }
+                playerData.gadgets.push();
+                console.log(`GameManager: Added gadget ${gadget} to local player ${playerData.name}. Gadgets: ${playerData.gadgets}`);
+            }
+        });
+        this.broadcastPlayerData(); // Broadcast updated player data after adding gadget
+    }
+
 }
 
 // TODO 

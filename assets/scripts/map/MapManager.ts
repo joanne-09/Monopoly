@@ -37,8 +37,14 @@ export default class MapManager extends cc.Component {
 
         this.gameManager = GameManager.getInstance();
 
-        this.gameManager.startGame(); // Start the game while load)
+      // Don't call startGame if the game is already active
         this.gameButton.node.on('click', this.loadGameScene, this);
+
+        if(!this.gameManager.getIsGameActive()) {
+          this.gameManager.startGame();
+        }
+        this.gameManager.broadcastTurn();
+         // Start the game while load)
 
     }
 
@@ -81,7 +87,7 @@ export default class MapManager extends cc.Component {
     }
 
     private loadGameScene() {
-      cc.director.loadScene("MiniGameSnowball");
+      cc.director.loadScene("MiniGameBalloon");
     }
     protected getSpaceNodeItemByIndex(index: number) {
       if (!this.spacesNode) {
@@ -111,6 +117,7 @@ export default class MapManager extends cc.Component {
         return cc.v2(0, 0); // Return a default value or handle the error as needed
       }
       const coord = spaceNodeItem.getCoord();
+      coord.x -= 132; coord.y += 293;
       cc.log(`Coord for index ${index}: ${coord}`);
       return coord;
     }
@@ -167,5 +174,6 @@ export default class MapManager extends cc.Component {
         if (MapManager.instance === this) {
             MapManager.instance = null;
         }
+        
     }
 }

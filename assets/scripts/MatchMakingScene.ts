@@ -48,6 +48,12 @@ export default class MatchMakingScene extends cc.Component {
     @property([cc.SpriteFrame])
     avatarSpriteFrames: cc.SpriteFrame[] = [];
 
+    @property({type: cc.AudioClip})
+    buttonClickSfx: cc.AudioClip = null;
+
+    @property({type: cc.AudioClip})
+    buttonHoverSfx: cc.AudioClip = null;
+
     avatarNames: string[] = ["Player ELECTRIC", "Player FIRE", "Player GRASS", "Player ICE"];
 
     private networkManager: NetworkManager = null;
@@ -119,6 +125,10 @@ export default class MatchMakingScene extends cc.Component {
         setPropertiesWhenReady();
 
         this.sceneLoadScheduled = false;
+
+        this.startGameButton.node.on("mouseenter", () => {
+            if (this.buttonHoverSfx) cc.audioEngine.playEffect(this.buttonHoverSfx, false);
+        });
     }
 
     onPhotonEvent(eventCode: number, content: any, actorNr: number) {
@@ -207,7 +217,8 @@ export default class MatchMakingScene extends cc.Component {
     onStartGame() {
         cc.log("start game button clicked");
         this.networkManager.sendGameAction(PhotonEventCodes.START_GAME, null);
-    
+        cc.audioEngine.stopAll();
+        cc.audioEngine.playEffect(this.buttonClickSfx, false);
         cc.director.loadScene("MapScene");
     }
 

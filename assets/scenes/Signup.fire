@@ -2476,6 +2476,12 @@
     "background2": {
       "__id__": 7
     },
+    "buttonClickSfx": {
+      "__uuid__": "c8bba6ab-849c-4d8f-b893-b6a4636f96c2"
+    },
+    "buttonHoverSfx": {
+      "__uuid__": "9050e650-86bc-40a7-9f20-81cfa8b0abcb"
+    },
     "_id": "28IWWuOfZGTKiOiY3TRR8B"
   }
 ]

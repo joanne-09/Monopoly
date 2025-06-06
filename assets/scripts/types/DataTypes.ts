@@ -1,3 +1,9 @@
+export enum PlayerGadgets{
+    DICEADD2 = "DICEADD2",
+    DICEMINUS2 = "DICEMINUS2",
+    STEALMONEY = "STEALMONEY",
+    STEALGADGET = "STEALGADGET",
+}
 export interface PlayerData {
     actorNumber: number; // Unique identifier for the player
     name: string; // Player's name
@@ -7,6 +13,7 @@ export interface PlayerData {
     islocal?: boolean;
     isready?: boolean; // Indicates if the player is ready to start the game
     money?: number;
+    gadgets?: number[]; // List of gadgets the player has
 }
 export interface PlayerMovement {
     actorNumber: number; // Unique identifier for the player
