@@ -23,6 +23,8 @@ export default class AvatarSelect extends cc.Component {
     playerLabel: cc.Label = null;
     @property(cc.Button)
     createButton: cc.Button = null;
+    @property(cc.Button)
+    logoutButton: cc.Button = null;
 
     @property({type: cc.AudioClip})
     buttonClickSfx: cc.AudioClip = null;
@@ -112,6 +114,13 @@ export default class AvatarSelect extends cc.Component {
         }, 0.5);
     }
 
+    onLogout() {
+        firebase.auth().signOut().then(() => {
+            console.log("User signed out successfully.");
+            cc.director.loadScene("Start");
+        });
+    }
+
     // Life cycle method
     onLoad() {
         // Character button click listeners
@@ -145,6 +154,11 @@ export default class AvatarSelect extends cc.Component {
         if(this.createButton) {
             this.createButton.node.on("click", () => {
                 this.onCreateRoom();
+            }, this);
+        }
+        if (this.logoutButton) {
+            this.logoutButton.node.on("click", () => {
+                this.onLogout();
             }, this);
         }
 
