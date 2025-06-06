@@ -250,6 +250,7 @@ export class PlayerControl extends cc.Component {
 
     update(dt: number){
         // Set player animation
+        this.setPlayerAnimation();
         this.playAnimation();
 
         if(this.playerState === PlayerState.MYTURN) {

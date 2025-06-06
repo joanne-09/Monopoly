@@ -9,5 +9,12 @@ export enum PhotonEventCodes {
     START_GAME = 8,
     START_NEXT_ROUND = 9, // Added
     PLAYER_TRIGGERED_MAP_EVENT = 10, // Added
-    PLAYER_MAP_JOINED = 11, // Check if player new player joined the map
+    // Balloon Minigame Events
+    MINIGAME_BALLOON_SPAWN = 11,
+    MINIGAME_BALLOON_POP_ATTEMPT = 12,
+    MINIGAME_BALLOON_POPPED_CONFIRMED = 13,
+    MINIGAME_BALLOON_GAME_OVER = 14,
+    MINIGAME_BALLOON_SCORE_UPDATE = 15,
+    MINIGAME_BALLOON_CURSOR_MOVE = 16, // Added for cursor synchronization
+    PLAYER_MAP_JOINED = 17, // Check if player new player joined the map
 }
