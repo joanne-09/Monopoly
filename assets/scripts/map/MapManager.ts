@@ -20,6 +20,9 @@ export default class MapManager extends cc.Component {
 
     @property(cc.Button)
     gameButton: cc.Button = null;
+
+    @property({type:cc.AudioClip})
+    gameBgm: cc.AudioClip = null;
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
@@ -30,10 +33,6 @@ export default class MapManager extends cc.Component {
             return;
         }
         MapManager.instance = this;
-        if(!cc.game.isPersistRootNode(this.node)) {
-            console.log("Adding MapManager node to persist root nodes.");
-            cc.game.addPersistRootNode(this.node);
-        }
 
         this.gameManager = GameManager.getInstance();
 
@@ -42,10 +41,12 @@ export default class MapManager extends cc.Component {
 
         if(!this.gameManager.getIsGameActive()) {
           this.gameManager.startGame();
+        }else{
+          this.gameManager.resetMapManager();
         }
         this.gameManager.broadcastTurn();
          // Start the game while load)
-
+        cc.audioEngine.playMusic(this.gameBgm, true);
     }
 
     public static getInstance(): MapManager {
@@ -87,7 +88,9 @@ export default class MapManager extends cc.Component {
     }
 
     private loadGameScene() {
-      cc.director.loadScene("MiniGameSnowball");
+      cc.audioEngine.stopAll();
+      cc.director.loadScene("MiniGameBalloon");
+      //cc.director.loadScene("MiniGameSnowball");
     }
     protected getSpaceNodeItemByIndex(index: number) {
       if (!this.spacesNode) {

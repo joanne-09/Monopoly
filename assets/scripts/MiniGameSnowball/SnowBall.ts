@@ -15,7 +15,10 @@ export default class SnowBall extends cc.Component {
     private isActive: boolean = false;
     private team: string = 'A'; // 發射者 team
     @property({ type: cc.Prefab }) hitFXPrefab: cc.Prefab = null; // 可選，若Prefab沒設可自動尋找
-
+    
+    @property({type:cc.AudioClip})
+    snowballHitSfx: cc.AudioClip = null;
+    
     // 初始化雪球方向與 team
     init(dir: cc.Vec2, team: string = 'A') {
         this.direction = dir.normalize();
@@ -72,6 +75,10 @@ export default class SnowBall extends cc.Component {
                     fx.x = this.node.x;
                     fx.y = this.node.y + 20;
                 }
+                if (this.snowballHitSfx) {
+                    cc.audioEngine.playEffect(this.snowballHitSfx, false);
+                    cc.log("!!!!!!")
+                } else cc.log("????????????");
                 this.isActive = false;
                 this.node.destroy();
                 return;

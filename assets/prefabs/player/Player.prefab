@@ -816,6 +816,14 @@
     "hitFXPrefab": {
       "__uuid__": "99affb74-466a-427d-b47b-8c7af06501a6"
     },
+    "icedFXPrefab": null,
+    "team": "A",
+    "playerDieSfx": {
+      "__uuid__": "394e9712-b37a-42c1-9ba1-fc66a75c5a69"
+    },
+    "snowballMakeSfx": {
+      "__uuid__": "e90fd748-48df-4568-89a1-48f9845b2b2f"
+    },
     "_id": ""
   },
   {
