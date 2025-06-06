@@ -25,15 +25,21 @@ export default class MapManager extends cc.Component {
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
+      console.log("MapManager onLoad");
         if (MapManager.instance) {
+            cc.error("MapManager instance already exists, destroying this instance.");
             this.node.destroy();
             return;
         }
         MapManager.instance = this;
+        if(!cc.game.isPersistRootNode(this.node)) {
+            console.log("Adding MapManager node to persist root nodes.");
+            cc.game.addPersistRootNode(this.node);
+        }
+
         this.gameManager = GameManager.getInstance();
 
-        this.gameManager.startGame(); // Start the game while load
-
+        this.gameManager.startGame(); // Start the game while load)
         this.gameButton.node.on('click', this.loadGameScene, this);
     }
 
@@ -124,6 +130,12 @@ export default class MapManager extends cc.Component {
             }
         } else {
             cc.warn("Local player data or money label is not set.");
+        }
+    }
+    onDestroy() {
+        console.log("MapManager onDestroy");
+        if (MapManager.instance === this) {
+            MapManager.instance = null;
         }
     }
 }
