@@ -30179,8 +30179,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
-      "height": 40
+      "width": 960,
+      "height": 640
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -30221,7 +30221,7 @@
     "_name": "PlayerCamera",
     "_objFlags": 0,
     "_parent": {
-      "__id__": 2
+      "__id__": 696
     },
     "_children": [
       {
@@ -30265,8 +30265,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 960,
-      "height": 640
+      "width": 100,
+      "height": 40
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -33551,8 +33551,8 @@
     "sync": false
   },
   {
-    "__type__": "cc.Node",
-    "_name": "DiceManager",
+    "__type__": "cc.Camera",
+    "_name": "",
     "_objFlags": 0,
     "_parent": {
       "__id__": 691
@@ -33574,39 +33574,40 @@
     "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
+      "r": 0,
+      "g": 0,
+      "b": 0,
       "a": 255
     },
-    "_contentSize": {
-      "__type__": "cc.Size",
-      "width": 0,
-      "height": 0
+    "_depth": 0,
+    "_zoomRatio": 1,
+    "_targetTexture": null,
+    "_fov": 60,
+    "_orthoSize": 10,
+    "_nearClip": 0.1,
+    "_farClip": 4096,
+    "_ortho": true,
+    "_rect": {
+      "__type__": "cc.Rect",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1
     },
-    "_anchorPoint": {
+    "_renderStages": 1,
+    "_alignWithScreen": true,
+    "_id": "36R+dDYVpEgI4e4bP1teIw"
+  },
+  {
+    "__type__": "8e0b8J4FypHmKc81hhgLgCZ",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 696
+    },
+    "_enabled": true,
+    "followOffset": {
       "__type__": "cc.Vec2",
-      "x": 0.5,
-      "y": 0.5
-    },
-    "_trs": {
-      "__type__": "TypedArray",
-      "ctor": "Float64Array",
-      "array": [
-        0,
-        0,
-        -554.25626,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-        1
-      ]
-    },
-    "_eulerAngles": {
-      "__type__": "cc.Vec3",
       "x": 0,
       "y": 0,
       "z": 0
@@ -33620,8 +33621,8 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "dice1",
-    "_objFlags": 0,
+    "_name": "Background",
+    "_objFlags": 512,
     "_parent": {
       "__id__": 775
     },
@@ -33630,7 +33631,7 @@
         "__id__": 777
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 780
@@ -33652,8 +33653,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 768,
-      "height": 896
+      "width": 100,
+      "height": 40
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -33691,8 +33692,8 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Sprite",
-    "_objFlags": 0,
+    "_name": "Label",
+    "_objFlags": 512,
     "_parent": {
       "__id__": 776
     },
@@ -33709,15 +33710,15 @@
     "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
+      "r": 0,
+      "g": 0,
+      "b": 0,
       "a": 255
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 40,
-      "height": 36
+      "width": 100,
+      "height": 40
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -33754,7 +33755,7 @@
     "_id": "f4rzn5GMBOR6ZsxAjGh8GL"
   },
   {
-    "__type__": "cc.Sprite",
+    "__type__": "cc.Label",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -39913,10 +39914,10 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "00ba008c-93ec-4e3b-89ad-4106bb1f639b"
+      "__uuid__": "f0048c10-f03e-4c97-b9d3-3506e1d58952"
     },
-    "_type": 0,
-    "_sizeMode": 1,
+    "_type": 1,
+    "_sizeMode": 0,
     "_fillType": 0,
     "_fillCenter": {
       "__type__": "cc.Vec2",
@@ -39932,7 +39933,7 @@
     "_id": "57lctecENJ7YrHZPEbtilw"
   },
   {
-    "__type__": "cc.Animation",
+    "__type__": "cc.Widget",
     "_name": "",
     "_objFlags": 0,
     "node": {
