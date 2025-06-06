@@ -16,14 +16,23 @@ export default class EventCard extends cc.Component {
     
     // Variable to control which sprite to show
     private currentSpriteIndex: number = 0;
-
-    onload() {
-
+    private static instance: EventCard = null;
+    onLoad() {
+        if (EventCard.instance) {
+            cc.warn("EventCard: Instance already exists, destroying duplicate.");
+            this.node.destroy();
+            return;
+        }
+        EventCard.instance = this;
     }
 
     start() {
         this.node.active = false; // Hide the card initially
         this.updateSprite();
+    }
+
+    public static getInstance(): EventCard {
+        return EventCard.instance;
     }
 
     public test() {
@@ -60,6 +69,9 @@ export default class EventCard extends cc.Component {
             case MapNodeEvents.DEDUCTMONEY:
                 this.setSpriteByType("deductmoney");
                 break;
+            case MapNodeEvents.STAR:
+                this.setSpriteByType("star");
+                break;
             default:
                 cc.warn(`Unknown node event type: ${nodeEvent}`);
                 break;
@@ -67,6 +79,10 @@ export default class EventCard extends cc.Component {
         cc.log(`Showing card for event: ${nodeEvent}, description: ${description}, effect: ${effect}`);
         // Set the card visibility to true
         this.node.active = true;
+
+        this.scheduleOnce(() => {
+            this.hideCard();
+        }, 3); // Hide the card after 3 seconds
     }
 
     // Method to switch sprite based on index

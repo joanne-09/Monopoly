@@ -5,6 +5,7 @@ import { config } from "./firebase/firebase-service";
 import { PhotonEventCodes } from "./types/PhotonEventCodes"; // Make sure this is correctly imported
 import MapManager from "./map/MapManager";
 import { MapNodeEvents } from "./types/GameEvents";
+import EventCard from "./EventCard";
 
 enum GameState {
     INIT = "initialized",
@@ -118,6 +119,27 @@ export default class GameManager extends cc.Component {
                 this.playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
                 console.log("GameManager: playerList updated due to PLAYER_MAP_JOINED event on master.", this.playerList);
             }
+        } else if(eventCode == PhotonEventCodes.SHOW_MAP_EVENT_CARD) {
+            console.log("GameManager: Received SHOW_MAP_EVENT_CARD event from actorNr:", actorNr, "content:", content);
+            switch(content) {
+                case MapNodeEvents.NORMAL:
+                    EventCard.getInstance().showCard(MapNodeEvents.NORMAL, `${this.playerMap.get(actorNr).name} found nothing`, "Nothing happened");
+                    break;
+                case MapNodeEvents.DESTINY:
+                    EventCard.getInstance().showCard(MapNodeEvents.DESTINY, `${this.playerMap.get(actorNr).name} found a destiny!`, "You found a destiny!"); 
+                    break;
+                case MapNodeEvents.CHANCE:
+                    EventCard.getInstance().showCard(MapNodeEvents.CHANCE, `${this.playerMap.get(actorNr).name} found a chance!`, "You found a chance!");
+                    break;
+                case MapNodeEvents.GAME:
+                    EventCard.getInstance().showCard(MapNodeEvents.GAME, `${this.playerMap.get(actorNr).name} found a game!`, "You found a game!");
+                    break;
+                case MapNodeEvents.ADDMONEY:
+                    EventCard.getInstance().showCard(MapNodeEvents.ADDMONEY, `${this.playerMap.get(actorNr).name} found $100!`, "You found $100!");
+                    break;
+                case MapNodeEvents.DEDUCTMONEY:
+                    EventCard.getInstance().showCard(MapNodeEvents.DEDUCTMONEY, `${this.playerMap.get(actorNr).name} lost $100!`, "You lost $100!");
+            }
         }
     }
 
@@ -125,16 +147,20 @@ export default class GameManager extends cc.Component {
         switch(mapEvent) {
             case MapNodeEvents.NORMAL:
                 console.log("GameManager: Handling NORMAL map event.");
-
+                //EventCard.getInstance().showCard(MapNodeEvents.NORMAL, "Nothing happened", "Nothing happened");
+                this.broadcastMapEventandShowCard(MapNodeEvents.NORMAL);
                 break;
             case MapNodeEvents.DESTINY:
                 console.log("GameManager: Handling DESTINY map event.");
+                this.broadcastMapEventandShowCard(MapNodeEvents.DESTINY);
                 break;
             case MapNodeEvents.CHANCE:
                 console.log("GameManager: Handling CHANCE map event.");
+                this.broadcastMapEventandShowCard(MapNodeEvents.CHANCE);
                 break;
             case MapNodeEvents.GAME:
                 console.log("GameManager: Handling GAME map event.");
+                this.broadcastMapEventandShowCard(MapNodeEvents.GAME);
                 break;
             case MapNodeEvents.ADDMONEY:
                 console.log("GameManager: Handling ADDMONEY map event.");
@@ -143,6 +169,8 @@ export default class GameManager extends cc.Component {
                         playerData.money += 100;
                     }
                 });
+                this.broadcastMapEventandShowCard(MapNodeEvents.ADDMONEY);
+                //EventCard.getInstance().showCard(MapNodeEvents.ADDMONEY, "You found $100!", "You found $100!");
                 this.broadcastPlayerData();
                 break;
             case MapNodeEvents.DEDUCTMONEY:
@@ -154,6 +182,8 @@ export default class GameManager extends cc.Component {
                 }
                 );
                 this.broadcastPlayerData();
+                this.broadcastMapEventandShowCard(MapNodeEvents.DEDUCTMONEY);
+                //EventCard.getInstance().showCard(MapNodeEvents.DEDUCTMONEY, "You lost $100!", "You lost $100!");
                 break;
             case MapNodeEvents.STAR:
                 console.log("GameManager: Handling STAR map event.");
@@ -162,11 +192,17 @@ export default class GameManager extends cc.Component {
                         playerData.stars += 1;
                     }
                 });
+                this.broadcastMapEventandShowCard(MapNodeEvents.STAR);
+                //EventCard.getInstance().showCard(MapNodeEvents.STAR, "You found a star!", "You found a star!");
                 break;
         }
         this.broadcastNextRound();
     }
 
+    public broadcastMapEventandShowCard(mapEvent: MapNodeEvents) {
+        console.log("GameManager: Broadcasting SHOW_MAP_EVENT_CARD event to all clients.");
+        this.networkManager.sendGameAction(PhotonEventCodes.SHOW_MAP_EVENT_CARD, mapEvent);
+    }
     private broadcastNextRound() {
         this.networkManager.sendGameAction(PhotonEventCodes.START_NEXT_ROUND, this.currentTurnIndex); // PLAYER_MOVE_COMPLETED is used to broadcast the next round
     }
@@ -328,7 +364,7 @@ export default class GameManager extends cc.Component {
 
         // Initialize playerData for ALL players on the Master Client
         this.playerMap.forEach((playerData: PlayerData) => {
-            if(playerData.actorNumber === this.networkManager.getMyActorNumber()) {
+            if(true) {
                 playerData.islocal = true; // Set local player flag
                 playerData.isready = true; // Set local player as ready
                 playerData.positionIndex = 1;  // Initialize Player Index
