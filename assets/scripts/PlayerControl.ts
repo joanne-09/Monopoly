@@ -55,6 +55,9 @@ export class PlayerControl extends cc.Component {
                     this.setOtherPlayerMoveBuffer(this.whosTurn, content);
                 }
                 break;
+            case PhotonEventCodes.PLAYER_MAP_JOINED:
+                this.initPlayersPosition(content);
+                break;
         }
     }
 
@@ -83,13 +86,11 @@ export class PlayerControl extends cc.Component {
     */
     public getPlayerPosition(playerId: number): cc.Vec2 {
         if (playerId === this.playerId) {
-            console.log(`Player ${this.playerId} position:`, this.position);
             return this.position;
         } else {
             const otherPlayerNode = this.otherPlayerMap.get(playerId);
             if (otherPlayerNode) {
                 const target = otherPlayerNode.getPosition();
-                console.log(`Other Player ${playerId} position:`, target);
                 return target;
             }
         }
@@ -135,11 +136,15 @@ export class PlayerControl extends cc.Component {
 
     initPlayersPosition(playerList: PlayerData[]) {
         playerList.forEach(player => {
-            if (player.actorNumber !== this.playerId) {
-                const otherPlayerNode = this.otherPlayerMap.get(player.actorNumber);
-                otherPlayerNode.getComponent(OtherPlayers).initPlayerPosition(cc.v2(player.position.x, player.position.y));
-            } else {
-                this.setPlayerPosition(cc.v2(player.position.x, player.position.y));
+            if(player.position){
+                if (player.actorNumber !== this.playerId) {
+                    const otherPlayerNode = this.otherPlayerMap.get(player.actorNumber);
+                    otherPlayerNode.getComponent(OtherPlayers).initPlayerPosition(cc.v2(player.position.x, player.position.y));
+                } else {
+                    this.setPlayerPosition(cc.v2(player.position.x, player.position.y));
+                }
+            }else{
+                console.log(`Player ${player.actorNumber} position is not initiated`);
             }
         });
     }
