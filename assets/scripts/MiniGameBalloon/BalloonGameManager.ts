@@ -258,11 +258,43 @@ export default class BalloonGameManager extends cc.Component {
         cc.log("[BalloonGameManager] Game Over!");
         this.activeBalloons.forEach(b => { if(b.node && cc.isValid(b.node)) b.node.destroy(); });
         this.activeBalloons.clear();
+        // --- Custom: After 0.5s, award money by rank, then return to MapScene ---
+        this.scheduleOnce(() => {
+            // Sort by score descending
+            const sorted = [...this.playerScores].sort((a, b) => b.score - a.score);
+            // Award: 1st 200, 2nd 100, 3rd 50, 4th 20
+            const rewards = [200, 100, 50, 20];
+            let gameManager = null;
+            try {
+                gameManager = (window as any).GameManager?.getInstance?.() || null;
+            } catch (e) {}
+            if (!gameManager) {
+                const gameManagerNode = cc.director.getScene().getChildByName("GameManager");
+                if (gameManagerNode) {
+                    gameManager = gameManagerNode.getComponent("GameManager");
+                }
+            }
+            if (gameManager && typeof gameManager.deductMoneyFromLocalPlayer === 'function') {
+                // Find local player rank
+                const myActorNr = this.myActorNr;
+                const myRank = sorted.findIndex(p => p.actorNr === myActorNr);
+                if (myRank >= 0 && myRank < rewards.length) {
+                    const reward = rewards[myRank];
+                    if (reward > 0) {
+                        gameManager.deductMoneyFromLocalPlayer(-reward); // Negative means add money
+                    }
+                }
+            } else {
+                cc.warn("[BalloonGameManager] GameManager not found or deductMoneyFromLocalPlayer missing.");
+            }
+            this.internalShowFinalResults();
+            // --- Return to MapScene ---
+            cc.director.loadScene("MapScene");
+        }, 0.5);
         if (this.isMasterClient) {
             this.networkManager.sendGameAction(PhotonEventCodes.MINIGAME_BALLOON_GAME_OVER, {
                 finalScores: this.playerScores 
             });
-            this.internalShowFinalResults();
         }
         const localController = this.localPlayerControllerNode?.getComponent(BalloonPlayerController);
         if (localController) {
@@ -318,37 +350,23 @@ export default class BalloonGameManager extends cc.Component {
         const y = -gameHeight / 2 - (balloonHeight / 2) - 10;
         const id = `b${Date.now()}_${this.nextBalloonIdSuffix++}`;
 
-        let points = 0; // Points are now always 0, score derived from operationValue or by manager for M/D
-        let opType = Math.random() < 0.7 ? 'addsub' : 'muldiv'; // 70% chance for add/sub
+        let points = 0;
+        let opType = Math.random() < 0.7 ? 'addsub' : 'muldiv';
         let op: BalloonOperation;
         let opValue: number;
-
         if (opType === 'addsub') {
             const addSubValues = [10, -10, 20, -20, 50, -50];
             let chosenVal = addSubValues[Math.floor(Math.random() * addSubValues.length)];
-            
-            // Handle '?' random value
-            if (Math.random() < 0.15) { // 15% chance for a random +/- 20-100 value
-                chosenVal = (Math.floor(Math.random() * 81) + 20) * (Math.random() < 0.5 ? 1 : -1);
-            }
-
             if (chosenVal >= 0) {
                 op = BalloonOperation.ADD;
                 opValue = chosenVal;
             } else {
                 op = BalloonOperation.SUBTRACT;
-                opValue = Math.abs(chosenVal); // operationValue is the magnitude
+                opValue = Math.abs(chosenVal);
             }
         } else { // muldiv
-            const mulDivFactors = [2, 0.5, 5, 0.2]; // *2, /2, *5, /5
-            let factor = mulDivFactors[Math.floor(Math.random() * mulDivFactors.length)];
-            if (factor >= 1) { // Multiply
-                op = BalloonOperation.MULTIPLY;
-                opValue = factor; // e.g., 2 or 5
-            } else { // Divide (factor is 0.5 or 0.2)
-                op = BalloonOperation.DIVIDE;
-                opValue = 1 / factor; // Store as divisor, e.g., 2 or 5
-            }
+            op = BalloonOperation.MULTIPLY;
+            opValue = 2; // Only *2 allowed
         }
         
         const speed = 200 + Math.random() * 200;
@@ -398,15 +416,13 @@ export default class BalloonGameManager extends cc.Component {
         const player = this.playerScores.find(p => p.actorNr === playerId);
         if (!player) {
             cc.warn(`[BalloonGameManager] Player ${playerId} not found for score update.`);
-            // Optionally, destroy balloon without score if player is missing
             if (balloon.node && cc.isValid(balloon.node)) balloon.node.destroy();
             this.activeBalloons.delete(balloonId);
-            // Broadcast pop confirmation without score change if needed, or just ignore
             this.networkManager.sendGameAction(PhotonEventCodes.MINIGAME_BALLOON_POPPED_CONFIRMED, {
                 balloonId,
                 playerId,
                 scoreAwarded: 0,
-                newScoreTotal: 0, // Or current score if player was found but something else went wrong
+                newScoreTotal: 0,
                 balloonDestroyed: true
             });
             return;
@@ -416,21 +432,17 @@ export default class BalloonGameManager extends cc.Component {
         let newScore = player.score;
 
         if (balloon.operation === BalloonOperation.ADD || balloon.operation === BalloonOperation.SUBTRACT) {
-            scoreAwarded = balloon.getCalculatedScore(); // This will be +opValue or -opValue
+            scoreAwarded = balloon.getCalculatedScore();
             newScore = player.score + scoreAwarded;
         } else if (balloon.operation === BalloonOperation.MULTIPLY) {
-            // operationValue is the factor (e.g., 2 or 5)
-            const scoreChange = player.score * (balloon.operationValue - 1); // Calculate the change in score
-            scoreAwarded = Math.round(scoreChange); // The points awarded/lost due to multiplication
-            newScore = Math.round(player.score * balloon.operationValue);
-        } else if (balloon.operation === BalloonOperation.DIVIDE) {
-            // operationValue is the divisor (e.g., 2 or 5)
-            const originalScore = player.score;
-            newScore = Math.round(player.score / balloon.operationValue);
-            scoreAwarded = newScore - originalScore; // The points lost due to division
+            // Only *2 allowed
+            let tempScore = player.score * 2;
+            newScore = Math.max(0, tempScore);
+            scoreAwarded = newScore - player.score;
         }
-        
-        balloon.pop(playerId); // Triggers visual pop effect
+        // Prevent negative scores
+        newScore = Math.max(0, newScore);
+        balloon.pop(playerId);
         this.activeBalloons.delete(balloonId);
         if (balloon.node && cc.isValid(balloon.node)) balloon.node.destroy();
         
@@ -439,7 +451,7 @@ export default class BalloonGameManager extends cc.Component {
         this.networkManager.sendGameAction(PhotonEventCodes.MINIGAME_BALLOON_POPPED_CONFIRMED, {
             balloonId,
             playerId,
-            scoreAwarded, // Send the actual change in score
+            scoreAwarded,
             newScoreTotal: newScore,
             balloonDestroyed: true
         });
