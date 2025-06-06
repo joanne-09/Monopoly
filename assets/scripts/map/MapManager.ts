@@ -1,6 +1,6 @@
 import SpaceNodeCtrl from "./SpaceNodeCtrl";
 import SpaceNodeItem from "./SpaceNodeItem";
-import { MapNodeEvents } from "../types/GameEvents";
+import { MapNodeEvents, NodeOwnership } from "../types/GameEvents";
 import GameManager from "../GameManager";
 import { PlayerData } from "../types/DataTypes";
 const {ccclass, property} = cc._decorator;
@@ -43,6 +43,9 @@ export default class MapManager extends cc.Component {
       this.schedule(() => {
         this.localPlayerData = this.gameManager.getLocalPlayerData();
       }, 0.5);
+      for (let i = 1; i <= this.spaceNum; i++) {
+        this.setOwnershipByIndex(i, NodeOwnership.NONE);
+      }
     }
 
     private loadGameScene() {
@@ -53,8 +56,8 @@ export default class MapManager extends cc.Component {
         cc.error(`Spaces node ${index} is not set!`);
         return null;
       }
-      if (index < 0 || index >= this.spaceNum) {
-        cc.error(`Invalid index: ${index}. It should be between 0 and ${this.spaceNum - 1}.`);
+      if (index <= 0 || index > this.spaceNum) {
+        cc.error(`Invalid index: ${index}. It should be between 1 and ${this.spaceNum}.`);
         return null;
       }
       let childNode = this.spacesNode.getChildByName(`space${index.toString().padStart(3, '0')}`);
@@ -65,7 +68,8 @@ export default class MapManager extends cc.Component {
       const spaceIndex = parseInt(index);
       let coord = SpaceNodeCtrl.getCoordByIndex(this.spacesNode, spaceIndex);
       let MapNodeEvent = this.getMapNodeEventByIndex(spaceIndex);
-      cc.log(`Space clicked at index: ${spaceIndex}, coord: ${coord}, event: ${MapNodeEvent}`);
+      let ownership = this.getOwnershipByIndex(spaceIndex);
+      cc.log(`Space clicked at index: ${spaceIndex}, coord: ${coord}, event: ${MapNodeEvent}, ownership: ${ownership}`);
     }
     
     public getCoordByIndex(index: number): cc.Vec2 {
@@ -82,6 +86,33 @@ export default class MapManager extends cc.Component {
       return spaceNodeItem.getMapNodeEvent();
     }
 
+    public getOwnershipByIndex(index: number): NodeOwnership | null {
+      const spaceNodeItem = this.getSpaceNodeItemByIndex(index);
+      if (!spaceNodeItem) {
+        cc.error(`Space node item at index ${index} not found!`);
+        return null;
+      }
+      if (spaceNodeItem.mapNodeEvents === MapNodeEvents.NORMAL) {
+        return spaceNodeItem.getOwner();
+      }
+      else {
+        return NodeOwnership.NONE;
+      }
+    }
+
+    public setOwnershipByIndex(index: number, ownership: NodeOwnership) {
+      const spaceNodeItem = this.getSpaceNodeItemByIndex(index);
+      if (!spaceNodeItem) {
+        cc.error(`Space node item at index ${index} not found!`);
+        return;
+      }
+      if (spaceNodeItem.mapNodeEvents === MapNodeEvents.NORMAL) {
+        spaceNodeItem.Owner = ownership;
+        cc.log(`Ownership for index ${index} set to ${ownership}`);
+      } else {
+        cc.warn(`Cannot set ownership for index ${index} as it is not a normal space.`);
+      }
+    }
     
     update (dt) {
         if (this.localPlayerData && this.moneyLabel) {
