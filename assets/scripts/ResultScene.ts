@@ -1,5 +1,6 @@
 import { PlayerAvatar, PlayerData } from "./types/DataTypes";
 const {ccclass, property} = cc._decorator;
+import GameManager  from "./GameManager";
 
 @ccclass
 export default class ResultScene extends cc.Component {
@@ -20,22 +21,48 @@ export default class ResultScene extends cc.Component {
     private playerNumber: number = 4; // Assuming 4 players for the result scene
     private playerData: PlayerData[] = []; 
     private playerScores: number[] = [];
+    private gameManager: GameManager = null;
     onLoad () {
       for(let i=0; i<this.playerNumber; i++) {
         this.listItem[i] = this.listNode.getChildByName(`listItem${i+1}`) as cc.Node;
       }
-      // give a testcase of 4 sets of playerData and playerScores
+      
+      this.gameManager = GameManager.getInstance();
+    }
+
+    start () {
+      // Calculate scores based on stars and money
+      this.playerNumber = this.gameManager.getPlayerList().length;
+       this.gameManager.getPlayerList().forEach((playerData: PlayerData) => {
+        this.playerData.push({
+          actorNumber: playerData.actorNumber, 
+          name: playerData.name, 
+          avatar: playerData.avatar, 
+          stars: playerData.stars || 0,
+          money: playerData.money || 0
+        });
+        cc.log("================================================")
+        cc.log({
+          actorNumber: playerData.actorNumber, 
+          name: playerData.name, 
+          avatar: playerData.avatar, 
+          stars: playerData.stars, 
+          money: playerData.money
+        });
+      });
+      this.playerScores = this.playerData.map(player => 
+        (player.stars || 0) * 1000 + (player.money || 0)
+      );
+
+ /*     // give a testcase of 4 sets of playerData and playerScores
       this.playerData = [
         { actorNumber: 0, name: "Alice", avatar: PlayerAvatar.GRASS },
         { actorNumber: 1, name: "Bob", avatar: PlayerAvatar.GRASS },
         { actorNumber: 2, name: "Charlie", avatar: PlayerAvatar.ICE },
         { actorNumber: 3, name: "Diana", avatar: PlayerAvatar.FIRE }
       ];
-      this.playerScores = [700, 1800, 2000, 900];
-    }
-
-    start () {
-      // sort the playerData and playerScores based on scores in descending order
+      this.playerScores = [700, 1800, 2000, 900];*/
+      // Sort the playerData and playerScores based on calculated scores in descending order
       let sortedIndices = this.playerScores.map((score, index) => index)
         .sort((a, b) => this.playerScores[b] - this.playerScores[a]);
       this.playerData = sortedIndices.map(index => this.playerData[index]);
@@ -169,7 +196,7 @@ export default class ResultScene extends cc.Component {
     private FadeInButton() {
       this.buttonNode.runAction(cc.fadeIn(0.5));
       this.buttonNode.on('click', () => {
-        cc.director.loadScene(this.nextScene.name);
+        cc.director.loadScene("Start");
       });
     }
 

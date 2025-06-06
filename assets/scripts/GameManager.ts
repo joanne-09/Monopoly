@@ -113,6 +113,7 @@ export default class GameManager extends cc.Component {
                 this.currentTurnPlayer = this.playerList[this.currentTurnIndex];
                 this.round++;
                 if(this.round > this.totalRounds) {
+                    this.broadcastPlayerData();
                     this.scheduleOnce(() => {
                         cc.director.loadScene("ResultScene");
                     }, 2); // Delay to allow any final actions
@@ -379,7 +380,7 @@ export default class GameManager extends cc.Component {
     // gameplay logic
     public startGame() {
         this.isGameActive = true;
-        this.round = 1;
+        this.round = 3;
         this.currentTurnIndex = 0;
 
         this.playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
