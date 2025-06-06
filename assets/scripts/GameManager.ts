@@ -337,6 +337,10 @@ export default class GameManager extends cc.Component {
         this.state = GameState.WAITING_FOR_PLAYERS;
     }
 
+    public resetMapManager() {
+        this.mapManager = MapManager.getInstance();
+    }
+
     public rolledDice(diceValue: number) {
         this.state = GameState.ROLL_DICE;
         if (!this.isGameActive) {
