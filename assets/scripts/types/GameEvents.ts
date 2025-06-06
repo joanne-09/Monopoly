@@ -14,4 +14,16 @@ export enum MapNodeEvents {
     DESTINY,
     CHANCE,
     GAME,
+    ADDMONEY,
+    DEDUCTMONEY,
+    SHOP,
+    STAR,
+}
+
+export enum NodeOwnership {
+  NONE,
+  PLAYER1,
+  PLAYER2,
+  PLAYER3,
+  PLAYER4,
 }

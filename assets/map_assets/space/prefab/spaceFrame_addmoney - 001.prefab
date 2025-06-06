@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "spaceFrame_chance",
+    "_name": "spaceFrame_addmoney",
     "_objFlags": 0,
     "_parent": null,
     "_children": [
@@ -187,7 +187,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "697IFCWXVLOImOcWnu/2cu",
+    "fileId": "aaPMF3IMxJZYmC/I9C3mXS",
     "sync": false
   },
   {
@@ -294,12 +294,12 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "1bUnmkVRpMto4tHIPC2bqg",
+    "fileId": "fa1w2DJYBNnZDqhKHkVo3M",
     "sync": false
   },
   {
     "__type__": "cc.Node",
-    "_name": "Icon_ItemIcon_Clover",
+    "_name": "coins_ic",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -377,7 +377,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "165d6c66-57af-47f7-a2fb-2de6d6fb689c"
+      "__uuid__": "6f92d2d8-5905-4d82-9bd9-1a9c6376d7ff"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -401,7 +401,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "51w0diiOtHrYfhGtxCt6Wi",
+    "fileId": "bbV5+f3V5GkrHdOwO3yzMR",
     "sync": false
   },
   {
