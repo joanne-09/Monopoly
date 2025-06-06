@@ -30,10 +30,6 @@ export default class MapManager extends cc.Component {
             return;
         }
         MapManager.instance = this;
-        if(!cc.game.isPersistRootNode(this.node)) {
-            console.log("Adding MapManager node to persist root nodes.");
-            cc.game.addPersistRootNode(this.node);
-        }
 
         this.gameManager = GameManager.getInstance();
 
@@ -42,6 +38,8 @@ export default class MapManager extends cc.Component {
 
         if(!this.gameManager.getIsGameActive()) {
           this.gameManager.startGame();
+        }else{
+          this.gameManager.resetMapManager();
         }
         this.gameManager.broadcastTurn();
          // Start the game while load)
@@ -87,7 +85,7 @@ export default class MapManager extends cc.Component {
     }
 
     private loadGameScene() {
-      cc.director.loadScene("MiniGameBalloon");
+      cc.director.loadScene("MiniGameSnowball");
     }
     protected getSpaceNodeItemByIndex(index: number) {
       if (!this.spacesNode) {
