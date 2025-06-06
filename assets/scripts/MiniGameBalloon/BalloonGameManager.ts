@@ -165,14 +165,21 @@ export default class BalloonGameManager extends cc.Component {
     internalUpdateScoreDisplay() {
         this.playerScores.forEach((player, displayIndex) => {
             // Assuming scoreLabels are ordered to match sorted playerScores (by actorNr)
+            // and that scoreLabels are assigned in the editor for P1, P2, etc.
             if (displayIndex < this.scoreLabels.length && this.scoreLabels[displayIndex]) {
-                this.scoreLabels[displayIndex].string = `${player.name}: ${player.score}`;
+                this.scoreLabels[displayIndex].string = player.score.toString(); // Display only the score
             } else if (this.scoreLabels.length > 0) {
-                // cc.warn(`[BalloonGameManager] Not enough score labels for player ${player.name}. Index ${displayIndex}, Labels ${this.scoreLabels.length}`);
+                // This case might indicate a mismatch or fewer labels than players.
+                // For simplicity, we'll only update if a direct match exists.
+                // cc.warn(`[BalloonGameManager] Mismatch in player count and score labels. Player ${player.name} (actorNr ${player.actorNr}) at displayIndex ${displayIndex} has no label.`);
             }
         });
+
+        // Clear any extra score labels if players leave or there are more labels than players
         for (let i = this.playerScores.length; i < this.scoreLabels.length; i++) {
-            if (this.scoreLabels[i]) this.scoreLabels[i].string = ""; // Clear unused labels
+            if (this.scoreLabels[i]) {
+                this.scoreLabels[i].string = ""; // Clear unused labels
+            }
         }
     }
 
@@ -292,65 +299,69 @@ export default class BalloonGameManager extends cc.Component {
      */
     internalSpawnBalloonRandomly() {
         if (!this.balloonPrefabs || this.balloonPrefabs.length === 0) return;
+
         let gameWidth = this.balloonLayer.width;
         let gameHeight = this.balloonLayer.height;
+
         if (gameWidth === 0 || gameHeight === 0) {
-            cc.warn(`[BalloonGameManager] balloonLayer width or height is 0! (width=${gameWidth}, height=${gameHeight}) - Balloons will not spawn correctly. Please set balloonLayer size in the editor to match your play area (e.g., 960x640). Using fallback values for now.`);
-            gameWidth = 960;
-            gameHeight = 640;
+            cc.warn("[BalloonGameManager] balloonLayer dimensions are zero. Using default spawn area.");
+            gameWidth = cc.winSize.width;
+            gameHeight = cc.winSize.height;
         }
-        // Pick a random prefab for color
+
         let prefab: cc.Prefab = this.balloonPrefabs[Math.floor(Math.random() * this.balloonPrefabs.length)];
-        // Create a temporary node to get balloon height
         const tempNode = cc.instantiate(prefab);
         let balloonHeight = tempNode.height * tempNode.scaleY;
         tempNode.destroy();
+
         const x = (Math.random() - 0.5) * gameWidth * 0.8;
-        const y = -gameHeight / 2 + (balloonHeight / 2) + 10; // 10px margin
+        const y = -gameHeight / 2 - (balloonHeight / 2) - 10;
         const id = `b${Date.now()}_${this.nextBalloonIdSuffix++}`;
-        // --- Operation logic ---
-        // Decide operation type: add/subtract or multiply/divide
-        let opType = Math.random() < 0.5 ? 'addsub' : 'muldiv';
+
+        let points = 0; // Points are now always 0, score derived from operationValue or by manager for M/D
+        let opType = Math.random() < 0.7 ? 'addsub' : 'muldiv'; // 70% chance for add/sub
         let op: BalloonOperation;
         let opValue: number;
+
         if (opType === 'addsub') {
-            // Add/Subtract: +10, -10, +20, -20, +50, -50, or ?
-            const addSubOptions = [10, -10, 20, -20, 50, -50, '?'];
-            let pick = addSubOptions[Math.floor(Math.random() * addSubOptions.length)];
-            if (pick === '?') {
-                // Random value: -100~-20 or +20~+100
-                if (Math.random() < 0.5) {
-                    opValue = -Math.floor(Math.random() * 81 + 20); // -20 to -100
-                } else {
-                    opValue = Math.floor(Math.random() * 81 + 20); // +20 to +100
-                }
-            } else {
-                opValue = pick as number;
+            const addSubValues = [10, -10, 20, -20, 50, -50];
+            let chosenVal = addSubValues[Math.floor(Math.random() * addSubValues.length)];
+            
+            // Handle '?' random value
+            if (Math.random() < 0.15) { // 15% chance for a random +/- 20-100 value
+                chosenVal = (Math.floor(Math.random() * 81) + 20) * (Math.random() < 0.5 ? 1 : -1);
             }
-            op = opValue > 0 ? BalloonOperation.ADD : BalloonOperation.SUBTRACT;
-        } else {
-            // Multiply/Divide: *2, /2, *5, /5
-            const mulDivOptions = [2, 0.5, 5, 0.2];
-            let pick = mulDivOptions[Math.floor(Math.random() * mulDivOptions.length)];
-            if (pick === 2 || pick === 5) {
-                op = BalloonOperation.MULTIPLY;
-                opValue = pick;
+
+            if (chosenVal >= 0) {
+                op = BalloonOperation.ADD;
+                opValue = chosenVal;
             } else {
+                op = BalloonOperation.SUBTRACT;
+                opValue = Math.abs(chosenVal); // operationValue is the magnitude
+            }
+        } else { // muldiv
+            const mulDivFactors = [2, 0.5, 5, 0.2]; // *2, /2, *5, /5
+            let factor = mulDivFactors[Math.floor(Math.random() * mulDivFactors.length)];
+            if (factor >= 1) { // Multiply
+                op = BalloonOperation.MULTIPLY;
+                opValue = factor; // e.g., 2 or 5
+            } else { // Divide (factor is 0.5 or 0.2)
                 op = BalloonOperation.DIVIDE;
-                opValue = pick === 0.5 ? 2 : 5; // /2 or /5
+                opValue = 1 / factor; // Store as divisor, e.g., 2 or 5
             }
         }
-        const points = 0; // You can set points logic as needed
-        // --- INCREASE SPEED RANGE ---
-        const speed = 200 + Math.random() * 200; // 200~400 px/sec
-        cc.log(`[BalloonGameManager] Spawning balloon id=${id} at x=${x.toFixed(1)}, y=${y.toFixed(1)}, op=${op}, opValue=${opValue}, speed=${speed.toFixed(1)}`);
+        
+        const speed = 200 + Math.random() * 200;
+
+        cc.log(`[BalloonGameManager] Spawning balloon id=${id}, op=${BalloonOperation[op]}(${op}), opValue=${opValue}, speed=${speed.toFixed(1)}`);
+
         this.networkManager.sendGameAction(PhotonEventCodes.MINIGAME_BALLOON_SPAWN, {
             id, x, y, points, operation: op, operationValue: opValue, speed,
             prefabIndex: this.balloonPrefabs.indexOf(prefab)
         });
+
         this.spawnBalloon(id, x, y, points, op, opValue, speed, prefab);
-        // --- DECREASE SPAWN INTERVAL FOR MORE BALLOONS ---
-        this.balloonSpawnInterval = 0.25 + Math.random() * 0.25; // 0.25~0.5s
+        this.balloonSpawnInterval = 0.25 + Math.random() * 0.25;
     }
 
     /**
@@ -383,19 +394,52 @@ export default class BalloonGameManager extends cc.Component {
     masterHandleBalloonPop(balloonId: string, playerId: number) {
         const balloon = this.activeBalloons.get(balloonId);
         if (!balloon || balloon.isPopped) return;
-        const scoreAwarded = balloon.getCalculatedScore();
-        balloon.pop(playerId);
+
+        const player = this.playerScores.find(p => p.actorNr === playerId);
+        if (!player) {
+            cc.warn(`[BalloonGameManager] Player ${playerId} not found for score update.`);
+            // Optionally, destroy balloon without score if player is missing
+            if (balloon.node && cc.isValid(balloon.node)) balloon.node.destroy();
+            this.activeBalloons.delete(balloonId);
+            // Broadcast pop confirmation without score change if needed, or just ignore
+            this.networkManager.sendGameAction(PhotonEventCodes.MINIGAME_BALLOON_POPPED_CONFIRMED, {
+                balloonId,
+                playerId,
+                scoreAwarded: 0,
+                newScoreTotal: 0, // Or current score if player was found but something else went wrong
+                balloonDestroyed: true
+            });
+            return;
+        }
+
+        let scoreAwarded = 0;
+        let newScore = player.score;
+
+        if (balloon.operation === BalloonOperation.ADD || balloon.operation === BalloonOperation.SUBTRACT) {
+            scoreAwarded = balloon.getCalculatedScore(); // This will be +opValue or -opValue
+            newScore = player.score + scoreAwarded;
+        } else if (balloon.operation === BalloonOperation.MULTIPLY) {
+            // operationValue is the factor (e.g., 2 or 5)
+            const scoreChange = player.score * (balloon.operationValue - 1); // Calculate the change in score
+            scoreAwarded = Math.round(scoreChange); // The points awarded/lost due to multiplication
+            newScore = Math.round(player.score * balloon.operationValue);
+        } else if (balloon.operation === BalloonOperation.DIVIDE) {
+            // operationValue is the divisor (e.g., 2 or 5)
+            const originalScore = player.score;
+            newScore = Math.round(player.score / balloon.operationValue);
+            scoreAwarded = newScore - originalScore; // The points lost due to division
+        }
+        
+        balloon.pop(playerId); // Triggers visual pop effect
         this.activeBalloons.delete(balloonId);
         if (balloon.node && cc.isValid(balloon.node)) balloon.node.destroy();
-        // Update score
-        const player = this.playerScores.find(p => p.actorNr === playerId);
-        let newScore = player ? player.score + scoreAwarded : scoreAwarded;
-        if (player) player.score = newScore;
-        // Broadcast pop confirmation
+        
+        player.score = newScore;
+        
         this.networkManager.sendGameAction(PhotonEventCodes.MINIGAME_BALLOON_POPPED_CONFIRMED, {
             balloonId,
             playerId,
-            scoreAwarded,
+            scoreAwarded, // Send the actual change in score
             newScoreTotal: newScore,
             balloonDestroyed: true
         });
