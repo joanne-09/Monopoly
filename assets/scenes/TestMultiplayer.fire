@@ -1228,7 +1228,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 68.37,
-      "height": 50.4
+      "height": 90.4
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -1240,7 +1240,7 @@
       "ctor": "Float64Array",
       "array": [
         0,
-        -170,
+        -180,
         0,
         0,
         0,
@@ -1279,8 +1279,8 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "Dice +2",
-    "_N$string": "Dice +2",
+    "_string": "Dice +2\n$200",
+    "_N$string": "Dice +2\n$200",
     "_fontSize": 20,
     "_lineHeight": 40,
     "_enableWrapText": true,
@@ -2114,7 +2114,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 63.35,
-      "height": 50.4
+      "height": 90.4
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -2126,7 +2126,7 @@
       "ctor": "Float64Array",
       "array": [
         0,
-        -170,
+        -180,
         0,
         0,
         0,
@@ -2165,8 +2165,8 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "Dice -2",
-    "_N$string": "Dice -2",
+    "_string": "Dice -2\n$200",
+    "_N$string": "Dice -2\n$200",
     "_fontSize": 20,
     "_lineHeight": 40,
     "_enableWrapText": true,
@@ -3000,7 +3000,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 111.17,
-      "height": 50.4
+      "height": 90.4
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -3012,7 +3012,7 @@
       "ctor": "Float64Array",
       "array": [
         0,
-        -170,
+        -180,
         0,
         0,
         0,
@@ -3051,8 +3051,8 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "Steal Money",
-    "_N$string": "Steal Money",
+    "_string": "Steal Money\n$250",
+    "_N$string": "Steal Money\n$250",
     "_fontSize": 20,
     "_lineHeight": 40,
     "_enableWrapText": true,
@@ -3886,7 +3886,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 116.75,
-      "height": 50.4
+      "height": 90.4
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -3898,7 +3898,7 @@
       "ctor": "Float64Array",
       "array": [
         0,
-        -170,
+        -180,
         0,
         0,
         0,
@@ -3937,8 +3937,8 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "Steal Gadget",
-    "_N$string": "Steal Gadget",
+    "_string": "Steal Gadget\n$250",
+    "_N$string": "Steal Gadget\n$250",
     "_fontSize": 20,
     "_lineHeight": 40,
     "_enableWrapText": true,
