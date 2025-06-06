@@ -24,6 +24,7 @@ export class PlayerControl extends cc.Component {
 
     playerName: string = '';
     playerId: number = 0;
+    playerMoney: number = 0;
     
     playerAvatar: PlayerAvatar = PlayerAvatar.NULL;
 
@@ -64,6 +65,13 @@ export class PlayerControl extends cc.Component {
                 break;
             case PhotonEventCodes.PLAYER_MAP_JOINED:
                 this.initPlayersPosition(content);
+                break;
+            case PhotonEventCodes.PLAYER_DATA:
+                const playerData: PlayerData = content.find((player: PlayerData) => player.actorNumber === this.playerId);
+                if(playerData.money !== this.playerMoney){
+                    this.updatePlayerMoney(playerData.money);
+                    console.log(`Player ${this.playerId} money updated:`, this.playerMoney);
+                }
                 break;
         }
     }
@@ -136,6 +144,7 @@ export class PlayerControl extends cc.Component {
             }else{
                 this.playerName = player.name;
                 this.playerAvatar = player.avatar;
+                this.playerMoney = player.money;
                 this.initPlayerAnimation();
             }
         });
@@ -206,6 +215,12 @@ export class PlayerControl extends cc.Component {
             animation.play(this.animationClip);
             this.currentClip = this.animationClip;
         }
+    }
+
+    // Handle Player Money
+    updatePlayerMoney(money: number) {
+        this.playerMoney = money;
+        this.playerCamera.getComponent(CameraFollow).updateMoney(money);   
     }
 
     // Handle Roll Dice
