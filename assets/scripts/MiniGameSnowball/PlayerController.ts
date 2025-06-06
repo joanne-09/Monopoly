@@ -34,6 +34,7 @@ export default class PlayerController extends cc.Component {
     @property(cc.Node)
     lifeNode: cc.Node = null; // 生命顯示父節點，底下放三個Sprite
     @property({ type: cc.Prefab }) hitFXPrefab: cc.Prefab = null;
+    @property({ type: cc.Prefab }) icedFXPrefab: cc.Prefab = null; // 冰凍特效Prefab
     @property
     team: string = 'A'; // Player's team, can be set in the editor
 
@@ -67,6 +68,7 @@ export default class PlayerController extends cc.Component {
 
     public static REMOTE_MOVE_ACTION_TAG = 1001;
     private inputListenersAttached: boolean = false; // Flag to track if listeners are on
+    private isDead: boolean = false; // 死亡旗標
 
     // Public getter for isLocalPlayer
     public getIsLocalPlayer(): boolean {
@@ -281,11 +283,59 @@ export default class PlayerController extends cc.Component {
 
     // 生命減少與顯示
     loseLife() {
+        if (this.isDead) return; // 死亡後不再觸發
         this.life = Math.max(0, this.life - 1);
-        if (this.lifeNode) { // Corrected: ensure parentheses are present
+        if (this.lifeNode) {
             for (let i = 0; i < this.lifeNode.children.length; i++) {
                 this.lifeNode.children[i].active = i < this.life;
             }
+        }
+        if (this.life <= 0) {
+            this.handleDeath();
+        }
+    }
+
+    // 玩家死亡流程
+    private handleDeath() {
+        this.isDead = true;
+        // 停止操控
+        this.state = PlayerState.Frozen;
+        // 關閉本地玩家輸入
+        if (this._isLocalPlayer && this.inputListenersAttached) {
+            cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+            cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
+            this.inputListenersAttached = false;
+        }
+        // 生成 IcedFX 特效
+        if (this.icedFXPrefab) {
+            const icedFX = cc.instantiate(this.icedFXPrefab);
+            icedFX.parent = this.node.parent;
+            icedFX.setPosition(this.node.getPosition());
+            // 如果A隊，IcedFX垂直反轉
+            if (this.team === 'A') {
+                icedFX.scaleX = -1;
+            }
+            // 不調整透明度
+            // 播放動畫（如果有 Animation 組件）
+            const icedAnim = icedFX.getComponent(cc.Animation);
+            if (icedAnim) {
+                icedAnim.play();
+            }
+        }
+        // 玩家角色消失
+        this.node.opacity = 0;
+        // 設定碰撞體為 sensor
+        const collider = this.node.getComponent(cc.PhysicsCollider);
+        if (collider) {
+            collider.sensor = true;
+            collider.apply();
+        }
+        // 若有剛體，停止移動
+        if (this.rb) {
+            this.rb.linearVelocity = cc.v2(0, 0);
+            this.rb.angularVelocity = 0;
+            // 不要設 active = false，避免 Box2D SetActive crash
+            // this.rb.active = false; // <-- 移除這行
         }
     }
 
@@ -435,8 +485,6 @@ export default class PlayerController extends cc.Component {
     applyRemoteMove(to: { x: number, y: number }, opts?: { inputDx?: number, inputDy?: number, hasSnowball?: boolean, faceRight?: boolean }) {
         if (this._isLocalPlayer) return;
 
-        // cc.log(`[PlayerController] applyRemoteMove START: node=${this.node.name} (actor: ${this._actorNumber}), targetPos=(${to.x.toFixed(1)}, ${to.y.toFixed(1)}), opts=`, opts);
-
         const currentPos = cc.v2(this.node.x, this.node.y);
         const targetPos = cc.v2(to.x, to.y);
         const distance = currentPos.sub(targetPos).mag();
@@ -461,7 +509,6 @@ export default class PlayerController extends cc.Component {
             // Check inputDx and inputDy from opts
             if (opts.inputDx !== undefined && opts.inputDy !== undefined) {
                 remoteIsActuallyMovingBasedOnInput = opts.inputDx !== 0 || opts.inputDy !== 0;
-                // cc.log(`[PlayerController] applyRemoteMove: node=${this.node.name}, received inputDx=${opts.inputDx}, inputDy=${opts.inputDy}. remoteIsActuallyMovingBasedOnInput=${remoteIsActuallyMovingBasedOnInput}`);
             }
         }
 
@@ -476,47 +523,51 @@ export default class PlayerController extends cc.Component {
         
         if (this.anim && (this.anim.currentClip?.name !== remoteAnimName || !this.anim.getAnimationState(remoteAnimName).isPlaying)) {
             this.anim.play(remoteAnimName);
-            // cc.log(`[PlayerController] applyRemoteMove: Node=${this.node.name}, Playing anim: ${remoteAnimName} (because remoteIsActuallyMovingBasedOnInput: ${remoteIsActuallyMovingBasedOnInput})`);
         }
-        // cc.log(`[PlayerController] applyRemoteMove END: Node=${this.node.name}, FinalState=${this.state}, Pos=(${this.node.x.toFixed(1)}, ${this.node.y.toFixed(1)}), HasSnowball=${this.hasSnowball}, FaceRight=${this.faceRight}`);
     }
     
     throwSnowball() {
         if (!this.hasSnowball || !this.snowballPrefab) return;
-        // cc.log(`[Player ${this._actorNumber} (${this.node.name})] throwSnowball. IsLocal: ${this._isLocalPlayer}`);
-        
         if (this.anim) this.anim.play(this.throwAnimName);
-        
         // Instantiate and init snowball locally for immediate feedback
-        const snowball = cc.instantiate(this.snowballPrefab);
         const dir = this.faceRight ? 1 : -1;
-        const offset = 40; // Consider making this a property or calculating based on player size
-        snowball.parent = this.node.parent; // Or a dedicated projectiles node
-        snowball.x = this.node.x + dir * offset;
-        snowball.y = this.node.y; // Adjust Y if needed for throw origin
+        const offset = 40;
+        const throwX = this.node.x + dir * offset;
+        const throwY = this.node.y;
+        const snowball = cc.instantiate(this.snowballPrefab);
+        snowball.parent = this.node.parent;
+        snowball.x = throwX;
+        snowball.y = throwY;
         const snowballScript = snowball.getComponent('SnowBall');
         if (snowballScript) {
             snowballScript.init(cc.v2(dir, 0), this.team);
         }
-        
+        cc.log(`[PlayerController] throwSnowball: node=${this.node.name}, actor=${this._actorNumber}, pos=(${throwX},${throwY}), dir=${dir}, team=${this.team}`);
         this.hasSnowball = false;
         if (this.handSnowball) this.handSnowball.active = false;
         this.state = PlayerState.Idle;
-
         if (this.anim) {
             const throwAnimState = this.anim.getAnimationState(this.throwAnimName);
             const duration = throwAnimState ? throwAnimState.duration : 0.5;
             this.scheduleOnce(() => {
-                if (this.anim && (this.state === PlayerState.Idle || this.state === PlayerState.HoldingSnowball) && !this.hasSnowball) { 
-                     const idleAnimToPlay = this.idleAnimName; // After throw, always normal idle
-                     this.anim.play(idleAnimToPlay);
+                if (this.anim && (this.state === PlayerState.Idle || this.state === PlayerState.HoldingSnowball) && !this.hasSnowball) {
+                    const idleAnimToPlay = this.idleAnimName;
+                    this.anim.play(idleAnimToPlay);
                 }
             }, duration);
         }
-
         if (this.networkManager && this._isLocalPlayer && this._actorNumber !== -1) {
-            // cc.log(`[LocalPlayer ${this._actorNumber} (${this.node.name})] throwSnowball: Sending PLAYER_THROW_ACTION`);
-            this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_THROW_ACTION, { playerId: this._actorNumber });
+            // 廣播丟雪球事件，包含座標、方向、team，正確包裝 data
+            this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_THROW_ACTION, {
+                playerId: this._actorNumber,
+                data: {
+                    x: throwX,
+                    y: throwY,
+                    dir: dir,
+                    team: this.team
+                }
+            });
+            cc.log(`[PlayerController] throwSnowball: sent PLAYER_THROW_ACTION, playerId=${this._actorNumber}, data={x:${throwX},y:${throwY},dir:${dir},team:${this.team}}`);
         }
     }
 
@@ -524,23 +575,32 @@ export default class PlayerController extends cc.Component {
     public handleRemoteAction(actionCode: number, data: any) {
         cc.log(`[PlayerController] handleRemoteAction RAW_INPUT: node=${this.node.name} (actor: ${this._actorNumber}), actionCode=${actionCode}, data=`, data);
 
+        if (!data) {
+            cc.warn(`[PlayerController] handleRemoteAction: node=${this.node.name} received undefined/null data, skip.`);
+            return;
+        }
         if (this._isLocalPlayer) {
             cc.log(`[PlayerController] handleRemoteAction: node=${this.node.name} isLocalPlayer. Ignoring remote action for self.`);
             return; 
         }
-        // Critical Check: Ensure the action is for this specific player instance.
-        // data.playerId is the actor who performed the action.
-        // this._actorNumber is the actor this node instance represents.
-        if (data.playerId !== this._actorNumber) {
-            cc.log(`[PlayerController] handleRemoteAction: node=${this.node.name} (represents actor: ${this._actorNumber}) received action intended for data.playerId=${data.playerId}. Ignoring.`);
-            return;
-        }
+        // For remote throw/hit, always process (do not check data.playerId)
         cc.log(`[PlayerController] handleRemoteAction PROCESSING: node=${this.node.name} (actor: ${this._actorNumber}), actionCode=${actionCode}, data=`, data);
 
         switch (actionCode) {
             case PhotonEventCodes.PLAYER_THROW_ACTION:
-                // cc.log(`[RemotePlayer ${this._actorNumber} (${this.node.name})] handleRemoteAction: PLAYER_THROW_ACTION`);
-                this.hasSnowball = false; // Player has thrown
+                // 遠端也要產生雪球
+                cc.log(`[PlayerController] [SYNC] Remote THROW: node=${this.node.name}, x=${data.x}, y=${data.y}, dir=${data.dir}, team=${data.team}`);
+                if (this.snowballPrefab && data) {
+                    const snowball = cc.instantiate(this.snowballPrefab);
+                    snowball.parent = this.node.parent;
+                    snowball.x = data.x;
+                    snowball.y = data.y;
+                    const snowballScript = snowball.getComponent('SnowBall');
+                    if (snowballScript) {
+                        snowballScript.init(cc.v2(data.dir, 0), data.team);
+                    }
+                }
+                this.hasSnowball = false;
                 if (this.handSnowball) this.handSnowball.active = false;
                 if (this.anim) {
                     this.anim.play(this.throwAnimName);
@@ -548,9 +608,8 @@ export default class PlayerController extends cc.Component {
                     const duration = throwAnimState ? throwAnimState.duration : 0.5;
                     this.scheduleOnce(() => {
                         if (this.anim) { 
-                           const idleAnimToPlay = this.idleAnimName; // After throw, always normal idle
-                           this.anim.play(idleAnimToPlay);
-                           // cc.log(`[RemotePlayer ${this._actorNumber} (${this.node.name})] handleRemoteAction: PLAYER_THROW_ACTION - Played idle animation ${idleAnimToPlay} after throw.`);
+                            const idleAnimToPlay = this.idleAnimName;
+                            this.anim.play(idleAnimToPlay);
                         }
                     }, duration);
                 }
@@ -558,7 +617,6 @@ export default class PlayerController extends cc.Component {
                 break;
 
             case PhotonEventCodes.PLAYER_HIT_ACTION:
-                // cc.log(`[RemotePlayer ${this._actorNumber} (${this.node.name})] handleRemoteAction: PLAYER_HIT_ACTION. Data:`, data);
                 if (data && data.newLife !== undefined) { // Assuming 'data' contains newLife
                     this.life = data.newLife;
                     if (this.lifeNode) {
@@ -575,7 +633,6 @@ export default class PlayerController extends cc.Component {
                 }
                 this.node.color = this.slowColor;
                 this.slowTimer = 2.0; // This will be handled by the update loop to revert color
-                // cc.log(`[RemotePlayer ${this._actorNumber} (${this.node.name})] handleRemoteAction: PLAYER_HIT_ACTION - Life: ${this.life}, Slowed.`);
                 break;
         }
     }

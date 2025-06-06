@@ -53,6 +53,11 @@ export default class SnowBall extends cc.Component {
             }
             // 擊中敵隊玩家：扣血、加分
             if (playerCtrl && playerCtrl.team !== this.team) {
+                if (playerCtrl.isDead) {
+                    // 死亡玩家不再觸發扣血/加分，讓雪球穿過
+                    contact.disabled = true;
+                    return;
+                }
                 playerCtrl.loseLife();
                 // 加分
                 const gm = cc.find('Canvas')?.getComponentInChildren('GameManager');
