@@ -16,6 +16,9 @@ export default class GameManager extends cc.Component {
     @property(cc.Button)
     backToMapButton: cc.Button = null;
 
+    @property({type:cc.AudioClip})
+    snowballBGM: cc.AudioClip = null;
+
     private gameTime: number = 120; // 遊戲總秒數
     private timer: number = 0;
     private isGameOver: boolean = false;
@@ -41,9 +44,12 @@ export default class GameManager extends cc.Component {
         
         if (this.backToMapButton) {
             this.backToMapButton.node.on('click', () => {
+                cc.audioEngine.stopAll();
                 cc.director.loadScene('MapScene');
             });
         }
+
+        cc.audioEngine.playMusic(this.snowballBGM, true);
     }
 
     initNetworkManager() {

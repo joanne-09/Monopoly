@@ -4927,6 +4927,9 @@
     "hitFXPrefab": {
       "__uuid__": "99affb74-466a-427d-b47b-8c7af06501a6"
     },
+    "snowballHitSfx": {
+      "__uuid__": "6a3cc1b8-b6df-4ab9-a1ca-6fb967a1b9de"
+    },
     "_id": "b6juCT/9RMiI3JtgAgM9bS"
   },
   {
@@ -6397,6 +6400,9 @@
     },
     "backToMapButton": {
       "__id__": 165
+    },
+    "snowballBGM": {
+      "__uuid__": "c06ab43d-ef3e-41ef-9349-528cb3fefb10"
     },
     "_id": "d34viMggxHE61RcqrokFMG"
   }
