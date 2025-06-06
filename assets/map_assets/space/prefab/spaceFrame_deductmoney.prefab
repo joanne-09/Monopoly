@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "spaceFrame_chance",
+    "_name": "spaceFrame_deductmoney",
     "_objFlags": 0,
     "_parent": null,
     "_children": [
@@ -129,8 +129,8 @@
         0,
         0,
         1,
-        1.1,
-        1.1,
+        1,
+        1,
         1
       ]
     },
@@ -187,7 +187,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "697IFCWXVLOImOcWnu/2cu",
+    "fileId": "1974Qu3nhM375zYfMSc0tL",
     "sync": false
   },
   {
@@ -294,12 +294,12 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "1bUnmkVRpMto4tHIPC2bqg",
+    "fileId": "d6w5z/8R5CMrkIA9e/4qOT",
     "sync": false
   },
   {
     "__type__": "cc.Node",
-    "_name": "Icon_ItemIcon_Clover",
+    "_name": "blue_potion_ic",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -377,7 +377,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "165d6c66-57af-47f7-a2fb-2de6d6fb689c"
+      "__uuid__": "bd6faff1-c5bf-4c55-964e-1175b3153013"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -401,7 +401,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "51w0diiOtHrYfhGtxCt6Wi",
+    "fileId": "8f/UHmD4ZMzazQAePIQSwO",
     "sync": false
   },
   {
