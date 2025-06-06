@@ -12,6 +12,8 @@ import CameraFollow from "./CameraFollow";
 export class PlayerControl extends cc.Component {
     @property(cc.Prefab)
     otherPlayerPrefab: cc.Prefab = null;
+    @property(cc.Node)
+    otherPlayers: cc.Node = null;
     @property(DiceManager)
     diceManager: DiceManager = null;
     @property(cc.Button)
@@ -130,7 +132,7 @@ export class PlayerControl extends cc.Component {
                 const playerControl = otherPlayerNode.getComponent(OtherPlayers);
                 playerControl.initPlayer(player);
                 this.otherPlayerMap.set(player.actorNumber, otherPlayerNode);
-                this.node.parent.addChild(otherPlayerNode);
+                this.otherPlayers.addChild(otherPlayerNode);
             }else{
                 this.playerName = player.name;
                 this.playerAvatar = player.avatar;
