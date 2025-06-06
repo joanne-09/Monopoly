@@ -75,8 +75,7 @@ export default class GameManager extends cc.Component {
     //content is playerData type
     private networkManagerHandler(eventCode: number, content: any, actorNr: number) {
         if(eventCode == PhotonEventCodes.PLAYER_JOINED) {
-            let clients = this.networkManager["client"];
-            //console.log("GameManager: Network manager handler called with event code:", eventCode, "content:", content, "actorNr:", actorNr);
+            console.log("GameManager: Network manager handler called with event code:", eventCode, "content:", content, "actorNr:", actorNr);
             //console.log("GameManager: Current clients:", clients);
             this.playerMap.set(actorNr, content);
         } else if(eventCode == PhotonEventCodes.PLAYER_DATA) {
