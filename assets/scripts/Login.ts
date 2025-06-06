@@ -28,6 +28,12 @@ export default class Login extends cc.Component {
     @property(cc.Node)
     background2: cc.Node = null;
 
+    @property({type: cc.AudioClip})
+    buttonClickSfx: cc.AudioClip = null;
+
+    @property({type: cc.AudioClip})
+    buttonHoverSfx: cc.AudioClip = null;
+
     private backgroundSpeed: number = 200;
     private backgroundEnd: number = 0;
 
@@ -70,12 +76,18 @@ export default class Login extends cc.Component {
         }
 
         this.signInFirebase(email, password);
+        cc.log("click effect played");
+        cc.audioEngine.playEffect(this.buttonClickSfx, false);
     }
 
     onLoad(){
         this.enterButton.node.on("click", this.onEnter, this);
 
         this.loadAndApplyBackgroundState();
+
+        this.enterButton.node.on("mouseenter", () => {
+            if (this.buttonHoverSfx) cc.audioEngine.playEffect(this.buttonHoverSfx, false);
+        });
     }
 
     loadAndApplyBackgroundState() {
