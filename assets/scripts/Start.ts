@@ -32,6 +32,21 @@ export default class Start extends cc.Component {
     @property({type: cc.AudioClip})
     buttonHoverSfx: cc.AudioClip = null;
 
+    @property(cc.Button)
+    settingsButton: cc.Button = null;
+
+    @property(cc.Button)
+    doneButton: cc.Button = null;
+
+    @property(cc.Node)
+    settingsPopup: cc.Node = null;
+
+    @property(cc.Slider)
+    bgmSlider: cc.Slider = null;
+
+    @property(cc.Slider)
+    sfxSlider: cc.Slider = null;
+
     private networkManager: any = null;
 
     private backgroundSpeed: number = 200;
@@ -72,9 +87,37 @@ export default class Start extends cc.Component {
         cc.director.loadScene("Signup");
     }
 
+    onSettingsClicked() {
+        this.settingsPopup.active = true;
+    }
+
+    onDoneClicked() {
+        this.settingsPopup.active = false;
+    }
+
     onLoad() {
+        cc.audioEngine.setMusicVolume(0.5);
+        cc.audioEngine.setEffectsVolume(0.5);
         this.loginButton.node.on("click", this.onLogin, this);
         this.signupButton.node.on("click", this.onSignup, this);
+        this.settingsButton.node.on("click", this.onSettingsClicked, this);
+        this.doneButton.node.on("click", this.onDoneClicked, this);
+
+        if (this.bgmSlider) {
+            this.bgmSlider.node.on("slide", () => {
+                const value = this.bgmSlider.progress; // 0.0 ~ 1.0
+                cc.audioEngine.setMusicVolume(value);
+            }, this);
+        }
+
+        // Handle SFX slider
+        if (this.sfxSlider) {
+            this.sfxSlider.node.on("slide", () => {
+                const value = this.sfxSlider.progress; // 0.0 ~ 1.0
+                cc.audioEngine.setEffectsVolume(value);
+            }, this);
+        }
+
         this.scheduleOnce(() => {
             this.networkManager = NetworkManager.getInstance();
             if (!this.networkManager) {
@@ -115,6 +158,12 @@ export default class Start extends cc.Component {
 
         // play bgm
         cc.audioEngine.playMusic(this.bgm, true);
+        this.settingsButton.node.on("mouseenter", () => {
+            if (this.buttonHoverSfx) cc.audioEngine.playEffect(this.buttonHoverSfx, false);
+        });
+        this.doneButton.node.on("mouseenter", () => {
+            if (this.buttonHoverSfx) cc.audioEngine.playEffect(this.buttonHoverSfx, false);
+        });
         this.loginButton.node.on("mouseenter", () => {
             if (this.buttonHoverSfx) cc.audioEngine.playEffect(this.buttonHoverSfx, false);
         });
