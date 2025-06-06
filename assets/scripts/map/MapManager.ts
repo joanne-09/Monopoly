@@ -1,4 +1,3 @@
-import SpaceNodeCtrl from "./SpaceNodeCtrl";
 import SpaceNodeItem from "./SpaceNodeItem";
 import { MapNodeEvents, NodeOwnership } from "../types/GameEvents";
 import GameManager from "../GameManager";
@@ -15,7 +14,6 @@ export default class MapManager extends cc.Component {
     @property(cc.Label)
     moneyLabel: cc.Label = null;
     private spaceNum: number = 60;
-    private spaceNodeCtrl = new SpaceNodeCtrl();
     private gameManager: GameManager;
     private localPlayerData: PlayerData;
     private lastMoney: number = null;
@@ -25,13 +23,29 @@ export default class MapManager extends cc.Component {
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
+        console.log("MapManager onLoad");
         if (MapManager.instance) {
+            cc.error("MapManager instance already exists, destroying this instance.");
             this.node.destroy();
             return;
         }
         MapManager.instance = this;
+        if(!cc.game.isPersistRootNode(this.node)) {
+            console.log("Adding MapManager node to persist root nodes.");
+            cc.game.addPersistRootNode(this.node);
+        }
+
         this.gameManager = GameManager.getInstance();
+
+      // Don't call startGame if the game is already active
         this.gameButton.node.on('click', this.loadGameScene, this);
+
+        if(!this.gameManager.getIsGameActive()) {
+          this.gameManager.startGame();
+        }
+        this.gameManager.broadcastTurn();
+         // Start the game while load)
+
     }
 
     public static getInstance(): MapManager {
@@ -39,13 +53,37 @@ export default class MapManager extends cc.Component {
     }
 
     start() {
-      this.gameManager.startGame();
       this.schedule(() => {
         this.localPlayerData = this.gameManager.getLocalPlayerData();
       }, 0.5);
       for (let i = 1; i <= this.spaceNum; i++) {
         this.setOwnershipByIndex(i, NodeOwnership.NONE);
       }
+
+      // Add click event listener to each space node
+        this.spacesNode.children.forEach((child) => {
+          cc.log(`Setting up click event for child: ${child.name}`);
+          try {
+            const spaceNum = parseInt(child.name.replace('space', ''));
+            let button = child.getComponent(cc.Button);
+            if (!button) {
+              button = child.addComponent(cc.Button);
+            }
+            
+            // Clear existing events to avoid duplicates
+            button.clickEvents = [];
+            
+            const clickEventHandler = new cc.Component.EventHandler();
+            clickEventHandler.target = this.node;
+            clickEventHandler.component = "MapManager"; 
+            clickEventHandler.handler = "onSpaceClicked";
+            clickEventHandler.customEventData = spaceNum.toString();
+            cc.log(`Setting up click event for space ${spaceNum}`);
+            button.clickEvents.push(clickEventHandler);
+          } catch (e) {
+            cc.error(`Error setting up click for ${child.name}: ${e}`);
+          }
+        });
     }
 
     private loadGameScene() {
@@ -66,14 +104,22 @@ export default class MapManager extends cc.Component {
 
     public onSpaceClicked(event: cc.Event.EventTouch, index: string) {
       const spaceIndex = parseInt(index);
-      let coord = SpaceNodeCtrl.getCoordByIndex(this.spacesNode, spaceIndex);
+      let coord = this.getCoordByIndex(spaceIndex);
       let MapNodeEvent = this.getMapNodeEventByIndex(spaceIndex);
       let ownership = this.getOwnershipByIndex(spaceIndex);
       cc.log(`Space clicked at index: ${spaceIndex}, coord: ${coord}, event: ${MapNodeEvent}, ownership: ${ownership}`);
     }
     
     public getCoordByIndex(index: number): cc.Vec2 {
-      return SpaceNodeCtrl.getCoordByIndex(this.spacesNode, index);
+      const spaceNodeItem = this.getSpaceNodeItemByIndex(index);
+      if (!spaceNodeItem) {
+        cc.error(`Space node item at index ${index} not found!`);
+        return cc.v2(0, 0); // Return a default value or handle the error as needed
+      }
+      const coord = spaceNodeItem.getCoord();
+      coord.x -= 132; coord.y += 293;
+      cc.log(`Coord for index ${index}: ${coord}`);
+      return coord;
     }
 
     public getMapNodeEventByIndex(index: number): MapNodeEvents | null {
@@ -108,7 +154,6 @@ export default class MapManager extends cc.Component {
       }
       if (spaceNodeItem.mapNodeEvents === MapNodeEvents.NORMAL) {
         spaceNodeItem.Owner = ownership;
-        cc.log(`Ownership for index ${index} set to ${ownership}`);
       } else {
         cc.warn(`Cannot set ownership for index ${index} as it is not a normal space.`);
       }
@@ -121,7 +166,14 @@ export default class MapManager extends cc.Component {
                 this.lastMoney = this.localPlayerData.money;
             }
         } else {
-            cc.warn("Local player data or money label is not set.");
+           // cc.warn("Local player data or money label is not set.");
         }
+    }
+    onDestroy() {
+        console.log("MapManager onDestroy");
+        if (MapManager.instance === this) {
+            MapManager.instance = null;
+        }
+        
     }
 }

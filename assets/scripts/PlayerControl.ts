@@ -17,7 +17,8 @@ export class PlayerControl extends cc.Component {
     @property(cc.Button)
     rollDiceButton: cc.Button = null;
 
-    private playerCamera: cc.Node = null;
+    @property(cc.Node)
+    playerCamera: cc.Node = null;
 
     playerName: string = '';
     playerId: number = 0;
@@ -37,6 +38,10 @@ export class PlayerControl extends cc.Component {
     private networkManager: NetworkManager = null;
     private gameManager: GameManager = GameManager.getInstance();
 
+    // Animation Settings
+    private animationClip: string = '';
+    private currentClip: string = '';
+
     // Send message to the network
     private sendMessageToNetwork(eventCode: number, content: any) {
         NetworkManager.getInstance().sendGameAction(eventCode, content);
@@ -54,6 +59,9 @@ export class PlayerControl extends cc.Component {
                 }else{
                     this.setOtherPlayerMoveBuffer(this.whosTurn, content);
                 }
+                break;
+            case PhotonEventCodes.PLAYER_MAP_JOINED:
+                this.initPlayersPosition(content);
                 break;
         }
     }
@@ -83,13 +91,11 @@ export class PlayerControl extends cc.Component {
     */
     public getPlayerPosition(playerId: number): cc.Vec2 {
         if (playerId === this.playerId) {
-            console.log(`Player ${this.playerId} position:`, this.position);
             return this.position;
         } else {
             const otherPlayerNode = this.otherPlayerMap.get(playerId);
             if (otherPlayerNode) {
                 const target = otherPlayerNode.getPosition();
-                console.log(`Other Player ${playerId} position:`, target);
                 return target;
             }
         }
@@ -135,31 +141,68 @@ export class PlayerControl extends cc.Component {
 
     initPlayersPosition(playerList: PlayerData[]) {
         playerList.forEach(player => {
-            if (player.actorNumber !== this.playerId) {
-                const otherPlayerNode = this.otherPlayerMap.get(player.actorNumber);
-                otherPlayerNode.getComponent(OtherPlayers).initPlayerPosition(cc.v2(player.position.x, player.position.y));
-            } else {
-                this.setPlayerPosition(cc.v2(player.position.x, player.position.y));
+            if(player.position){
+                if (player.actorNumber !== this.playerId) {
+                    const otherPlayerNode = this.otherPlayerMap.get(player.actorNumber);
+                    otherPlayerNode.getComponent(OtherPlayers).initPlayerPosition(cc.v2(player.position.x, player.position.y));
+                } else {
+                    this.setPlayerPosition(cc.v2(player.position.x, player.position.y));
+                }
+            }else{
+                console.log(`Player ${player.actorNumber} position is not initiated`);
             }
         });
     }
 
+    // handle Player Animation
     initPlayerAnimation() {
         const animation = this.node.getComponent(cc.Animation);
         const clips = animation.getClips();
         switch (this.playerAvatar) {
             case PlayerAvatar.ELECTRIC:
-                animation.play(clips[0].name);
+                this.animationClip = clips[0].name;
                 break;
             case PlayerAvatar.FIRE:
-                animation.play(clips[2].name);
+                this.animationClip = clips[2].name;
                 break;
             case PlayerAvatar.GRASS:
-                animation.play(clips[4].name);
+                this.animationClip = clips[4].name;
                 break;
             case PlayerAvatar.ICE:
-                animation.play(clips[6].name);
+                this.animationClip = clips[6].name;
                 break;
+        }
+    }
+
+    setPlayerAnimation(){
+        const animation = this.node.getComponent(cc.Animation);
+        const clips = animation.getClips();
+
+        if(this.playerState === PlayerState.MOVING){
+            switch (this.playerAvatar) {
+            case PlayerAvatar.ELECTRIC:
+                this.animationClip = clips[1].name;
+                break;
+            case PlayerAvatar.FIRE:
+                this.animationClip = clips[3].name;
+                break;
+            case PlayerAvatar.GRASS:
+                this.animationClip = clips[5].name;
+                break;
+            case PlayerAvatar.ICE:
+                this.animationClip = clips[7].name;
+                break;
+            }
+        }else{
+            this.initPlayerAnimation();
+        }
+    }
+
+    playAnimation() {
+        const animation = this.node.getComponent(cc.Animation);
+        if(this.currentClip !== this.animationClip) {
+            animation.play(this.animationClip);
+            this.currentClip = this.animationClip;
         }
     }
 
@@ -182,7 +225,6 @@ export class PlayerControl extends cc.Component {
         NetworkManager.getInstance().registerMessageHandler(this.networkManagerHandler);
 
         // Find the player camera
-        this.playerCamera = this.node.getChildByName('PlayerCamera');
         this.playerCamera.getComponent(CameraFollow).initPlayers(this.gameManager.getPlayerList(), this.playerId);
 
         // Bind the rollDiceButton click event
@@ -203,9 +245,14 @@ export class PlayerControl extends cc.Component {
 
     start(){
         this.initPlayersPosition(this.gameManager.getPlayerList());
+        
     }
 
     update(dt: number){
+        // Set player animation
+        this.setPlayerAnimation();
+        this.playAnimation();
+
         if(this.playerState === PlayerState.MYTURN) {
 
         }else if(this.playerState === PlayerState.MOVING){

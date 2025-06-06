@@ -24,6 +24,12 @@ export default class AvatarSelect extends cc.Component {
     @property(cc.Button)
     createButton: cc.Button = null;
 
+    @property({type: cc.AudioClip})
+    buttonClickSfx: cc.AudioClip = null;
+
+    @property({type: cc.AudioClip})
+    buttonHoverSfx: cc.AudioClip = null;
+
     private activeAvatar: number = 1;
     private readonly ANIMATION_INTERVAL: number = 3; // Interval in seconds for active character's random animation
 
@@ -74,6 +80,7 @@ export default class AvatarSelect extends cc.Component {
         this.schedule(this.playActiveCharacterRandomAnimationScheduled, this.ANIMATION_INTERVAL, cc.macro.REPEAT_FOREVER, 0.1);
 
         console.log(`Character ${selected} selected. Active avatar set to ${this.activeAvatar}.`);
+        cc.audioEngine.playEffect(this.buttonClickSfx, false);
     }
 
     onCreateRoom() {
@@ -95,12 +102,14 @@ export default class AvatarSelect extends cc.Component {
                 console.error("Invalid character selection, defaulting to ELECTRIC.");
                 activeAvatarEnum = PlayerAvatar.NULL
         }
-
+        cc.audioEngine.playEffect(this.buttonClickSfx, false);
         //Will set player name and avatar in GameManager
         this.gameManager.setPlayerNameandAvatar(this.playerName, activeAvatarEnum);
         console.log("WHO AM I: ", this.gameManager.whoAmI());
         this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_JOINED, this.gameManager.whoAmI());
-        cc.director.loadScene("MatchMaking");
+        this.scheduleOnce(() => {
+            cc.director.loadScene("MatchMaking");
+        }, 0.5);
     }
 
     // Life cycle method
@@ -138,6 +147,10 @@ export default class AvatarSelect extends cc.Component {
                 this.onCreateRoom();
             }, this);
         }
+
+        this.createButton.node.on("mouseenter", () => {
+            if (this.buttonHoverSfx) cc.audioEngine.playEffect(this.buttonHoverSfx, false);
+        });
     }
 
     start() {
