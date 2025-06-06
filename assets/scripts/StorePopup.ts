@@ -18,12 +18,12 @@ export default class StorePopup extends cc.Component {
     @property(cc.Label)
     moneyLabel: cc.Label = null;
 
-    private gadgetPrices = [100, 200, 300, 400];
+    private gadgetPrices = [200, 200, 300, 400];
     private selectedAmounts = [0, 0, 0, 0];
-    private playerMoney = 1000;
+    private playerMoney = 0;
     private playerInventory = [0, 0, 0, 0];
-
     onLoad() {
+        
         this.updateUI();
         for (let i = 0; i < 4; i++) {
             if (this.plusButtons[i]) {
@@ -39,7 +39,9 @@ export default class StorePopup extends cc.Component {
         if (this.leaveButton) {
             this.leaveButton.node.on("click", this.onLeave, this);
         }
+
     }
+
 
     changeAmount(index: number, delta: number) {
         this.selectedAmounts[index] = Math.max(0, this.selectedAmounts[index] + delta);
@@ -53,7 +55,7 @@ export default class StorePopup extends cc.Component {
             }
         }
         if (this.moneyLabel) {
-            this.moneyLabel.string = `${this.playerMoney}`;
+            this.moneyLabel.string = `${GameManager.getInstance().getLocalPlayerData()?.money || -1}`;
         }
     }
 
@@ -62,11 +64,11 @@ export default class StorePopup extends cc.Component {
         for (let i = 0; i < 4; i++) {
             total += this.selectedAmounts[i] * this.gadgetPrices[i];
         }
-        if (total > this.playerMoney) {
+        if (total > GameManager.getInstance().getLocalPlayerData()?.money) {
             alert("You don't have enough money!");
             return;
         }
-        this.playerMoney -= total;
+        //this.playerMoney -= total;
         GameManager.getInstance().addGadgetToLocalPlayer(this.selectedAmounts);
         GameManager.getInstance().deductMoneyFromLocalPlayer(total);
         for (let i = 0; i < 4; i++) {
