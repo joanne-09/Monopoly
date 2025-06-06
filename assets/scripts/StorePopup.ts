@@ -18,6 +18,15 @@ export default class StorePopup extends cc.Component {
     @property(cc.Label)
     moneyLabel: cc.Label = null;
 
+    @property({type: cc.AudioClip})
+    cachierSfx: cc.AudioClip = null;
+
+    @property({type:cc.AudioClip})
+    errorSfx: cc.AudioClip = null;
+
+    @property({type:cc.AudioClip})
+    clickSfx: cc.AudioClip = null;
+
     private gadgetPrices = [200, 200, 300, 400];
     private selectedAmounts = [0, 0, 0, 0];
     private playerMoney = 0;
@@ -44,6 +53,7 @@ export default class StorePopup extends cc.Component {
 
 
     changeAmount(index: number, delta: number) {
+        cc.audioEngine.playEffect(this.clickSfx, false);
         this.selectedAmounts[index] = Math.max(0, this.selectedAmounts[index] + delta);
         this.updateUI();
     }
@@ -65,6 +75,7 @@ export default class StorePopup extends cc.Component {
             total += this.selectedAmounts[i] * this.gadgetPrices[i];
         }
         if (total > GameManager.getInstance().getLocalPlayerData()?.money) {
+            cc.audioEngine.playEffect(this.errorSfx, false);
             alert("You don't have enough money!");
             return;
         }
@@ -78,7 +89,10 @@ export default class StorePopup extends cc.Component {
         }
 
         this.updateUI();
-        if(total != 0) alert("Purchase successful!");
+        if(total != 0) {
+            cc.audioEngine.playEffect(this.cachierSfx, false);
+            alert("Purchase successful!");
+        }
     }
 
     onLeave() {

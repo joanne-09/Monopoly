@@ -41262,6 +41262,15 @@
     "moneyLabel": {
       "__id__": 968
     },
+    "cachierSfx": {
+      "__uuid__": "5e76b972-0a2d-4ca5-b520-24be57b2a0e9"
+    },
+    "errorSfx": {
+      "__uuid__": "d42bcd70-e09d-4fef-9fa7-53425423c134"
+    },
+    "clickSfx": {
+      "__uuid__": "c8bba6ab-849c-4d8f-b893-b6a4636f96c2"
+    },
     "_id": "c94prPXH9Lh7mrCViLi6N7"
   },
   {
@@ -42764,6 +42773,9 @@
     },
     "playerCamera": {
       "__id__": 754
+    },
+    "walkSfx": {
+      "__uuid__": "13d149a0-b3f1-4e8f-8fc2-17114a8b0f54"
     },
     "_id": "a3dDc9DX1NWZTY/8ib0GEE"
   },

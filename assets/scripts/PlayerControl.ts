@@ -22,6 +22,9 @@ export class PlayerControl extends cc.Component {
     @property(cc.Node)
     playerCamera: cc.Node = null;
 
+    @property({type:cc.AudioClip})
+    walkSfx: cc.AudioClip = null;
+
     playerName: string = '';
     playerId: number = 0;
     
@@ -43,6 +46,9 @@ export class PlayerControl extends cc.Component {
     // Animation Settings
     private animationClip: string = '';
     private currentClip: string = '';
+
+    // walk sound effect
+    private walkSfxId: number = -1;
 
     // Send message to the network
     private sendMessageToNetwork(eventCode: number, content: any) {
@@ -258,6 +264,9 @@ export class PlayerControl extends cc.Component {
         if(this.playerState === PlayerState.MYTURN) {
 
         }else if(this.playerState === PlayerState.MOVING){
+            if(this.walkSfx && this.walkSfxId === -1) {
+                this.walkSfxId = cc.audioEngine.playEffect(this.walkSfx, true); // loop
+            }
             if(this.movementIndex < this.moveBuffer.length) {
                 // get current move from the buffer
                 const nextMove = this.moveBuffer[this.movementIndex];
@@ -288,6 +297,10 @@ export class PlayerControl extends cc.Component {
                     this.setPlayerPosition(currentPosition.add(moveVector));
                 }
             }else if(this.moveBuffer.length > 0) {
+                if (this.walkSfxId !== -1) {
+                    cc.audioEngine.stopEffect(this.walkSfxId);
+                    this.walkSfxId = -1;
+                }
                 this.playerState = PlayerState.IDLE;
                 this.moveBuffer = [];
                 this.movementIndex = 0;
