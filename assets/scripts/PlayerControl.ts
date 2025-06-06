@@ -40,6 +40,7 @@ export class PlayerControl extends cc.Component {
 
     // Animation Settings
     private animationClip: string = '';
+    private currentClip: string = '';
 
     // Send message to the network
     private sendMessageToNetwork(eventCode: number, content: any) {
@@ -199,7 +200,10 @@ export class PlayerControl extends cc.Component {
 
     playAnimation() {
         const animation = this.node.getComponent(cc.Animation);
-        animation.play(this.animationClip);
+        if(this.currentClip !== this.animationClip) {
+            animation.play(this.animationClip);
+            this.currentClip = this.animationClip;
+        }
     }
 
     // Handle Roll Dice
