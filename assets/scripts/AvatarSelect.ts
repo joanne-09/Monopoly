@@ -107,7 +107,9 @@ export default class AvatarSelect extends cc.Component {
         this.gameManager.setPlayerNameandAvatar(this.playerName, activeAvatarEnum);
         console.log("WHO AM I: ", this.gameManager.whoAmI());
         this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_JOINED, this.gameManager.whoAmI());
-        cc.director.loadScene("MatchMaking");
+        this.scheduleOnce(() => {
+            cc.director.loadScene("MatchMaking");
+        }, 0.5);
     }
 
     // Life cycle method
