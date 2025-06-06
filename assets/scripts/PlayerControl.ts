@@ -17,7 +17,8 @@ export class PlayerControl extends cc.Component {
     @property(cc.Button)
     rollDiceButton: cc.Button = null;
 
-    private playerCamera: cc.Node = null;
+    @property(cc.Node)
+    playerCamera: cc.Node = null;
 
     playerName: string = '';
     playerId: number = 0;
@@ -187,7 +188,6 @@ export class PlayerControl extends cc.Component {
         NetworkManager.getInstance().registerMessageHandler(this.networkManagerHandler);
 
         // Find the player camera
-        this.playerCamera = this.node.getChildByName('PlayerCamera');
         this.playerCamera.getComponent(CameraFollow).initPlayers(this.gameManager.getPlayerList(), this.playerId);
 
         // Bind the rollDiceButton click event

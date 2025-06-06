@@ -10,6 +10,8 @@ enum CameraState {
 
 @ccclass
 export default class CameraFollow extends cc.Component {
+    @property(PlayerControl)
+    parentPlayer: PlayerControl = null;
     @property(cc.Vec2)
     followOffset: cc.Vec2 = cc.v2(0, 0);
     @property(cc.Float)
@@ -38,7 +40,6 @@ export default class CameraFollow extends cc.Component {
     @property(cc.SpriteFrame)
     ICE_Avatar: cc.SpriteFrame = null;
 
-    private parentPlayer: PlayerControl = null;
     private playerIndex: Map<number, number> = new Map();
 
     private currentCameraState: CameraState = CameraState.FOLLOW_PLAYER;
@@ -95,14 +96,11 @@ export default class CameraFollow extends cc.Component {
             return cc.v2(0, 0);
         }
 
-        const parentPosition = this.parentPlayer.getPlayerPosition(this.parentPlayer.playerId);
-        const targetPosition = this.parentPlayer.getPlayerPosition(this.targetPlayerId).sub(parentPosition);
+        const targetPosition = this.parentPlayer.getPlayerPosition(this.targetPlayerId);
         return targetPosition;
     }
 
     onLoad() {
-        this.parentPlayer = this.node.getParent().getComponent(PlayerControl);
-
         this.cameraComponent = this.getComponent(cc.Camera);
         if (!this.cameraComponent) {
             console.error("CameraFollow: cc.Camera component not found on this node!");
@@ -127,9 +125,11 @@ export default class CameraFollow extends cc.Component {
         }
 
         if(this.currentCameraState === CameraState.FOLLOW_PLAYER) {
+            const parentPosition = this.parentPlayer.getPlayerPosition(this.parentPlayer.playerId);
+
             // Clamp position within bounds
-            const targetX = cc.misc.clampf(0, this.mapMinX, this.mapMaxX);
-            const targetY = cc.misc.clampf(0, this.mapMinY, this.mapMaxY);
+            const targetX = cc.misc.clampf(parentPosition.x, this.mapMinX, this.mapMaxX);
+            const targetY = cc.misc.clampf(parentPosition.y, this.mapMinY, this.mapMaxY);
 
             // Smooth follow
             const currentX = cc.misc.lerp(this.node.x, targetX, this.smoothFollow);
