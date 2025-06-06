@@ -20,6 +20,8 @@ export default class MapManager extends cc.Component {
     private localPlayerData: PlayerData;
     private lastMoney: number = null;
 
+    @property(cc.Button)
+    gameButton: cc.Button = null;
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
@@ -29,6 +31,7 @@ export default class MapManager extends cc.Component {
         }
         MapManager.instance = this;
         this.gameManager = GameManager.getInstance();
+        this.gameButton.node.on('click', this.loadGameScene, this);
     }
 
     public static getInstance(): MapManager {
@@ -42,6 +45,9 @@ export default class MapManager extends cc.Component {
       }, 0.5);
     }
 
+    private loadGameScene() {
+      cc.director.loadScene("MiniGameSnowball");
+    }
     protected getSpaceNodeItemByIndex(index: number) {
       if (!this.spacesNode) {
         cc.error(`Spaces node ${index} is not set!`);
