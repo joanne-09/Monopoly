@@ -834,8 +834,10 @@
     "_fontSize": 20,
     "_lineHeight": 25,
     "_enableWrapText": false,
-    "_N$file": null,
-    "_isSystemFontUsed": true,
+    "_N$file": {
+      "__uuid__": "43bc41d0-a7e5-40d9-9088-7eeab5a7bfed"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_batchAsBitmap": false,
     "_styleFlags": 0,
@@ -959,8 +961,10 @@
     "_fontSize": 20,
     "_lineHeight": 25,
     "_enableWrapText": false,
-    "_N$file": null,
-    "_isSystemFontUsed": true,
+    "_N$file": {
+      "__uuid__": "43bc41d0-a7e5-40d9-9088-7eeab5a7bfed"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_batchAsBitmap": false,
     "_styleFlags": 0,
@@ -1306,8 +1310,10 @@
     "_fontSize": 20,
     "_lineHeight": 25,
     "_enableWrapText": false,
-    "_N$file": null,
-    "_isSystemFontUsed": true,
+    "_N$file": {
+      "__uuid__": "43bc41d0-a7e5-40d9-9088-7eeab5a7bfed"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_batchAsBitmap": false,
     "_styleFlags": 0,
@@ -1431,8 +1437,10 @@
     "_fontSize": 20,
     "_lineHeight": 25,
     "_enableWrapText": false,
-    "_N$file": null,
-    "_isSystemFontUsed": true,
+    "_N$file": {
+      "__uuid__": "43bc41d0-a7e5-40d9-9088-7eeab5a7bfed"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_batchAsBitmap": false,
     "_styleFlags": 0,
@@ -1778,8 +1786,10 @@
     "_fontSize": 20,
     "_lineHeight": 25,
     "_enableWrapText": false,
-    "_N$file": null,
-    "_isSystemFontUsed": true,
+    "_N$file": {
+      "__uuid__": "43bc41d0-a7e5-40d9-9088-7eeab5a7bfed"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_batchAsBitmap": false,
     "_styleFlags": 0,
@@ -1903,8 +1913,10 @@
     "_fontSize": 20,
     "_lineHeight": 25,
     "_enableWrapText": false,
-    "_N$file": null,
-    "_isSystemFontUsed": true,
+    "_N$file": {
+      "__uuid__": "43bc41d0-a7e5-40d9-9088-7eeab5a7bfed"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_batchAsBitmap": false,
     "_styleFlags": 0,
@@ -2190,8 +2202,10 @@
     "_fontSize": 20,
     "_lineHeight": 40,
     "_enableWrapText": false,
-    "_N$file": null,
-    "_isSystemFontUsed": true,
+    "_N$file": {
+      "__uuid__": "7225c2c5-2ed8-4309-a16c-dfa9ad5781b9"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_batchAsBitmap": false,
     "_styleFlags": 0,
