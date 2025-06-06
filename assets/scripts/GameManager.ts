@@ -150,6 +150,12 @@ export default class GameManager extends cc.Component {
                 case MapNodeEvents.DEDUCTMONEY:
                     EventCard.getInstance().showCard(MapNodeEvents.DEDUCTMONEY, `${content.actorName} lost $100!`, "You lost $100!");
             }
+        } else if(eventCode == PhotonEventCodes.ENTER_MINI_GAME) {
+                this.inMiniGame = true;
+                this.scheduleOnce(() => {
+                    //cc.director.loadScene("MiniGameBalloon");
+                    Math.random() < 0.5 ? cc.director.loadScene("MiniGameBalloon") : cc.director.loadScene("MiniGameSnowball");
+                }, 5);
         }
     }
 
@@ -171,11 +177,8 @@ export default class GameManager extends cc.Component {
             case MapNodeEvents.GAME:
                 console.log("GameManager: Handling GAME map event.");
                 this.broadcastMapEventandShowCard(MapNodeEvents.GAME);
-                this.inMiniGame = true;
-                this.scheduleOnce(() => {
-                    //cc.director.loadScene("MiniGameBalloon");
-                    Math.random() < 0.5 ? cc.director.loadScene("MiniGameBalloon") : cc.director.loadScene("MiniGameSnowball");
-                }, 5);
+                this.broadcastEnterMiniGame();
+     
                 break;
             case MapNodeEvents.ADDMONEY:
                 console.log("GameManager: Handling ADDMONEY map event.");
@@ -222,6 +225,9 @@ export default class GameManager extends cc.Component {
     }
     private broadcastNextRound() {
         this.networkManager.sendGameAction(PhotonEventCodes.START_NEXT_ROUND, this.currentTurnIndex); // PLAYER_MOVE_COMPLETED is used to broadcast the next round
+    }
+    private broadcastEnterMiniGame() {
+        this.networkManager.sendGameAction(PhotonEventCodes.ENTER_MINI_GAME, this.currentTurnPlayer);
     }
     public broadcastTurn() {
         if (!this.isGameActive) {
