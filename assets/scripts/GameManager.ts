@@ -87,6 +87,7 @@ export default class GameManager extends cc.Component {
                 this.playerList = this.getPlayerList().sort((a, b) => a.actorNumber - b.actorNumber);
                 console.log("GameManager: playerList updated due to PLAYER_DATA event on master.", this.playerList);
             }
+
         } else if(eventCode == PhotonEventCodes.PLAYER_MOVEMENT) { 
             //console.log("GameManager: Received player movement from network manager handler.");
             this.state = GameState.MOVE_PLAYER;
@@ -422,7 +423,6 @@ export default class GameManager extends cc.Component {
         // This will be the logical, potentially ever-increasing, position index.
         // MapManager.getCoordByIndex is expected to handle wrapping this to a board coordinate.
         let newLogicalPositionIndex = playerToMove.positionIndex; 
-
         for (let i = 0; i < diceValue; i++) {
             newLogicalPositionIndex++; // Increment the logical position index for the next step
             newLogicalPositionIndex = ((newLogicalPositionIndex-1) % 60) + 1;
@@ -456,7 +456,7 @@ export default class GameManager extends cc.Component {
             playerToMove.position = finalPositionVec.clone();
         }
 
-
+        this.currentTurnPlayer.positionIndex = playerToMove.positionIndex; // Update currentTurnPlayer's positionIndex)
         this.broadcastPlayerData(); // playerMap now contains the updated playerToMove
         this.broadcastPlayerMovement(playerMovement);
     }
@@ -475,6 +475,7 @@ export default class GameManager extends cc.Component {
             // Handle map events
             const currentPlayerMapEvent: MapNodeEvents = this.getMapEventofCurrentPlayer();
             if(currentPlayerMapEvent !== null) {
+                console.log("Current player map event:", currentPlayerMapEvent);
                 this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_TRIGGERED_MAP_EVENT, currentPlayerMapEvent);
             }  
             //this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_MOVE_COMPLETED, { /* actorWhoMoved: myActorNumber */ }); // Content is optional
@@ -490,6 +491,7 @@ export default class GameManager extends cc.Component {
             console.error("GameManager: No current player data found for getting map event.");
             return null;
         }
+        console.log(`GameManager: Getting map event for current player ${currentPlayerData.name} (Actor: ${currentPlayerData.actorNumber}) at position index ${currentPlayerData.positionIndex}.`);
         return this.mapManager.getMapNodeEventByIndex(currentPlayerData.positionIndex);
     }
 
