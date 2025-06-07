@@ -36,7 +36,7 @@ export default class GameManager extends cc.Component {
     private isGameActive = false; // Flag to check if the game is active
     private state: GameState = null;
     private inMiniGame: boolean = false;
-    private totalRounds: number = 3;
+    private totalRounds: number = 12;
     
     onLoad() {
         // Prevent duplicate instances
@@ -115,6 +115,7 @@ export default class GameManager extends cc.Component {
                 if(this.round > this.totalRounds) {
                     this.broadcastPlayerData();
                     this.scheduleOnce(() => {
+                        console.log("this round", this.round);
                         //cc.director.loadScene("ResultScene");
                     }, 2); // Delay to allow any final actions
                     this.broadcastGameOver();
