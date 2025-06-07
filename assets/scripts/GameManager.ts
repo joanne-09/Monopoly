@@ -585,6 +585,23 @@ export default class GameManager extends cc.Component {
         // Optionally, you can reset any mini-game specific state here
         this.broadcastNextRound(); // Proceed to the next round after exiting the mini-game
     }
+    public resetGameData() {
+        console.log("GameManager: Resetting game data.");
+        this.playerMap.clear();
+        this.localPlayerInfo = null;
+        this.playerList = [];
+        this.round = 0;
+        this.currentTurnIndex = 0;
+        this.currentTurnPlayer = null;
+        this.isGameActive = false;
+        this.state = GameState.INIT;
+        this.inMiniGame = false;
+
+        // Reset MapManager if needed
+        if (this.mapManager) {
+            this.resetMapManager(); // Assuming MapManager has a resetMap method
+        }
+    }
 }
 
 // TODO 

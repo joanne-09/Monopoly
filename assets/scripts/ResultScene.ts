@@ -196,6 +196,7 @@ export default class ResultScene extends cc.Component {
     private FadeInButton() {
       this.buttonNode.runAction(cc.fadeIn(0.5));
       this.buttonNode.on('click', () => {
+        this.gameManager.resetGameData();
         cc.director.loadScene("Start");
       });
     }
