@@ -20,6 +20,8 @@ export default class MapManager extends cc.Component {
 
     @property(cc.Button)
     gameButton: cc.Button = null;
+    @property(cc.Button)
+    gameButton2: cc.Button = null;
 
     @property({type:cc.AudioClip})
     gameBgm: cc.AudioClip = null;
@@ -38,7 +40,7 @@ export default class MapManager extends cc.Component {
 
       // Don't call startGame if the game is already active
         this.gameButton.node.on('click', this.loadGameScene, this);
-
+        this.gameButton2.node.on('click', this.loadGameScene2, this);
 
         if(!this.gameManager.getIsGameActive()) {
           this.gameManager.startGame();
@@ -94,6 +96,11 @@ export default class MapManager extends cc.Component {
       cc.audioEngine.stopAll();
       cc.director.loadScene("MiniGameBalloon");
       //cc.director.loadScene("MiniGameSnowball");
+    }
+
+    private loadGameScene2() {
+      cc.audioEngine.stopAll();
+      cc.director.loadScene("MiniGameSnowball");
     }
     protected getSpaceNodeItemByIndex(index: number) {
       if (!this.spacesNode) {

@@ -31593,6 +31593,9 @@
     "gameButton": {
       "__id__": 752
     },
+    "gameButton2": {
+      "__id__": 1028
+    },
     "gameBgm": {
       "__uuid__": "562b4128-23d6-455f-8d03-c1bf457289ee"
     },
@@ -31696,7 +31699,7 @@
         "__id__": 1040
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 752
@@ -41271,6 +41274,7 @@
     "clickSfx": {
       "__uuid__": "c8bba6ab-849c-4d8f-b893-b6a4636f96c2"
     },
+    "purchaseParticle": null,
     "_id": "c94prPXH9Lh7mrCViLi6N7"
   },
   {
@@ -41298,6 +41302,7 @@
     "storePopup": {
       "__id__": 859
     },
+    "clickSfx": null,
     "_id": "935Nrnc4dC75oVGaUvqhPf"
   },
   {
@@ -42252,7 +42257,7 @@
         "__id__": 1021
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 1028
