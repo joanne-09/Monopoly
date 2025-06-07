@@ -107,26 +107,29 @@ export default class GameManager extends cc.Component {
             this.currentTurnPlayer = content;
         } else if (eventCode == PhotonEventCodes.START_NEXT_ROUND) {
             this.state = GameState.PLAYER_TURN;
-            this.round++;
+
             console.log(`GameManager: Received STARTNEXTROUND event from actorNr: ${actorNr}. Content:`, content);
             if (this.networkManager.isMasterClient()) {
                 this.currentTurnIndex = (content + 1) % this.playerList.length;
                 this.currentTurnPlayer = this.playerList[this.currentTurnIndex];
 
-                if(this.round > this.totalRounds) {
-                    this.broadcastPlayerData();
-                    this.scheduleOnce(() => {
-                        console.log("this round", this.round);
-                        //cc.director.loadScene("ResultScene");
-                    }, 2); // Delay to allow any final actions
-                    this.broadcastGameOver();
-                    
-                }
+    
                 this.broadcastPlayerData(); // Broadcast any state changes
                 this.broadcastTurn();     // Broadcast the new turn
             }
             
-        } else if(eventCode == PhotonEventCodes.PLAYER_TRIGGERED_MAP_EVENT) {
+        } else if(eventCode == PhotonEventCodes.PLAYER_TRIGGERED_MAP_EVENT) {            
+            this.round++;
+
+                if(this.round > this.totalRounds) {
+            this.broadcastPlayerData();
+            this.scheduleOnce(() => {
+                console.log("this round", this.round);
+                //cc.director.loadScene("ResultScene");
+            }, 2); // Delay to allow any final actions
+            this.broadcastGameOver();
+            
+        }
             this.state = GameState.RESOLVE_EVENT;
             if(this.networkManager.isMasterClient()) {
                 //console.log("GameManager: Received PLAYER_TRIGGERED_MAP_EVENT from network manager handler.");
