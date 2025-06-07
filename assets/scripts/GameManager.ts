@@ -121,7 +121,7 @@ export default class GameManager extends cc.Component {
         } else if(eventCode == PhotonEventCodes.PLAYER_TRIGGERED_MAP_EVENT) {            
             this.round++;
 
-                if(this.round > this.totalRounds) {
+            if(this.round > this.totalRounds) {
             this.broadcastPlayerData();
             this.scheduleOnce(() => {
                 console.log("this round", this.round);
@@ -166,23 +166,27 @@ export default class GameManager extends cc.Component {
             }
         } else if(eventCode == PhotonEventCodes.ENTER_MINI_GAME) {
                 this.inMiniGame = true;
-                if(content.randomGame){
-                    this.scheduleOnce(() => {
-                        console.log("GameManager: Entering Balloon Mini-game.");
-                        cc.director.loadScene("MiniGameBalloon");
-                    }, 5);
-                }else{
-                    this.scheduleOnce(() => {
-                        console.log("GameManager: Entering Dice Mini-game.");
-                        cc.director.loadScene("MiniGameSnowball");
-                    }, 5);
-                }
+                // if(content.randomGame){
+                //     this.scheduleOnce(() => {
+                //         console.log("GameManager: Entering Balloon Mini-game.");
+                //         cc.director.loadScene("MiniGameBalloon");
+                //     }, 5);
+                // }else{
+                //     this.scheduleOnce(() => {
+                //         console.log("GameManager: Entering Dice Mini-game.");
+                //         cc.director.loadScene("MiniGameSnowball");
+                //     }, 5);
+                // }
+                this.scheduleOnce(() => {
+                    console.log("GameManager: Entering Balloon Mini-game.");
+                    cc.director.loadScene("MiniGameBalloon");
+                }, 5);
         } else if(eventCode == PhotonEventCodes.MINIGAME_BALLOON_GAME_OVER){
             this.scheduleOnce(() => {
                 console.log("GameManager: Mini-game over, returning to main game state.");
                 cc.director.loadScene("MapScene");
                 this.exitMiniGame();
-            }, 5); // Delay to allow mini-game to finish
+            }, 3); // Delay to allow mini-game to finish
         } else if(eventCode == PhotonEventCodes.GAME_OVER){
             cc.director.loadScene("ResultScene")
         }

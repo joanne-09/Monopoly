@@ -341,9 +341,10 @@ export default class GameManager extends cc.Component {
                 }
             }
         });
+        this.networkManager.sendGameAction(PhotonEventCodes.MINIGAME_BALLOON_GAME_OVER, null);
         // 3. 0.5秒後回到地圖
-        this.scheduleOnce(() => {
-            cc.director.loadScene('MapScene');
-        }, 0.5);
+        // this.scheduleOnce(() => {
+        //     cc.director.loadScene('MapScene');
+        // }, 0.5);
     }
 }
