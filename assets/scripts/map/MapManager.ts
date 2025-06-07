@@ -52,7 +52,7 @@ export default class MapManager extends cc.Component {
               this.gameManager.exitMiniGame();
           this.gameManager.resetMapManager();
         }
-        this.gameManager.broadcastTurn();
+        // this.gameManager.broadcastTurn();
 
          // Start the game while load)
         cc.audioEngine.playMusic(this.gameBgm, true);

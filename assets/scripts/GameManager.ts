@@ -166,10 +166,17 @@ export default class GameManager extends cc.Component {
             }
         } else if(eventCode == PhotonEventCodes.ENTER_MINI_GAME) {
                 this.inMiniGame = true;
-                this.scheduleOnce(() => {
-                    //cc.director.loadScene("MiniGameBalloon");
-                    Math.random() < 0.5 ? cc.director.loadScene("MiniGameBalloon") : cc.director.loadScene("MiniGameSnowball");
-                }, 5);
+                if(content.randomGame){
+                    this.scheduleOnce(() => {
+                        console.log("GameManager: Entering Balloon Mini-game.");
+                        cc.director.loadScene("MiniGameBalloon");
+                    }, 5);
+                }else{
+                    this.scheduleOnce(() => {
+                        console.log("GameManager: Entering Dice Mini-game.");
+                        cc.director.loadScene("MiniGameSnowball");
+                    }, 5);
+                }
         } else if(eventCode == PhotonEventCodes.MINIGAME_BALLOON_GAME_OVER){
             this.scheduleOnce(() => {
                 console.log("GameManager: Mini-game over, returning to main game state.");
@@ -199,7 +206,8 @@ export default class GameManager extends cc.Component {
             case MapNodeEvents.GAME:
                 console.log("GameManager: Handling GAME map event.");
                 this.broadcastMapEventandShowCard(MapNodeEvents.GAME);
-                this.broadcastEnterMiniGame();
+                const randomGame = Math.random() < 0.5;
+                this.broadcastEnterMiniGame(randomGame);
      
                 break;
             case MapNodeEvents.ADDMONEY:
@@ -248,8 +256,8 @@ export default class GameManager extends cc.Component {
     private broadcastNextRound() {
         this.networkManager.sendGameAction(PhotonEventCodes.START_NEXT_ROUND, this.currentTurnIndex); // PLAYER_MOVE_COMPLETED is used to broadcast the next round
     }
-    private broadcastEnterMiniGame() {
-        this.networkManager.sendGameAction(PhotonEventCodes.ENTER_MINI_GAME, this.currentTurnPlayer);
+    private broadcastEnterMiniGame(randomGame: boolean) {
+        this.networkManager.sendGameAction(PhotonEventCodes.ENTER_MINI_GAME, {player: this.currentTurnPlayer, randomGame: randomGame});
     }
     public broadcastTurn() {
         if (!this.isGameActive) {
