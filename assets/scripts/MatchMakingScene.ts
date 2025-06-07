@@ -200,8 +200,8 @@ export default class MatchMakingScene extends cc.Component {
         if (this.leaveButton) {
             this.leaveButton.getComponent(cc.Button).enabled = this.playerList.length < 4;
         }
-        if (this.playerList.length === 4 && !this.sceneLoadScheduled) {
-            this.sceneLoadScheduled = true
+        if (this.playerList.length === 5 && !this.sceneLoadScheduled) {
+            this.sceneLoadScheduled = true;
             this.scheduleOnce(() => {
                 cc.director.loadScene("MapScene");
             }, 3.0);

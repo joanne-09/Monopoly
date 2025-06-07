@@ -36,7 +36,7 @@ export default class GameManager extends cc.Component {
     private isGameActive = false; // Flag to check if the game is active
     private state: GameState = null;
     private inMiniGame: boolean = false;
-    private totalRounds: number = 1;
+    private totalRounds: number = 3;
     
     onLoad() {
         // Prevent duplicate instances
@@ -115,8 +115,9 @@ export default class GameManager extends cc.Component {
                 if(this.round > this.totalRounds) {
                     this.broadcastPlayerData();
                     this.scheduleOnce(() => {
-                        cc.director.loadScene("ResultScene");
+                        //cc.director.loadScene("ResultScene");
                     }, 2); // Delay to allow any final actions
+                    this.broadcastGameOver();
                     
                 }
                 this.broadcastPlayerData(); // Broadcast any state changes
@@ -170,6 +171,8 @@ export default class GameManager extends cc.Component {
                 cc.director.loadScene("MapScene");
                 this.exitMiniGame();
             }, 5); // Delay to allow mini-game to finish
+        } else if(eventCode == PhotonEventCodes.GAME_OVER){
+            cc.director.loadScene("ResultScene")
         }
     }
 
@@ -272,7 +275,11 @@ export default class GameManager extends cc.Component {
         this.networkManager.sendGameAction(PhotonEventCodes.PLAYER_DATA, Array.from(this.playerMap.values()));
         console.log("GameManager: Broadcasting player data to all clients.");
     }
-
+    private broadcastGameOver(){
+        this.scheduleOnce(() => {
+            this.networkManager.sendGameAction(PhotonEventCodes.GAME_OVER, null);
+        });
+    }
     private broadcastPlayerMovement(playerMovement: cc.Vec2[]) {
         if (!this.isGameActive) {
             console.warn("GameManager: Cannot broadcast player movement, game is not active.");

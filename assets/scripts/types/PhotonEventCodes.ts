@@ -19,4 +19,5 @@ export enum PhotonEventCodes {
     PLAYER_MAP_JOINED = 17, // Check if player new player joined the map
     SHOW_MAP_EVENT_CARD = 18, // Show the map event card
     ENTER_MINI_GAME = 19, // Enter a mini-game
+    GAME_OVER = 20, // Game over event
 }
