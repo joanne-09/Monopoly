@@ -177,7 +177,7 @@ export default class GameManager extends cc.Component {
                 this.exitMiniGame();
             }, 5); // Delay to allow mini-game to finish
         } else if(eventCode == PhotonEventCodes.GAME_OVER){
-            //cc.director.loadScene("ResultScene")
+            cc.director.loadScene("ResultScene")
         }
     }
 
