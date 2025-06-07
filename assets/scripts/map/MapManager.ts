@@ -23,6 +23,9 @@ export default class MapManager extends cc.Component {
     @property(cc.Button)
     gameButton2: cc.Button = null;
 
+    @property(cc.Button)
+    endGameButton: cc.Button = null;
+
     @property({type:cc.AudioClip})
     gameBgm: cc.AudioClip = null;
     // LIFE-CYCLE CALLBACKS:
@@ -41,6 +44,7 @@ export default class MapManager extends cc.Component {
       // Don't call startGame if the game is already active
         this.gameButton.node.on('click', this.loadGameScene, this);
         this.gameButton2.node.on('click', this.loadGameScene2, this);
+        this.endGameButton.node.on('click', this.endGame, this);
 
         if(!this.gameManager.getIsGameActive()) {
           this.gameManager.startGame();
@@ -58,6 +62,10 @@ export default class MapManager extends cc.Component {
         return MapManager.instance;
     }
 
+    private endGame() {
+      console.log("Ending game...");
+      cc.director.loadScene("ResultScene");
+    }
     start() {
       this.schedule(() => {
         this.localPlayerData = this.gameManager.getLocalPlayerData();
