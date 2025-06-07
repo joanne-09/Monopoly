@@ -36,7 +36,7 @@ export default class GameManager extends cc.Component {
     private isGameActive = false; // Flag to check if the game is active
     private state: GameState = null;
     private inMiniGame: boolean = false;
-    private totalRounds: number = 12;
+    private totalRounds: number = 2;
     
     onLoad() {
         // Prevent duplicate instances
@@ -601,6 +601,7 @@ export default class GameManager extends cc.Component {
         if (this.mapManager) {
             this.resetMapManager(); // Assuming MapManager has a resetMap method
         }
+        this.broadcastPlayerData();
     }
 }
 
