@@ -107,11 +107,12 @@ export default class GameManager extends cc.Component {
             this.currentTurnPlayer = content;
         } else if (eventCode == PhotonEventCodes.START_NEXT_ROUND) {
             this.state = GameState.PLAYER_TURN;
+            this.round++;
             console.log(`GameManager: Received STARTNEXTROUND event from actorNr: ${actorNr}. Content:`, content);
             if (this.networkManager.isMasterClient()) {
                 this.currentTurnIndex = (content + 1) % this.playerList.length;
                 this.currentTurnPlayer = this.playerList[this.currentTurnIndex];
-                this.round++;
+
                 if(this.round > this.totalRounds) {
                     this.broadcastPlayerData();
                     this.scheduleOnce(() => {
@@ -173,7 +174,7 @@ export default class GameManager extends cc.Component {
                 this.exitMiniGame();
             }, 5); // Delay to allow mini-game to finish
         } else if(eventCode == PhotonEventCodes.GAME_OVER){
-            cc.director.loadScene("ResultScene")
+            //cc.director.loadScene("ResultScene")
         }
     }
 
